@@ -27,7 +27,7 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "/",
+  "start_url": "https://nearbys.online",
   "display": "standalone",
   "background_color": "#DBF9DB",
   "theme_color": "#000"
