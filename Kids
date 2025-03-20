@@ -1,0 +1,89 @@
+<div class="item-card" onclick="handleClick(event)">
+    <img src="" alt="T-Shirts">
+    <p>T-Shirts</p>
+</div>
+
+<div class="item-card" onclick="handleClick(event)">
+    <img src="" alt="Shirts">
+    <p>Shirts</p>
+</div>
+
+<div class="item-card" onclick="handleClick(event)">
+    <img src="" alt="Skirts">
+    <p>Skirts</p>
+</div>
+
+<div class="item-card" onclick="handleClick(event)">
+    <img src="" alt="Jeans">
+    <p>Jeans</p>
+</div>
+
+<div class="item-card" onclick="handleClick(event)">
+    <img src="" alt="Shorts">
+    <p>Shorts</p>
+</div>
+
+<div class="item-card" onclick="handleClick(event)">
+    <img src="" alt="Leggings">
+    <p>Leggings</p>
+</div>
+
+<div class="item-card" onclick="handleClick(event)">
+    <img src="" alt="Hoodies">
+    <p>Hoodies</p>
+</div>
+
+<div class="item-card" onclick="handleClick(event)">
+    <img src="" alt="Sneakers">
+    <p>Sneakers</p>
+</div>
+
+<div class="item-card" onclick="handleClick(event)">
+    <img src="" alt="Sandals">
+    <p>Sandals</p>
+</div>
+
+<div class="item-card" onclick="handleClick(event)">
+    <img src="" alt="School Shoes">
+    <p>School Shoes</p>
+</div>
+
+<div class="item-card" onclick="handleClick(event)">
+    <img src="" alt="Slippers">
+    <p>Slippers</p>
+</div>
+
+<div class="item-card" onclick="handleClick(event)">
+    <img src="" alt="Boots">
+    <p>Boots</p>
+</div>
+
+<div class="item-card" onclick="handleClick(event)">
+    <img src="" alt="Caps & Hats">
+    <p>Caps & Hats</p>
+</div>
+
+<div class="item-card" onclick="handleClick(event)">
+    <img src="" alt="Hairbands and Clips">
+    <p>Hairbands and Clips</p>
+</div>
+
+<div class="item-card" onclick="handleClick(event)">
+    <img src="" alt="Belts">
+    <p>Belts</p>
+</div>
+
+<div class="item-card" onclick="handleClick(event)">
+    <img src="" alt="Abayas & Kanduras">
+    <p>Abayas & Kanduras</p>
+</div>
+
+<div class="item-card" onclick="handleClick(event)">
+    <img src="" alt="Party Dresses">
+    <p>Party Dresses</p>
+</div>
+
+<div class="item-card" onclick="handleClick(event)">
+    <img src="" alt="Suits & Blazers">
+    <p>Suits & Blazers</p>
+</div>
