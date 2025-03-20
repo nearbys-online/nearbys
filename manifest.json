@@ -27,7 +27,7 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "https://90g1r0-f2.myshopify.com",
+  "start_url": "/?utm_source=pwa"
   "display": "standalone",
   "background_color": "#DBF9DB",
   "theme_color": "#000"
