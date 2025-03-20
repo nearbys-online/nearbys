@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nearbys - Your Nearby Stores in just one tap</title>
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="https://nearbys.pages.dev/manifest.json" href="manifest.json">
+    <style>
+        /* General Styles */
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle, #ffffff 25%, #00950025 50%, #00950050 75%, #00950075 100%);
+            flex-direction: column;
+            font-family: 'Righteous', cursive;
+        }
+
+        /* Title at the Top */
+        .top-center {
+            position: absolute;
+            top: 30px;
+            text-align: center;
+            font-size: 28px;
+            font-style: italic;
+            color: #009500;
+            text-shadow: 2.8px 0 0 #000;
+            white-space: nowrap;
+        }
+
+        .top-center .small {
+            color: #A0D6B4;
+            text-shadow: -0.3px -0.3px 0 #000, 0.3px -0.3px 0 #000, -0.3px 0px 0 #000, 0.3px 0.3px 0 #000;
+        }
+
+        /* Subtitle */
+        .subtitle {
+            margin-top: 140px;
+            font-size: 20px;
+            color: #555;
+            text-align: center;
+        }
+
+        /* Slider Container */
+        .slider-container {
+            width: 90%;
+            height: 100%; 
+            margin: 0px auto;
+            overflow: hidden;
+            position: relative;
+            background: transparent; /* No background */
+            border: none; /* Remove border and shadow */
+        }
+
+        .slides {
+            display: flex;
+            position: relative;
+        }
+
+        .slide {
+            min-width: 100%;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            text-align: center;
+            padding: 20px 0;
+            opacity: 0; 
+            transition: opacity 1.5s ease-in-out; 
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .slide.active {
+            opacity: 1; /* Show active slide */
+        }
+
+        .slide-text {
+            font-size: 18px;
+            text-align: center;
+            padding: 10px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .slide img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            border-radius: 0;
+        }
+
+        /* Install App Section */
+        .install-container {
+            text-align: center;
+            margin: 20px;
+        }
+
+        .install-container button {
+            background: #009500;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Footer - Contact Links */
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: calc(100% - 40px);
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .footer a {
+            color: #009500;
+            text-decoration: none;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .footer img {
+            width: 100px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Title -->
+    <div class="top-center">
+        <h1 style="font-family: 'Righteous', cursive; font-style: italic;">        
+            <span class="medium">nearby</span><span class="small">s</span>
+        </h1>
+    </div>
+
+    <!-- Subtitle -->
+    <p class="subtitle">Your nearest stores in one tap</p>
+
+    <!-- Slider -->
+    <div class="slider-container">
+        <div class="slides">
+            <!-- Slide 1 -->
+            <div class="slide active">
+                <p class="slide-text">
+                    Nearbys connects you with stores within 1 KM. Order groceries, clothes, food, accessories, laundry, and more—all with just one tap!
+                </p>
+            </div>
+            <!-- Slide 2 -->
+            <div class="slide">
+                <p class="slide-text">Find nearby stores instantly</p>
+                <img src="https://i.postimg.cc/kGhhHKb7/1000083239.webp" alt="Stores">
+            </div>
+            <!-- Slide 3 -->
+            <div class="slide">
+                <p class="slide-text">Order groceries with ease</p>
+                <img src="https://i.postimg.cc/jjd3RM4R/1000083246.webp" alt="Groceries">
+            </div>
+            <!-- Slide 4 -->
+            <div class="slide">
+                <p class="slide-text">Get food delivered fast</p>
+                <img src="https://i.postimg.cc/NGNVLqPZ/1000083238.webp" alt="Food Delivery">
+            </div>
+            <!-- Slide 5 -->
+            <div class="slide">
+                <p class="slide-text">Shop the latest fashion trends</p>
+                <img src="https://i.postimg.cc/kGhhHKb7/1000083239.webp" alt="Fashion">
+            </div>
+        </div>
+    </div>
+
+    <!-- Install App Button -->
+    <div class="install-container">
+        <p>Install the App, it's just 1mb only</p>
+        <button id="install-button">Install App</button>
+    </div>
+
+    <!-- Footer with Contact Links -->
+    <div class="footer">
+        <a href="https://nearbys.online" target="_blank">
+            <img src="https://cdn.shopify.com/s/files/1/0664/3751/3414/files/nearbys-logo-2.webp?v=1741497581" alt="Nearbys Logo">
+        </a>
+        <a href="mailto:admin@nearbys.online">
+            <i class="fas fa-envelope"></i> Email
+        </a>
+        <a href="https://wa.me/971509880960">
+            <i class="fab fa-whatsapp" style="font-size: 20px;"></i> WhatsApp
+        </a>
+    </div>
+
+    <script>
+        let index = 0;
+        const slides = document.querySelectorAll(".slide");
+        const totalSlides = slides.length;
+
+        function showSlide() {
+            // Hide all slides
+            slides.forEach(slide => slide.classList.remove("active"));
+
+            // Show the current slide
+            slides[index].classList.add("active");
+
+            // Move to the next slide
+            index = (index + 1) % totalSlides;
+        }
+
+        // Show the first slide immediately
+        showSlide();
+
+        // Auto-slide every 4 seconds (adjust timing as needed)
+        setInterval(showSlide, 4000);
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js')
+    .then(() => console.log("Service Worker Registered"))
+    .catch(err => console.log("Service Worker Registration Failed", err));
+}
+    </script>
+    <script>
+      let deferredPrompt;
+
+      window.addEventListener('beforeinstallprompt', (event) => {
+        event.preventDefault();
+        deferredPrompt = event;
+        document.getElementById('install-button').style.display = 'block';
+      });
+
+      document.getElementById('install-button').addEventListener('click', () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+              console.log('User accepted the install prompt');
+            } else {
+              console.log('User dismissed the install prompt');
+            }
+            deferredPrompt = null;
+          });
+        }
+      });
+
+      window.addEventListener('appinstalled', () => {
+        console.log('PWA was installed');
+        document.getElementById('install-button').style.display = 'none';
+      });
+    </script>
+</body>
+</html>
