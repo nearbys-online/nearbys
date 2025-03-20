@@ -21,3 +21,7 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
+if (window.matchMedia('(display-mode: standalone)').matches) {
+    window.location.href = "https://90g1r0-f2.myshopify.com";
+}
