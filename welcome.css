@@ -1,4 +1,4 @@
-.welcome-container {
+    .welcome-container {
             margin: 0;
             width:100vw;
             height: 100vh;
@@ -13,9 +13,7 @@
 );
             flex-direction: column;
             font-family: 'Righteous', cursive;
-        }
-
-        /* Title at the Top */
+        }        
         .top-center {
             position: relative;
             top: 0;
@@ -26,25 +24,20 @@
             text-shadow: 2.8px 0 0 #000;
             white-space: nowrap;
         }
-
         .top-center .small {
             color: #A0D6B4;
             text-shadow: -0.3px -0.3px 0 #000, 0.3px -0.3px 0 #000, -0.3px 0px 0 #000, 0.3px 0.3px 0 #000;
-        }
-
-        /* Subtitle */
+        }        
         .subtitle {
             margin-top: -50px;
             font-size: 20px;
             color: #555;
             text-align: center;
-        }
-
-        /* Slider Container */
+        }        
         .slider-container {            
             width: 90%;
             height: 100%; 
-            margin-top:-150px;        
+            top: -2%;       
             margin: 0px auto;
             overflow: hidden;
             position: relative;
