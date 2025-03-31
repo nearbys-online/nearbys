@@ -35,6 +35,8 @@ function closeOpenPopup() {
     let itemPopup = document.getElementById("itemPopup");
     let storesPopup = document.getElementById("storesPopup");
     let locationPopup = document.getElementById("locationPopup");
+    let locationPopup = document.getElementById("devicesPopup");
+    let locationPopup = document.getElementById("seriesPopup");
 
     if (itemPopup?.style.display === "block") {
         itemPopup.style.display = "none";
@@ -46,6 +48,14 @@ function closeOpenPopup() {
     }
     if (locationPopup?.style.display === "block") {
         locationPopup.style.display = "none";
+        return true;
+    }
+    if (devicesPopup?.style.display === "block") {
+        devicesPopup.style.display = "none";
+        return true;
+    }
+    if (seriesPopup?.style.display === "block") {
+        seriesPopup.style.display = "none";
         return true;
     }
     return false;
