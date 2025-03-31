@@ -29,32 +29,38 @@ if (isPWA || (lastVisit && now - lastVisit < 60 * 60 * 1000)) {
 });
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+// Define the order of popups to close
+const POPUP_CLOSE_ORDER = [
+    "seriesPopup",
+    "devicesPopup",
+    "storesPopup",
+    "itemPopup"
+];
+
 // Function to check and close open popups in specific order
 function closeOpenPopup() {
-    // Define the order of popups to close
-    const popupOrder = [
-        "seriesPopup",
-        "devicesPopup",
-        "storesPopup",
-        "itemPopup"
-    ];
-
     // Check each popup in order
-    for (const popupId of popupOrder) {
+    for (const popupId of POPUP_CLOSE_ORDER) {
         const popup = document.getElementById(popupId);
         if (popup?.style.display === "block") {
             popup.style.display = "none";
             return true; // Indicate that a popup was closed
         }
     }
-
     return false; // No popups were closed
 }
 
 // Handle back button press
 window.addEventListener("popstate", function (event) {
-    if (closeOpenPopup()) {
-        // Prevent further back navigation if a popup was closed
+    let popupWasClosed = false;
+    
+    // Keep closing popups until none are left
+    while (closeOpenPopup()) {
+        popupWasClosed = true;
+    }
+
+    if (popupWasClosed) {
+        // If we closed any popups, stay on the current page
         history.pushState(null, null, location.href);
         return;
     }
