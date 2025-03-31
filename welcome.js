@@ -29,22 +29,23 @@ if (isPWA || (lastVisit && now - lastVisit < 60 * 60 * 1000)) {
 });
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-// Function to check and close open popups
+// Function to check and close open popups in specific order
 function closeOpenPopup() {
-    let seriesPopup = document.getElementById("seriesPopup");
-    let devicesPopup = document.getElementById("devicesPopup");
+    // Define the order of popups to close
+    const popupOrder = [
+        "seriesPopup",
+        "devicesPopup",
+        "storesPopup",
+        "itemPopup"
+    ];
 
-    // Close only seriesPopup first, keeping devicesPopup open
-    if (seriesPopup?.style.display === "block") {
-        seriesPopup.style.display = "none";
-        return true; // Indicate that seriesPopup was closed
-    }
-
-    // If seriesPopup is already closed, close devicesPopup
-    if (devicesPopup?.style.display === "block") {
-        devicesPopup.style.display = "none";
-        return true;
+    // Check each popup in order
+    for (const popupId of popupOrder) {
+        const popup = document.getElementById(popupId);
+        if (popup?.style.display === "block") {
+            popup.style.display = "none";
+            return true; // Indicate that a popup was closed
+        }
     }
 
     return false; // No popups were closed
@@ -53,7 +54,9 @@ function closeOpenPopup() {
 // Handle back button press
 window.addEventListener("popstate", function (event) {
     if (closeOpenPopup()) {
-        return; // Stop further back navigation if a popup was closed
+        // Prevent further back navigation if a popup was closed
+        history.pushState(null, null, location.href);
+        return;
     }
 
     // If already on the main page, prevent leaving
@@ -70,7 +73,6 @@ window.addEventListener("popstate", function (event) {
 window.onload = function () {
     history.pushState(null, null, location.href);
 };
-
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 window.addEventListener("popstate", function (event) {
