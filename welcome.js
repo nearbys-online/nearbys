@@ -29,55 +29,48 @@ if (isPWA || (lastVisit && now - lastVisit < 60 * 60 * 1000)) {
 });
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
 // Function to check and close open popups
 function closeOpenPopup() {
     let seriesPopup = document.getElementById("seriesPopup");
     let devicesPopup = document.getElementById("devicesPopup");
-    let itemPopup = document.getElementById("itemPopup");
-    let storesPopup = document.getElementById("storesPopup");
-    let locationPopup = document.getElementById("locationPopup");
 
     // Close only seriesPopup first, keeping devicesPopup open
     if (seriesPopup?.style.display === "block") {
         seriesPopup.style.display = "none";
-        return true; // Indicate a popup was closed
+        return true; // Indicate that seriesPopup was closed
     }
 
-    // Close devicesPopup only if seriesPopup is already closed
+    // If seriesPopup is already closed, close devicesPopup
     if (devicesPopup?.style.display === "block") {
         devicesPopup.style.display = "none";
         return true;
     }
 
-    // Close other popups if seriesPopup and devicesPopup are already closed
-    if (itemPopup?.style.display === "block") {
-        itemPopup.style.display = "none";
-        return true;
-    }
-    if (storesPopup?.style.display === "block") {
-        storesPopup.style.display = "none";
-        return true;
-    }
-    if (locationPopup?.style.display === "block") {
-        locationPopup.style.display = "none";
-        return true;
-    }
-    return false;
+    return false; // No popups were closed
 }
 
 // Handle back button press
 window.addEventListener("popstate", function (event) {
     if (closeOpenPopup()) {
-        history.pushState(null, null, location.href); // Keep page state after closing a popup
-    } else {
-        history.back(); // Navigate to the previous page if no popups are open
+        return; // Stop further back navigation if a popup was closed
     }
+
+    // If already on the main page, prevent leaving
+    if (window.location.href === "https://nearbys.online") {
+        history.pushState(null, null, location.href);
+        return;
+    }
+
+    // Otherwise, allow regular back navigation
+    history.back();
 });
 
 // Initialize history state
 window.onload = function () {
     history.pushState(null, null, location.href);
 };
+
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 window.addEventListener("popstate", function (event) {
