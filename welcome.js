@@ -40,24 +40,29 @@ function closeOpenPopup() {
     // Close only seriesPopup first if it's open
     if (seriesPopup?.style.display === "block") {
         seriesPopup.style.display = "none";
-        return true; // Return true to indicate a popup was closed
+        history.pushState(null, null, location.href); // Prevent navigating back to the previous website
+        return true; 
     }
 
     // Check and close other popups if seriesPopup wasn't open
     if (devicesPopup?.style.display === "block") {
         devicesPopup.style.display = "none";
+        history.pushState(null, null, location.href);
         return true;
     }
     if (itemPopup?.style.display === "block") {
         itemPopup.style.display = "none";
+        history.pushState(null, null, location.href);
         return true;
     }
     if (storesPopup?.style.display === "block") {
         storesPopup.style.display = "none";
+        history.pushState(null, null, location.href);
         return true;
     }
     if (locationPopup?.style.display === "block") {
         locationPopup.style.display = "none";
+        history.pushState(null, null, location.href);
         return true;
     }
     return false;
@@ -66,7 +71,7 @@ function closeOpenPopup() {
 // Handle back button press
 window.addEventListener("popstate", function (event) {
     if (closeOpenPopup()) {
-        history.pushState(null, null, location.href); // Keep the page state
+        history.pushState(null, null, location.href); // Keep the page state to prevent going back to another website
     }
 });
 
@@ -74,7 +79,6 @@ window.addEventListener("popstate", function (event) {
 window.onload = function () {
     history.pushState(null, null, location.href);
 };
-
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
