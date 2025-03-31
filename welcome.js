@@ -29,7 +29,7 @@ if (isPWA || (lastVisit && now - lastVisit < 60 * 60 * 1000)) {
 });
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-// Define the order of popups to close
+// Define the order in which popups should be closed (first to last)
 const POPUP_CLOSE_ORDER = [
     "seriesPopup",
     "devicesPopup",
@@ -37,46 +37,51 @@ const POPUP_CLOSE_ORDER = [
     "itemPopup"
 ];
 
-// Function to check and close open popups in specific order
-function closeOpenPopup() {
-    // Check each popup in order
+// Track if we're currently processing a popup close
+let isProcessingPopup = false;
+
+// Function to close the next popup in order
+function closeNextPopup() {
+    // Don't process if already handling a popup
+    if (isProcessingPopup) return false;
+    
+    isProcessingPopup = true;
+    
+    // Find the first open popup in our order
     for (const popupId of POPUP_CLOSE_ORDER) {
         const popup = document.getElementById(popupId);
         if (popup?.style.display === "block") {
             popup.style.display = "none";
-            return true; // Indicate that a popup was closed
+            isProcessingPopup = false;
+            return true; // Closed one popup
         }
     }
+    
+    isProcessingPopup = false;
     return false; // No popups were closed
 }
 
 // Handle back button press
-window.addEventListener("popstate", function (event) {
-    let popupWasClosed = false;
-    
-    // Keep closing popups until none are left
-    while (closeOpenPopup()) {
-        popupWasClosed = true;
-    }
-
-    if (popupWasClosed) {
-        // If we closed any popups, stay on the current page
+window.addEventListener("popstate", function(event) {
+    // Try to close just one popup
+    if (closeNextPopup()) {
+        // If we closed a popup, stay on current page
         history.pushState(null, null, location.href);
         return;
     }
 
-    // If already on the main page, prevent leaving
+    // If on main page and no popups open, prevent leaving
     if (window.location.href === "https://nearbys.online") {
         history.pushState(null, null, location.href);
         return;
     }
 
-    // Otherwise, allow regular back navigation
+    // Otherwise, proceed with normal back navigation
     history.back();
 });
 
 // Initialize history state
-window.onload = function () {
+window.onload = function() {
     history.pushState(null, null, location.href);
 };
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
