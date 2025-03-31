@@ -29,12 +29,13 @@ if (isPWA || (lastVisit && now - lastVisit < 60 * 60 * 1000)) {
 });
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
 // Function to check and close open popups
 function closeOpenPopup() {
     let itemPopup = document.getElementById("itemPopup");
     let storesPopup = document.getElementById("storesPopup");
     let locationPopup = document.getElementById("locationPopup");
+    let devicesPopup = document.getElementById("devicesPopup");
+    let seriesPopup = document.getElementById("seriesPopup");
 
     if (itemPopup?.style.display === "block") {
         itemPopup.style.display = "none";
@@ -46,6 +47,14 @@ function closeOpenPopup() {
     }
     if (locationPopup?.style.display === "block") {
         locationPopup.style.display = "none";
+        return true;
+    }
+    if (devicesPopup?.style.display === "block") {
+        devicesPopup.style.display = "none";
+        return true;
+    }
+    if (seriesPopup?.style.display === "block") {
+        seriesPopup.style.display = "none";
         return true;
     }
     return false;
@@ -62,7 +71,6 @@ window.addEventListener("popstate", function (event) {
 window.onload = function () {
     history.pushState(null, null, location.href);
 };
-
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 window.addEventListener("popstate", function (event) {
