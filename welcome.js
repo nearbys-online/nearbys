@@ -29,7 +29,7 @@ if (isPWA || (lastVisit && now - lastVisit < 60 * 60 * 1000)) {
 });
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-// Define the order in which popups should be closed (first to last)
+// Define the strict closing order
 const POPUP_CLOSE_ORDER = [
     "seriesPopup",
     "devicesPopup",
@@ -37,50 +37,46 @@ const POPUP_CLOSE_ORDER = [
     "itemPopup"
 ];
 
-// Track if we're currently processing a popup close
-let isProcessingPopup = false;
+// Track current popup closing state
+let activePopupIndex = -1;
 
-// Function to close the next popup in order
-function closeNextPopup() {
-    // Don't process if already handling a popup
-    if (isProcessingPopup) return false;
-    
-    isProcessingPopup = true;
-    
-    // Find the first open popup in our order
-    for (const popupId of POPUP_CLOSE_ORDER) {
-        const popup = document.getElementById(popupId);
-        if (popup?.style.display === "block") {
-            popup.style.display = "none";
-            isProcessingPopup = false;
-            return true; // Closed one popup
+function getNextPopupToClose() {
+    // Check which popups are currently open
+    const openPopups = POPUP_CLOSE_ORDER.map(id => ({
+        id,
+        element: document.getElementById(id),
+        isOpen: document.getElementById(id)?.style.display === "block"
+    }));
+
+    // Find the highest priority open popup
+    for (let i = 0; i < openPopups.length; i++) {
+        if (openPopups[i].isOpen) {
+            return { index: i, id: openPopups[i].id, element: openPopups[i].element };
         }
     }
-    
-    isProcessingPopup = false;
-    return false; // No popups were closed
+    return null;
 }
 
-// Handle back button press
 window.addEventListener("popstate", function(event) {
-    // Try to close just one popup
-    if (closeNextPopup()) {
-        // If we closed a popup, stay on current page
+    const nextPopup = getNextPopupToClose();
+    
+    if (nextPopup) {
+        // Close only this specific popup
+        nextPopup.element.style.display = "none";
+        // Stay on current page
         history.pushState(null, null, location.href);
         return;
     }
 
-    // If on main page and no popups open, prevent leaving
-    if (window.location.href === "https://nearbys.online") {
-        history.pushState(null, null, location.href);
-        return;
+    // If we get here, no popups are open
+    // Keep user on main page no matter what
+    if (window.location.href !== "https://nearbys.online") {
+        window.location.href = "https://nearbys.online";
     }
-
-    // Otherwise, proceed with normal back navigation
-    history.back();
+    history.pushState(null, null, location.href);
 });
 
-// Initialize history state
+// Initialize
 window.onload = function() {
     history.pushState(null, null, location.href);
 };
