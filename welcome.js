@@ -37,32 +37,29 @@ function closeOpenPopup() {
     let storesPopup = document.getElementById("storesPopup");
     let locationPopup = document.getElementById("locationPopup");
 
-    // Close only seriesPopup first if it's open
+    // Close only seriesPopup first, keeping devicesPopup open
     if (seriesPopup?.style.display === "block") {
         seriesPopup.style.display = "none";
-        history.pushState(null, null, location.href); // Prevent navigating back to the previous website
-        return true; 
+        return true; // Indicate a popup was closed
     }
 
-    // Check and close other popups if seriesPopup wasn't open
+    // Close devicesPopup only if seriesPopup is already closed
     if (devicesPopup?.style.display === "block") {
         devicesPopup.style.display = "none";
-        history.pushState(null, null, location.href);
         return true;
     }
+
+    // Close other popups if seriesPopup and devicesPopup are already closed
     if (itemPopup?.style.display === "block") {
         itemPopup.style.display = "none";
-        history.pushState(null, null, location.href);
         return true;
     }
     if (storesPopup?.style.display === "block") {
         storesPopup.style.display = "none";
-        history.pushState(null, null, location.href);
         return true;
     }
     if (locationPopup?.style.display === "block") {
         locationPopup.style.display = "none";
-        history.pushState(null, null, location.href);
         return true;
     }
     return false;
@@ -71,7 +68,9 @@ function closeOpenPopup() {
 // Handle back button press
 window.addEventListener("popstate", function (event) {
     if (closeOpenPopup()) {
-        history.pushState(null, null, location.href); // Keep the page state to prevent going back to another website
+        history.pushState(null, null, location.href); // Keep page state after closing a popup
+    } else {
+        history.back(); // Navigate to the previous page if no popups are open
     }
 });
 
@@ -79,7 +78,6 @@ window.addEventListener("popstate", function (event) {
 window.onload = function () {
     history.pushState(null, null, location.href);
 };
-
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 window.addEventListener("popstate", function (event) {
