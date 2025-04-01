@@ -29,57 +29,7 @@ if (isPWA || (lastVisit && now - lastVisit < 60 * 60 * 1000)) {
 });
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-// Define the strict closing order
-const POPUP_CLOSE_ORDER = [
-    "seriesPopup",
-    "devicesPopup",
-    "storesPopup",
-    "itemPopup"
-];
 
-// Track current popup closing state
-let activePopupIndex = -1;
-
-function getNextPopupToClose() {
-    // Check which popups are currently open
-    const openPopups = POPUP_CLOSE_ORDER.map(id => ({
-        id,
-        element: document.getElementById(id),
-        isOpen: document.getElementById(id)?.style.display === "block"
-    }));
-
-    // Find the highest priority open popup
-    for (let i = 0; i < openPopups.length; i++) {
-        if (openPopups[i].isOpen) {
-            return { index: i, id: openPopups[i].id, element: openPopups[i].element };
-        }
-    }
-    return null;
-}
-
-window.addEventListener("popstate", function(event) {
-    const nextPopup = getNextPopupToClose();
-    
-    if (nextPopup) {
-        // Close only this specific popup
-        nextPopup.element.style.display = "none";
-        // Stay on current page
-        history.pushState(null, null, location.href);
-        return;
-    }
-
-    // If we get here, no popups are open
-    // Keep user on main page no matter what
-    if (window.location.href !== "https://nearbys.online") {
-        window.location.href = "https://nearbys.online";
-    }
-    history.pushState(null, null, location.href);
-});
-
-// Initialize
-window.onload = function() {
-    history.pushState(null, null, location.href);
-};
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 window.addEventListener("popstate", function (event) {
