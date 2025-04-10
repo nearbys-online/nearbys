@@ -414,6 +414,7 @@ function searchStores(stores) {
 
 document.addEventListener("DOMContentLoaded", function () {
     let currentHandleToRemove = null; // Track the handle to remove
+    let isRemoveMode = false; // Track remove/done state
 
     window.showLiked = function() {
       const storesPopup = document.getElementById('storesPopup');
@@ -451,6 +452,10 @@ document.addEventListener("DOMContentLoaded", function () {
         });
       }
       popup.style.display = 'block';
+      // Reset remove mode on open
+      isRemoveMode = false;
+      document.getElementById('toggleRemove').textContent = 'remove';
+      document.querySelectorAll('.remove-icon').forEach(icon => icon.style.display = 'none');
     };
 
     window.confirmRemove = function(handle) {
@@ -470,10 +475,21 @@ document.addEventListener("DOMContentLoaded", function () {
         const container = document.getElementById('likedCollections');
         if (favorites.length === 0) {
           container.innerHTML = '<p style="text-align: center; color: #009500;">No liked vendors yet.</p>';
+          isRemoveMode = false;
+          document.getElementById('toggleRemove').textContent = 'remove';
         }
 
         document.getElementById('removeliked-popup').style.display = 'none';
         currentHandleToRemove = null;
       }
     });
+
+    window.toggleRemoveMode = function() {
+      isRemoveMode = !isRemoveMode;
+      const toggleText = document.getElementById('toggleRemove');
+      toggleText.textContent = isRemoveMode ? 'done' : 'remove';
+      document.querySelectorAll('.remove-icon').forEach(icon => {
+        icon.style.display = isRemoveMode ? 'flex' : 'none';
+      });
+    };
   });
