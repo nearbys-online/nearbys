@@ -321,10 +321,15 @@ function showNoItemPopup() {
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
   function showStores(category) {
-    // Close likedPopup if it exists and is open
+    // Open storesPopup first
+    document.getElementById("storesPopup").style.display = "block";
+
+    // Close likedPopup after a short delay for smooth transition
     const likedPopup = document.getElementById('likedPopup');
     if (likedPopup && likedPopup.style.display !== 'none') {
-      likedPopup.style.display = 'none';
+      setTimeout(() => {
+        likedPopup.style.display = 'none';
+      }, 100); // 100ms delay for smooth transition
     }
 
     fetch(categoryUrls[category])
@@ -354,7 +359,6 @@ function showNoItemPopup() {
         });
         storesList += `</div>`;
         document.getElementById("storesList").innerHTML = storesList;
-        document.getElementById("storesPopup").style.display = "block";
       })
       .catch(error => {
         console.error("Error loading items:", error);
