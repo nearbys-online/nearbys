@@ -53,6 +53,7 @@ window.onload = function () {
 function closeVisiblePopup() {
     // List all possible popups to check
     const popups = [
+        { id: 'removeliked-popup', display: 'block' },
         { id: 'storesPopup', display: 'block' },
         { id: 'likedPopup', display: 'block' },    
         { id: 'seriesPopup', display: 'block' },
