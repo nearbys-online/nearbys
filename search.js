@@ -320,46 +320,51 @@ function showNoItemPopup() {
         
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-function showStores(category) {
-
-        fetch(categoryUrls[category])
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.text();
-            })
-            .then(data => {
-                let parser = new DOMParser();
-                let doc = parser.parseFromString(data, "text/html");
-                let stores = [];
-
-                doc.querySelectorAll(".stores-card").forEach(card => {
-                    let img = card.querySelector("img")?.src;
-                    let name = card.querySelector("p")?.textContent;
-                    if (img && name) stores.push({ name, image: img });
-                });
-
-                let storesList = `<div class="stores-grid">`;
-                stores.forEach(stores => {
-                    storesList += `
-                        <div class="stores-card" onclick="searchStores('${stores.name}')">
-                            <img src="${stores.image}" alt="${stores.name}" loading="lazy">
-                            <p>${stores.name}</p>
-                        </div>
-                    `;
-                });
-                storesList += `</div>`;
-                document.getElementById("storesList").innerHTML = storesList;
-                document.getElementById("storesPopup").style.display = "block";
-            })
-            .catch(error => {
-                console.error("Error loading items:", error);
-                document.getElementById("errorPopup").style.display = "block";
-            });
+  function showStores(category) {
+    // Close likedPopup if it exists and is open
+    const likedPopup = document.getElementById('likedPopup');
+    if (likedPopup && likedPopup.style.display !== 'none') {
+      likedPopup.style.display = 'none';
     }
-  
+
+    fetch(categoryUrls[category])
+      .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.text();
+      })
+      .then(data => {
+        let parser = new DOMParser();
+        let doc = parser.parseFromString(data, "text/html");
+        let stores = [];
+
+        doc.querySelectorAll(".stores-card").forEach(card => {
+          let img = card.querySelector("img")?.src;
+          let name = card.querySelector("p")?.textContent;
+          if (img && name) stores.push({ name, image: img });
+        });
+
+        let storesList = `<div class="stores-grid">`;
+        stores.forEach(stores => {
+          storesList += `
+            <div class="stores-card" onclick="searchStores('${stores.name}')">
+              <img src="${stores.image}" alt="${stores.name}" loading="lazy">
+              <p>${stores.name}</p>
+            </div>
+          `;
+        });
+        storesList += `</div>`;
+        document.getElementById("storesList").innerHTML = storesList;
+        document.getElementById("storesPopup").style.display = "block";
+      })
+      .catch(error => {
+        console.error("Error loading items:", error);
+        document.getElementById("errorPopup").style.display = "block";
+      });
+  }
+
   function closeErrorPopup() {
     document.getElementById("errorPopup").style.display = "none";
-}  
+  }
 
 <!-- xxxxxxxxxxxxxxxxxxxxxx --> 
 
@@ -401,3 +406,44 @@ function searchStores(stores) {
     document.getElementById("noItemPopup").style.display = "block";
   }
 }
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxx 
+document.addEventListener("DOMContentLoaded", function () {
+    window.showLiked = function() {
+      // Close storesPopup if it exists and is open
+      const storesPopup = document.getElementById('storesPopup');
+      if (storesPopup && storesPopup.style.display !== 'none') {
+        storesPopup.style.display = 'none';
+      }
+
+      // Open likedPopup
+      const popup = document.getElementById('likedPopup');
+      const container = document.getElementById('likedCollections');
+      const favorites = JSON.parse(localStorage.getItem('favoriteCollections')) || [];
+
+      container.innerHTML = ''; // Clear previous content
+
+      if (favorites.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #009500;">No liked vendors yet.</p>';
+      } else {
+        favorites.forEach(handle => {
+          const collection = window.Shopify.collections?.find(c => c.handle === handle) || {
+            handle: handle,
+            title: handle.replace(/-/g, ' ').replace(/\b\w/g, char => char.toUpperCase()),
+            url: `/collections/${handle}`,
+            image: { src: 'https://via.placeholder.com/300' }
+          };
+
+          const collectionUrl = collection.url && collection.url !== 'undefined' ? collection.url : `/collections/${handle}`;
+
+          const collectionHtml = `
+            <div class="liked-card" onclick="window.location.href='${collectionUrl}'">
+              <img src="${collection.image.src}" alt="${collection.title}">
+              <p>${collection.title}</p>
+            </div>
+          `;
+          container.insertAdjacentHTML('beforeend', collectionHtml);
+        });
+      }
+      popup.style.display = 'block';
+    };
+  });
