@@ -411,7 +411,10 @@ function searchStores(stores) {
   }
 }
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxx 
-document.addEventListener("DOMContentLoaded", function () {
+
+  document.addEventListener("DOMContentLoaded", function () {
+    let currentHandleToRemove = null; // Track the handle to remove
+
     window.showLiked = function() {
       // Close storesPopup if it exists and is open
       const storesPopup = document.getElementById('storesPopup');
@@ -419,7 +422,6 @@ document.addEventListener("DOMContentLoaded", function () {
         storesPopup.style.display = 'none';
       }
 
-      // Open likedPopup
       const popup = document.getElementById('likedPopup');
       const container = document.getElementById('likedCollections');
       const favorites = JSON.parse(localStorage.getItem('favoriteCollections')) || [];
@@ -440,8 +442,9 @@ document.addEventListener("DOMContentLoaded", function () {
           const collectionUrl = collection.url && collection.url !== 'undefined' ? collection.url : `/collections/${handle}`;
 
           const collectionHtml = `
-            <div class="liked-card" onclick="window.location.href='${collectionUrl}'">
-              <img src="${collection.image.src}" alt="${collection.title}">
+            <div class="liked-card" data-handle="${handle}">
+              <div class="remove-icon" onclick="confirmRemove('${handle}')">×</div>
+              <img src="${collection.image.src}" alt="${collection.title}" onclick="window.location.href='${collectionUrl}'">
               <p>${collection.title}</p>
             </div>
           `;
@@ -450,4 +453,33 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       popup.style.display = 'block';
     };
-  });
+
+    // Show confirmation popup
+    window.confirmRemove = function(handle) {
+      currentHandleToRemove = handle;
+      document.getElementById('bottom-popup').style.display = 'block';
+    };
+
+    // Handle Yes button click
+    document.getElementById('confirmRemove').addEventListener('click', function() {
+      if (currentHandleToRemove) {
+        let favorites = JSON.parse(localStorage.getItem('favoriteCollections')) || [];
+        favorites = favorites.filter(h => h !== currentHandleToRemove);
+        localStorage.setItem('favoriteCollections', JSON.stringify(favorites));
+
+        // Remove the card from the UI
+        const card = document.querySelector(`.liked-card[data-handle="${currentHandleToRemove}"]`);
+        if (card) card.remove();
+
+        // Check if popup is empty
+        const container = document.getElementById('likedCollections');
+        if (favorites.length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: #009500;">No liked vendors yet.</p>';
+        }
+
+        // Hide bottom popup
+        document.getElementById('bottom-popup').style.display = 'none';
+        currentHandleToRemove = null;
+      }
+    });
+  });         
