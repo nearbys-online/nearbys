@@ -70,3 +70,72 @@ function closeVisiblePopup() {
         }
     }
 }
+
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+document.addEventListener("DOMContentLoaded", function () {
+    let currentHandleToRemove = null; // Track the handle to remove
+
+    window.showLiked = function() {
+      const storesPopup = document.getElementById('storesPopup');
+      if (storesPopup && storesPopup.style.display !== 'none') {
+        storesPopup.style.display = 'none';
+      }
+
+      const popup = document.getElementById('likedPopup');
+      const container = document.getElementById('likedCollections');
+      const favorites = JSON.parse(localStorage.getItem('favoriteCollections')) || [];
+
+      container.innerHTML = ''; // Clear previous content
+
+      if (favorites.length === 0) {
+        container.innerHTML = '<p style="text-align: left; color: #009500; white-space: nowrap;">No Liked Stores yet.</p>';
+      } else {
+        favorites.forEach(handle => {
+          const collection = window.Shopify.collections?.find(c => c.handle === handle) || {
+            handle: handle,
+            title: handle.replace(/-/g, ' ').replace(/\b\w/g, char => char.toUpperCase()),
+            url: `/collections/${handle}`,
+            image: { src: 'https://via.placeholder.com/300' }
+          };
+
+          const collectionUrl = collection.url && collection.url !== 'undefined' ? collection.url : `/collections/${handle}`;
+
+          const collectionHtml = `
+            <div class="liked-card" data-handle="${handle}">
+              <div class="remove-icon" onclick="confirmRemove('${handle}')">×</div>
+              <img src="${collection.image.src}" alt="${collection.title}" onclick="window.location.href='${collectionUrl}'">
+              <p>${collection.title}</p>
+            </div>
+          `;
+          console.log('Card HTML:', collectionHtml); // Debug to confirm icon is included
+          container.insertAdjacentHTML('beforeend', collectionHtml);
+        });
+      }
+      popup.style.display = 'block';
+    };
+
+    window.confirmRemove = function(handle) {
+      currentHandleToRemove = handle;
+      document.getElementById('removeliked-popup').style.display = 'block';
+    };
+
+    document.getElementById('confirmRemove').addEventListener('click', function() {
+      if (currentHandleToRemove) {
+        let favorites = JSON.parse(localStorage.getItem('favoriteCollections')) || [];
+        favorites = favorites.filter(h => h !== currentHandleToRemove);
+        localStorage.setItem('favoriteCollections', JSON.stringify(favorites));
+
+        const card = document.querySelector(`.liked-card[data-handle="${currentHandleToRemove}"]`);
+        if (card) card.remove();
+
+        const container = document.getElementById('likedCollections');
+        if (favorites.length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: #009500; white-space:nowrap;">No Liked Stores yet.</p>';
+        }
+
+        document.getElementById('removeliked-popup').style.display = 'none';
+        currentHandleToRemove = null;
+      }
+    });
+  });
