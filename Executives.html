@@ -1,73 +1,428 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fixed Footer Page</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Executives</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 5px;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            -webkit-tap-highlight-color: transparent; 
+            user-select: none; 
+            -webkit-user-select: none; 
+            -moz-user-select: none; 
+            -ms-user-select: none;
+         }
+
+         .page-wrapper {
+              min-height: 100%;
+              display: flex;
+              flex-direction: column;
+         }
+
+         .content {
+              flex: 1;
+         }
+
+        input {
+            width: 80%;
+            padding: 10px;
+            margin: 5px 0;
+        }
+        input:focus {
+            outline: 2px solid #009500;
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: -5px;
+        }
+        button, .button {
+            padding: 10px;
+            background-color: #009500;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+            border-radius:20px;
+            text-decoration: none;
+        }
+        #message {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        #successPopup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #popupBox {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            width: 300px;
+        }
+
+        #popupMessage {
+            margin-bottom: 15px;
+        }
+
+        #okButton {
+            margin-top: 15px;
+            padding: 8px 16px;
+            background: #009500;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .center {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .medium-green {
+            color: #009500;
+            font-size: 30px;
+            font-weight: bold;
+        }                             
+        .flex-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            text-align: center;
+            padding: 10px;
+        }
+        .number {
+            font-size: 16px;
+            color: #009500;
+            font-weight: bold;
+        }
+        .label {
+            font-size: 14px;
+            color: black;
+        }
+        
+        
+        .counter-container {
+            display: flex;
+            background: linear-gradient(to bottom, #ddd, #555);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+        }
+        .digit {
+            width: 50px;
+            height: 80px;
+            background: linear-gradient(to bottom, #444, #111);
+            color: white;
+            font-size: 50px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 80px;
+            margin: 0 5px;
+            border-radius: 5px;
+            border: 2px solid #333;
+            box-shadow: inset 0px -2px 5px rgba(255, 255, 255, 0.2);
+        }
+        .center {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .small-text {
+            font-size: 18px;
+            color: #333;
+        } 
+               
+        
+    .payment-table-container {
+        width: 100%;
+        hight: auto;
+        max-height: 400px;
+        overflow-y: auto;         
+        border: 1px solid #ccc; 
+        margin: 0 auto;
     }
 
-    header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 50px;
-      background-color: #000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
+    .payment-table {
+        width: 100%;
+        border-collapse: collapse;
+        outline: 0.5px solid #000;
     }
 
-    main {
-      padding: 70px 20px 70px; /* Top padding for header, bottom for footer */
-      min-height: 100vh;
-      box-sizing: border-box;
+    .payment-table th, .payment-table td {
+        border: 0.5px solid #000; 
+        padding: 8px;
+        text-align: left;
     }
 
-    footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100vw;
-      background-color: #000;
-      color: white;
+    .payment-table th {
+        text-align: center;
+        background-color: #009500; 
+        color: white; 
+    }  
+    
+.contact {
+  background: #fff;
+  font-family: 'Righteous', cursive;
+}
+
+.contact-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: calc(100% - 20px);
+  margin: 0 auto;
+  padding: 50px 10px;
+  margin-bottom: 20px;
+}
+
+.contact-logo {
+  width: 100px;
+  height: auto;
+  margin-top: -1px;
+}
+
+.contact-link {
+  color: #009500;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.contact-link i {
+  font-size: 20px;
+}  
+
+  .test {
+      background: #000;
+      color: #fff;
       text-align: center;
       font-size: 10px;
-      padding: 15px 10px;
-      z-index: 1000;
-    }
-  </style>
-</head>
-<body>
+      width: 100vw;
+      position: fixed;
+      
+  }
+  .test b {
+      font-size: 12px;
+      color: #009500;
+      margin-top: 10px;
+  }   
+  
+  #foot {
+    position: fixed !important;
+    bottom:0;
+    left: 0;
+    margin-bottom: 40px;
+    transform: translateY(-50%); 
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 1001;     
+}   
+    </style>
+<body> 
 
-  <header>
-    <a href="https://nearbys.online" style="display: inline-block; text-decoration: none;">
-      <img src="https://cdn.shopify.com/s/files/1/0664/3751/3414/files/nearbys-logo.webp?v=1741177270" alt="NearbYs Logo" style="width: 150px; height: auto; display: block;">
-    </a>
-  </header>
-
-  <main>
-    <p>This is the main 3rd content area. The footer is fixed at the bottom of the screen.</p>
-    <p>Add more content to test scrolling...</p>
-    <p style="height: 1000px;"></p>
-  </main>
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Righteous&amp;display=swap" rel="stylesheet"> 
-
-  <footer>
-    <div style="font-family: 'Righteous', cursive; font-style: italic;">
-      <b style="font-size: 12px; color: #009500;">nearby<span style="color:#A0D6B4;">s</span></b> ⓒ 2025 <br>
+<div id="foot">
+    <div class="test">
+    <div style="padding: 10px; font-family: 'Righteous', cursive; font-style:italic;">
+      <b>nearby<span style="color:#A0D6B4;">s</span></b> ⓒ 2025 <br>
       All rights reserved
     </div>
-  </footer>
+    </div>
+</div>
+    
+<div class="page-wrapper">
+  <div class="content">
+<!-- xxxxxxxxxxxxxxxxxx -->
+<header style="position: fixed; top: 0; left: 0; width: 100vw; height: 50px;background-color: #000; display: flex; justify-content: center; align-items: center;z-index: 1000;">
+    <a href="https://nearbys.online" style="display: inline-block; text-decoration: none;">
+        <img src="https://cdn.shopify.com/s/files/1/0664/3751/3414/files/nearbys-logo.webp?v=1741177270" alt="NearbYs Logo" style="width: 150px; height: auto; display: block;">
+    </a>
+</header>
+<!-- xxxxxxxxxxxxxxxxxx -->
+<div id="loginContainer" style="margin-top:100px;">
 
+    <h1 style="margin-bottom:50px;">Executives</h1>
+
+    <input type="text" id="userId" placeholder="User ID" required>
+    <div id="userIdError" class="error"></div>
+
+    <input type="text" id="vendorsCode" placeholder="REFF-Code" required>
+    <div id="vendorsCodeError" class="error"></div>
+
+    <button id="loginBtn" style="font-weight:bold; font-size:18px; padding:10px 50px; margin-top:20px; margin-bottom:50px;">Login</button><br>
+
+    <div style="display:flex;">
+        <p style="position:absolute; left: 10%;">register here</p>
+        <button id="addShopBtn" style="border-radius:5px; padding:10px 10px; position:absolute; right:10%;">Create Account</button>
+    </div>
+
+</div>
+<!-- xxxxxxxxxxxxxxxxxxx -->
+<form id="vendorForm" style="margin-top:100px; display:none;">
+
+    <button id="closeVendorForm" style="position:absolute; top:50px; right:10px; background:#555; color:white; border:none; padding:6px 10px; cursor:pointer;">✖
+    </button>
+
+    <h1 style="font-size:20px; text-align:left; padding:20px;">Submit Your Details</h1>
+
+    <input style="display:none;" type="text" id="firstName" placeholder="First Name">
+
+    <input style="display:none;" type="text" id="lastName" placeholder="Last Name">
+
+    <input style="display:none;" type="text" id="refCode" placeholder="REFF-Code click to validate">
+
+    <input style="display:none;" type="text" id="storeName" placeholder="Store Name">
+
+    <input style="display:none;" type="text" id="storeCategory" placeholder="Store Category">
+
+    <input style="display:none;" type="text" id="storesAddress" placeholder="Store Address">
+
+
+    <input style="display:none;" type="text" id="location" placeholder="Click 'Get' to retrieve location">
+
+    <input style="display:none;" type="email" id="email" placeholder="Email">
+
+    <input style="display:none;" type="number" id="contact" placeholder="Contact Number">
+
+    <input style="display:none;" type="text" id="vendorCode" placeholder="Vendor's Code">
+
+<!-- xxxxxxxxxxxxxxx --> 
+  
+    <input type="email" id="affiliateEmail" placeholder="Email">
+    <div class="error" id="affiliateEmailError"></div>
+    
+    <input type="text" id="affiliateName" placeholder="Name">
+    <div class="error" id="affiliateNameError"></div>
+
+    <input type="text" id="platform" placeholder="Platform you are popular in &amp; ID">
+    <div class="error" id="platformError"></div>  
+    
+    <input type="text" id="manager" placeholder="manager-code">
+    <div class="error" id="managerError"></div>            
+<!-- xxxxxxxxxxxxxx -->        
+   <input style="display:none;" type="text" id="totalSales"> 
+   
+   <input style="display:none;" type="text" id="totalReceived">
+   
+   <input style="display:none;" type="text" id="balanceToReceive">
+   
+   <input style="display:none;" type="text" id="totalEarned">
+   
+   <input style="display:none;" type="text" id="paid">
+   
+   <input style="display:none;" type="text" id="balance">           
+<!-- xxxxxxxxxxxxxxxxxx -->                      
+    <button type="button" onclick="submitUser()" style="font-weight:bold; font-size:18px; padding:10px 115px; margin-top:20px;">Submit</button>
+    <div id="submittingText" style="display: none; color: blue; margin-top: 10px;">Submitting...</div>
+    <div style="margin-bottom:100px;" id="message"></div>
+</form>
+<!-- xxxxxxxxxxxxxxxxxx -->
+<div id="vendorDashboard" style="display:none; margin-bottom:100px; margin-top:120px;">
+
+    <button id="logoutBtn" style="position: absolute; top: 60px; right: 20px; border-radius:5px;">Logout</button>
+
+    <p style="font-size: 24px; font-style:italic;">Hello<span style="font-weight:bold; font-style:normal;" id="dashboard-affiliateName">,</span></p>
+<!-- xxxxxxxxxxxxxxxxxxx -->
+
+    <!-- Counter Display -->
+    <div class="counter-container" id="counter">    
+</div>
+    <div class="center">    
+        <div id="aTotalSales" class="green-number" style="display:none;"></div>
+        <div class="small-text"><b>Total Sales</b></div>
+    </div>       
+     
+<!-- xxxxxxxxxxxxxxxxxxx -->
+<div class="center">
+    <div style="display: inline-block; border-radius:2px; outline:1px solid #555;  padding:5px 10px; box-shadow: inset 2px 0px 2px black, inset 0px -2px 2px black;">
+        <div id="aTotalCommission" class="medium-green" style="display: inline-block; color:blue;"></div>
+        <span class="medium-green" style="font-size:20px; color:blue;">dhs</span>
+    </div>
+    <div style="margin-top:5px;"><b>Commissions Generated</b></div>
+</div>     
+<!-- xxxxxxxxxxxxxxxxxx -->
+<div style="margin-top:50px; outline:3px solid #009500; border-radius:5px; background: linear-gradient(to bottom, #fff, #00950025);">
+<!-- Left Aligned Text -->
+<div style="text-align:left; padding:10px;">
+    <div>Total Paid: <b id="aTotalCommissionPaid"></b>
+</div>
+    <div>Last Payment Date: <b id="aLastPaidDate"></b>
+</div>
+</div>
+  <!-- Balance and Payment Date -->
+<div class="flex-container">
+    <div>
+        <div id="aBalanceToPay" class="number"></div>
+        <div class="label">Balance to be Paid</div>
+    </div>
+    <div>
+        <div id="aNextPaymentDate" class="number"></div>
+        <div class="label">Payment Date</div>
+    </div>
+</div>
+             </div>    
+    
+    <div style=" display:none; padding:20px; text-align:left; margin:25px; padding:10px 10px; outline: 1px solid #000; border-radius:10px;">
+        <p><b>Store Name: </b><span id="dashboard-storeName">Loading...</span></p>
+        <p><b>Address: </b><span id="dashboard-storesAddress">Loading...</span></p>
+        <p><b>Contact Number: </b><span id="dashboard-contact">Loading...</span></p>
+    </div>
+
+  <!-- Table Container -->
+<div style="padding:10px; text-align:left; margin-bottom: 15px;">
+    <h3 style="text-align:center; color:#009500;">Registered Vendors Details</h3>
+    <div class="payment-table-container" style="outline: 2px solid #000;">
+        <table id="paymentTable" class="payment-table">
+            <thead id="paymentTableHead">           
+     <!-- Headers will be dynamically added here -->
+            </thead>
+            <tbody id="paymentTableBody">        
+    <!-- Rows will be dynamically added here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+    
+</div>
+<!-- xxxxxxxxxxxxxxxxxxx -->
+<div id="successPopup" style="display: none;">
+    <div id="popupBox">
+        <p id="popupMessage"><span style="color:#009500; font-weight:bold;">Your details have been submitted successfully.</span><br><br>
+            Please check your email for login information.</p>
+        <button id="okButton" style="font-weight:bold">OK</button>
+    </div>
+</div>
+<!-- xxxxxxxxxxxxxxxxxxxx -->
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Righteous&amp;display=swap" rel="stylesheet"> 
+  <div class="contact">
+    <div class="contact-inner">
+       <a href="https://nearbys.online" target="_blank">
+      <img src="https://cdn.shopify.com/s/files/1/0947/2340/8240/files/1000084881.webp?v=1743588303" alt="nearbys Logo" class="contact-logo">
+    </a>
+
+<!-- Email Link with Icon -->
+    <a href="mailto:admin@nearbys.online" class="contact-link">
+      <i class="fas fa-envelope"></i> email
+    </a>
+
+<!-- WhatsApp with Icon -->
+    <a href="https://wa.me/971509880960" class="contact-link">
+      <i class="fab fa-whatsapp"></i> whatsApp
+    </a>     
+    </div>
+  </div>
 </body>
-</html>
