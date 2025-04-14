@@ -1,348 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sticky Footer Page</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      font-family: Arial, sans-serif;
+    }
+
+    main {
+      flex: 1;
+      margin-top: 50px;
+      padding: 20px;
+    }
+
+    footer {
+      background-color: #000;
+      color: white;
+      text-align: center;
+      font-size: 10px;
+    }       
+  </style>
+</head>
 <body>
 
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Submit User Details</title>
-    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-      text-align: center; overflow-y: auto;
-        }
-        input {
-            width: 80%;
-            padding: 10px;
-            margin: 5px 0;
-        }
-        input:focus {
-            outline: 2px solid #009500;
-        }
-        .error {
-            color: red;
-            font-size: 14px;
-            margin-top: -5px;
-        }
-        button, .button {
-            padding: 10px;
-            background-color: #009500;
-            color: white;
-            border: none;
-            cursor: pointer;
-            margin-top: 10px;
-            border-radius:20px;
-            text-decoration: none;
-        }
-        #message {
-            margin-top: 10px;
-            font-weight: bold;
-        }
-        .footer {
-            background: #000;
-            color: #fff;
-            text-align: center;
-            font-size: 10px;
-            bottom:0;
-            left: 0;
-            position: fixed;
-            width: 100vw;
-        }
-        .footer b {
-            font-size: 12px;
-            color: #009500;
-            margin-top: 10px;
-        }
-        #successPopup {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        #popupBox {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-            width: 300px;
-        }
-
-        #popupMessage {
-            margin-bottom: 15px;
-        }
-
-        #okButton {
-            margin-top: 15px;
-            padding: 8px 16px;
-            background: #009500;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .center {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .green-number {
-            color: #009500;
-            font-size: 50px;
-            font-weight: bold;
-        }
-        .small-text {
-            color: black;
-            font-size: 16px;
-        }
-        .medium-green {
-            color: #009500;
-            font-size: 30px;
-            font-weight: bold;
-        }
-        .left {
-            text-align: left;
-            padding: 40px;            
-            margin-top: 20px;
-        }
-        .flex-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            text-align: center;
-            padding: 10px;
-        }
-        .number {
-            font-size: 16px;
-            color: #009500;
-            font-weight: bold;
-        }
-        .label {
-            font-size: 14px;
-            color: black;
-        }        
-    </style>
-
-<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
 <header style="position: fixed; top: 0; left: 0; width: 100vw; height: 50px;background-color: #000; display: flex; justify-content: center; align-items: center;z-index: 1000;">
     <a href="https://nearbys.online" style="display: inline-block; text-decoration: none;">
-        <img src="https://cdn.shopify.com/s/files/1/0664/3751/3414/files/1000079051.webp?v=1740903600" alt="NearbYs Logo" style="width: 150px; height: auto; display: block;">
+        <img src="https://cdn.shopify.com/s/files/1/0664/3751/3414/files/nearbys-logo.webp?v=1741177270" alt="NearbYs Logo" style="width: 150px; height: auto; display: block;">
     </a>
 </header>
-<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
 
-<div id="loginContainer" style="margin-top:100px;">
+  <main>
+    <p>This is the main content area. The footer will stay at the bottom of the page.</p>
+  </main>
 
-    <h1 style="margin-bottom:50px;">Affiliates Registration</h1>
-
-    <input type="text" id="userId" placeholder="User ID" required>
-    <div id="userIdError" class="error"></div>
-
-    <input type="text" id="vendorsCode" placeholder="REFF-Code" required>
-    <div id="vendorsCodeError" class="error"></div>
-
-    <button id="loginBtn" style="font-weight:bold; font-size:18px; padding:10px 50px; margin-top:20px; margin-bottom:50px;">Login</button><br>
-
-    <div style="display:flex;">
-        <p style="position:absolute; left: 10%;">register here</p>
-        <button id="addShopBtn" style="border-radius:5px; padding:10px 10px; position:absolute; right:10%;">Create Account</button>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Righteous&amp;display=swap" rel="stylesheet"> 
+  <footer>
+    <div style="padding: 10px; font-family: 'Righteous', cursive; font-style:italic;">
+      <b style="font-size: 12px; color: #009500; margin-top: 10px;">nearby<span style="color:#A0D6B4;">s</span></b> ⓒ 2025 <br>
+      All rights reserved
     </div>
-
-</div>
-
-<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
-
-<form id="vendorForm" style="margin-top:100px; display:none;">
-
-    <button id="closeVendorForm" style="position:absolute; top:50px; right:10px; background:#555; color:white; border:none; padding:6px 10px; cursor:pointer;">✖
-    </button>
-
-    <h1 style="font-size:20px; text-align:left; padding:20px;">Submit Your Details</h1>
-
-    <input style="display:none;" type="text" id="firstName" placeholder="First Name">
-
-    <input style="display:none;" type="text" id="lastName" placeholder="Last Name">
-
-    <input style="display:none;" type="text" id="refCode" placeholder="REFF-Code click to validate">
-
-    <input style="display:none;" type="text" id="storeName" placeholder="Store Name">
-
-    <input style="display:none;" type="text" id="storeCategory" placeholder="Store Category">
-
-    <input style="display:none;" type="text" id="storesAddress" placeholder="Store Address">
-
-
-    <input style="display:none;" type="text" id="location" placeholder="Click 'Get' to retrieve location">
-
-    <input style="display:none;" type="email" id="email" placeholder="Email">
-
-    <input style="display:none;" type="number" id="contact" placeholder="Contact Number">
-
-    <input style="display:none;" type="text" id="vendorCode" placeholder="Vendor's Code">
-
-    <!-- xxxxxxxxxxxxxxxxxxxxxxxxxxx -->    
-
-    <input type="email" id="affiliateEmail" placeholder="Email">
-    <div class="error" id="affiliateEmailError"></div>
-    
-    <input type="text" id="affiliateName" placeholder="Name">
-    <div class="error" id="affiliateNameError"></div>
-
-    <input type="text" id="platform" placeholder="Platform you are popular in &amp; ID">
-    <div class="error" id="platformError"></div>        
-    
-    <!-- xxxxxxxxxxxxxxxxxxxxxxxxxxx -->    
-    
-   <input style="display:none;" type="text" id="totalSales"> 
-   
-   <input style="display:none;" type="text" id="totalReceived">
-   
-   <input style="display:none;" type="text" id="balanceToReceive">
-   
-   <input style="display:none;" type="text" id="totalEarned">
-   
-   <input style="display:none;" type="text" id="paid">
-   
-   <input style="display:none;" type="text" id="balance">
-           
-    <!-- xxxxxxxxxxxxxxxxxxxxxxxxxxx -->                      
-
-    <button type="button" onclick="submitUser()" style="font-weight:bold; font-size:18px; padding:10px 115px; margin-top:20px;">Submit</button>
-    <div id="submittingText" style="display: none; color: blue; margin-top: 10px;">Submitting...</div>
-    <div style="margin-bottom:100px;" id="message"></div>
-
-</form>
-<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
-<div id="vendorDashboard" style="display:none; margin-bottom:100px; margin-top:120px;">
-
-    <button id="logoutBtn" style="position: absolute; top: 60px; right: 20px; border-radius:5px;">Logout</button>
-
-    <p style="font-size: 24px; font-style:italic;">Hello<span style="font-weight:bold; font-style:normal;" id="dashboard-affiliateName">,</span></p>
-<br>
-<!-- vvvvvvvvvvvvvv -->
-
-<!-- Centered Numbers and Text -->
-    <div class="center">
-    <div id="aTotalSales" class="green-number"></div>
-    <div class="small-text">Total Sales</div>
-</div>
-
-<div class="center">
-    <div style="display: inline-block;">
-        <div id="aTotalCommission" class="medium-green" style="display: inline-block;"></div>
-        <span class="medium-green" style="font-size:20px;">dhs</span>
-    </div>
-    <div class="small-text">Commissions Generated</div>
-</div>
-
-<!-- Left Aligned Text -->
-<div class="left">
-    <div>Total Paid: <b id="aTotalCommissionPaid"></b></div>
-    <div>Last Payment Date: <b id="aLastPaidDate"></b></div>
-</div>
-
-<!-- Balance and Payment Date -->
-<div class="flex-container">
-    <div>
-        <div id="aBalanceToPay" class="number"></div>
-        <div class="label">Balance to be Paid</div>
-    </div>
-    <div>
-        <div id="aNextPaymentDate" class="number"></div>
-        <div class="label">Payment Date</div>
-    </div>
-</div>
-<!-- vvvvvvvvvvvvvv -->
-    
-    
-
-    <div style=" display:none; padding:20px; text-align:left; margin:25px; padding:10px 10px; outline: 1px solid #000; border-radius:10px;">
-        <p><b>Store Name: </b><span id="dashboard-storeName">Loading...</span></p>
-        <p><b>Address: </b><span id="dashboard-storesAddress">Loading...</span></p>
-        <p><b>Contact Number: </b><span id="dashboard-contact">Loading...</span></p>
-    </div>
-            
-    <!-- table -->
-<style>
-    .payment-table-container {
-        width: 100%;
-        hight: auto;
-        max-height: 400px;
-        overflow-y: auto;         
-        border: 1px solid #ccc; 
-        margin: 0 auto;
-    }
-
-    .payment-table {
-        width: 100%;
-        border-collapse: collapse;
-        outline: 0.5px solid #000;
-    }
-
-    .payment-table th, .payment-table td {
-        border: 0.5px solid #000; 
-        padding: 8px;
-        text-align: left;
-    }
-
-    .payment-table th {
-        text-align: center;
-        background-color: #009500; 
-        color: white; 
-    }
-</style>
-
-<!-- Table Container -->
-<div style="padding:10px; text-align:left; margin-bottom: 15px;">
-    <h3 style="text-align:center; color:#009500;">Registered Vendors Details</h3>
-    <div class="payment-table-container">
-        <table id="paymentTable" class="payment-table">
-            <thead id="paymentTableHead">           
-                <!-- Headers will be dynamically added here -->
-            </thead>
-            <tbody id="paymentTableBody">        
-                <!-- Rows will be dynamically added here -->
-            </tbody>
-        </table>
-    </div>
-</div>
-    
-</div>
-<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
-<div id="successPopup" style="display: none;">
-    <div id="popupBox">
-        <p id="popupMessage"><span style="color:#009500; font-weight:bold;">Your details have been submitted successfully.</span><br><br>
-            Please check your email for login information.</p>
-        <button id="okButton" style="font-weight:bold">OK</button>
-    </div>
-</div>
-<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
-    <div style="text-align: center; padding: 0; margin-top:150px; margin-bottom: 70px;">
-        <h3 style="color: #555;">Contact Us:</h3>
-        <p style="margin: 5px 0; font-family: 'Abril Fatface', serif; cursive; color: #009500;
-              font-size: 24px; text-shadow: 1.2px 0px 0px #000;">
-            <b>NearbY<span style="color:#A0D6B4;">s</span></b>
-        </p>
-        <p style="margin: 5px 0;">Dubai, United Arab Emirates</p>
-        <p style="margin: 5px 0; color:#2B547E;"><b>email:</b> <a href="mailto:admin@nearbys.online" style="color: #007bff; text-decoration: none;">admin@nearbys.online</a></p>
-        <p style="margin: 5px 0;">
-            <b style="color:#009500;">whatsApp:</b>
-            <a href="https://wa.me/971509880960" style="color: #009500; text-decoration: none; font-weight:bold;">050 988 0960</a>
-        </p>
-    </div>
-
-<footer class="footer">
-    <div style="padding: 10px;">
-  <b>NearbY<span style="color:#A0D6B4;">s</span></b> ⓒ 2025 <br>
-  All rights reserved</div>
-</footer>  
-<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
-<script src="https://order-1ib.pages.dev/affiliate-page.js"></script>
+</footer>
 
 </body>
+</html>
