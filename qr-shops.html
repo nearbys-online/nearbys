@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR A4 PDF Generator</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet"> 
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    padding: 20px;
+    margin: 0;
+    text-align: center;
+  }
+
+  #inputSection {
+    margin-bottom: 20px;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    max-width: 300px;
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+
+  button {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    margin: 6px auto;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    background-color: #005000;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  #doc {
+    width: 794px;
+    height: 1123px;
+    background: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    margin: 20px auto;
+    padding: 0;
+    box-sizing: border-box;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+#borderWrapper {
+  width: calc(100% - 1.5in);
+  height: calc(100% - 1.5in);
+  margin-top: -0.5in;
+  border: 2px solid #009500;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: url('https://i.postimg.cc/sXFynf60/store-bg.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}  
+
+  #docContent {
+    padding: 0in 0.75in 1.5in 0.75in; /* top, right, bottom, left */
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  #doc h3 {
+    position: fixed;
+    bottom:14in;
+    left: 28%;  
+    font-size: 40px;
+    font-weight: bold;
+    margin-top: 1.5in;
+    text-align: center;
+    color: #fff;
+    text-shadow:
+    -1px -1px 0 black,
+     1px -1px 0 black,
+    -1px  1px 0 black,
+     1px  1px 0 black;
+  }
+
+  canvas {
+    margin-top: -2.75in;
+    margin-bottom: 50px;
+  }
+
+  @media (max-width: 600px) {
+    #doc {
+      transform: scale(1);
+    }
+  }
+  
+.shop {
+  position: relative;
+  bottom: 2.5in;
+  left: 50;  
+  font-size: 60px;    
+  font-weight: bold;  
+  color: #F5E216;
+  text-shadow: 4px 0px 0px black;
+  display: inline-block; 
+}
+
+.icon {
+    position: fixed;
+    bottom:9.25in;
+    left:45%;
+    width:100px; 
+    height:auto; 
+}
+
+.logo {
+    position: fixed;
+    bottom:8.55in;
+    left: 35%;
+    width:250px; 
+    height:auto; 
+}
+
+.subtitle {
+    position: fixed;
+    bottom:8in;
+    left: 28%;
+    font-size: 25px;
+    font-weight: bold;
+    font-family: 'Righteous', cursive; 
+    font-style:italic;
+    margin-top: -5px;
+    text-align: center;
+    color: #A0D6B4;
+    text-shadow:
+    -1px -1px 0 black,
+     1px -1px 0 black,
+    -1px  1px 0 black,
+     1px  1px 0 black;
+  }
+  
+.site {
+    position: fixed;
+    bottom:5.275in;
+    left: 0;
+    width: 600px; 
+    height: auto;    
+  }    
+  
+</style>
+</head>
+<body>
+  <div id="inputSection">
+    <h2>QR code for Stores</h2>
+    <input type="text" id="collection" placeholder="Enter store name" maxlength="15" />
+    <button onclick="generateQR()">Generate QR</button>
+    <button onclick="downloadPDF()">Download PDF</button>
+    <button onclick="sharePDF()">Share PDF</button>
+  </div>
+
+  <div id="doc">
+    <div id="borderWrapper">
+      <div id="docContent">
+        <h3>Scan to Shop Online</h3>
+        <p class="shop">Aj Store</p>        
+        <div id="qrCanvas"></div>
+        <img class="icon" src="https://i.postimg.cc/PxT07LHJ/icon.png"><br>
+        <img class="logo" src="https://cdn.shopify.com/s/files/1/0947/2340/8240/files/1000084881.webp?v=1743588303">  
+        <p class="subtitle">your nearby stores in one tap !</p> 
+        <img class="site" src="https://i.postimg.cc/wTRNP8NN/url.webp">             
+      </div>
+    </div>
+  </div>
+
+  <script>
+  function updateStoreName() {
+    const col = document.getElementById("collection").value.trim();
+    document.querySelector(".shop").textContent = col || "Aj Store";
+  }
+
+  function generateQR() {
+    const col = document.getElementById("collection").value.trim();
+    if (!col) return alert("Please enter a collection name");
+
+    updateStoreName();
+    currentURL = `https://nearbys.online/pages/stores?collections=${col}`;
+
+    QRCode.toCanvas(currentURL, { width: 250 }, function (err, canvas) {
+      if (err) {
+        console.error(err);
+        return alert("Error generating QR code");
+      }
+      const qrContainer = document.getElementById("qrCanvas");
+      qrContainer.innerHTML = '';
+      qrContainer.appendChild(canvas);
+    });
+  }
+
+  async function downloadPDF() {
+    updateStoreName();
+    const imageUrl = "https://cdn.shopify.com/s/files/1/0947/2340/8240/files/1000084881.webp?v=1743588303";
+    await loadImage(imageUrl);
+
+    const element = document.getElementById("doc");
+    const opt = {
+      margin: 0,
+      filename: 'store-link.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'cm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['avoid-all'] }
+    };
+    html2pdf().set(opt).from(element).save();
+  }
+
+  async function sharePDF() {
+    updateStoreName();
+    const imageUrl = "https://cdn.shopify.com/s/files/1/0947/2340/8240/files/1000084881.webp?v=1743588303";
+    await loadImage(imageUrl);
+
+    const element = document.getElementById("doc");
+    const opt = {
+      margin: 0,
+      filename: 'store-link.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'cm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['avoid-all'] }
+    };
+
+    const blob = await html2pdf().set(opt).from(element).outputPdf('blob');
+    const file = new File([blob], "store-link.pdf", { type: "application/pdf" });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: "Store QR PDF",
+          text: "Scan this QR code to visit the store!"
+        });
+      } catch (err) {
+        alert("Sharing cancelled or failed.");
+      }
+    } else {
+      alert("Sharing not supported on this device/browser.");
+    }
+  }
+  
+  function loadImage(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve();
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+</script>
+</body>
+</html>
