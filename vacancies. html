@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>vacancies - nearbys</title>
+<link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
+   -webkit-tap-highlight-color: transparent; 
+    }
+    .job-box {
+      margin-top: 50px;
+      margin-bottom: 150px;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+    .job-box p {
+      margin: 5px 0;
+    }
+    
+    .job-box p strong {
+     color: #1569C7;   
+    }
+    
+td:first-child {
+  color: #1569C7;
+}
+    .btn {
+      display: inline-block;
+      margin: 10px 5px 0 0;
+      padding: 5px 10px;
+      background: #009500;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn:hover {
+      background: #007e00;
+    }
+    .right-align {
+      text-align: right;
+    }
+    .job-details {
+      display: none;
+      margin-top: 20px;
+    }
+        .footer {
+            background: #000;
+            color: #fff;
+            text-align: center;
+            font-size: 10px;
+            bottom:0;
+            left: 0;
+            position: fixed;
+            width: 100vw;
+        }
+        .footer b {
+            font-size: 12px;
+            color: #009500;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<!-- xxxxxxxxxxxxxxxxxx -->
+<header style="position: fixed; top: 0; left: 0; width: 100vw; height: 50px;background-color: #000; display: flex; justify-content: center; align-items: center;z-index: 1000;">
+    <a href="" style="display: inline-block; text-decoration: none;">
+        <img src="https://cdn.shopify.com/s/files/1/0664/3751/3414/files/nearbys-logo.webp?v=1741177270" alt="nearbys Logo" style="width: 150px; height: auto; display: block;">
+    </a>
+</header>
+<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->    
+
+  <div class="job-box" id="jobBox">
+    <h2>Area Sales Executive</h2>
+    <table style="border-collapse: collapse; width: 100%;">
+  <tr>
+    <td style="padding: 4px 8px; font-weight: bold; white-space: nowrap;">Date:</td>
+    <td style="padding: 4px 8px;">April 18, 2025</td>
+  </tr>
+  <tr>
+    <td style="padding: 4px 8px; font-weight: bold; white-space: nowrap;">Company:</td>
+    <td style="padding: 4px 8px;"><span style="font-family: 'Righteous', cursive; font-style:italic; color:#009500;">
+  <span>nearby</span><span style="color:#A0D6B4;">s</span></td>
+  </tr>
+  <tr>
+    <td style="padding: 4px 8px; font-weight: bold; white-space: nowrap;">Location:</td>
+    <td style="padding: 4px 8px;">UAE (Multiple Locations)</td>
+  </tr>
+  <tr>
+    <td style="padding: 4px 8px; font-weight: bold; white-space: nowrap; vertical-align: top;">Salary:</td>
+    <td style="padding: 4px 8px;">AED 3500 (including allowances) & commission up to AED 2000 and above</td>
+  </tr>
+</table>
+    <p>Join our fast-growing platform and help connect local shops with our online marketplace and maximize sales</p>
+    <div class="right-align">
+      <a href="#" id="toggleDetails" class="btn">More Details</a>
+    </div>
+
+    <div class="job-details" id="details">
+      <h3>Job Description</h3>
+      <p>We are hiring Area Sales Executives to join our fast-growing platform. Ideal candidates will be energetic, self-driven, and passionate about working in the field to connect local shops with our online marketplace.</p>
+      <br>
+      <strong>Key Responsibilities:</strong>
+      <ul>
+        <li>Visit and onboard shops onto the platform.</li>
+        <li>Help shop owners list products, update prices, and maintain their online presence.</li>
+        <li>Distribute promotional cards.</li>
+        <li>Support shop owners with delivery coordination and product-related assistance.</li>
+        <li>Continuously bring new shops and promote the platform in the assigned area.</li>
+        <li>Provide customer service and build strong shop relationships.</li>
+        <li>Participate in virtual deliveries or coordinate delivery help when needed.</li>
+      </ul>
+
+      <strong>Requirements:</strong>
+      <ul>
+        <li>Minimum 1 year of experience in field sales or marketing in UAE/in country.</li>
+        <li>Fluent in English is a must.</li>
+        <li>Hardworking, presentable, and good communication skills.</li>
+        <li>Ability to work independently and meet performance targets.</li>
+      </ul>
+
+      <strong>Nationalities:</strong> Any<br/>
+      <strong>Age:</strong> Open to all age groups<br/>
+      <strong>Gender:</strong> Male or Female<br/>
+      <strong>Driving License:</strong> Preferred, but not mandatory<br/>
+
+      <h4>Earning & Benefits:</h4>
+      <ul>
+        <li><strong>Salary:</strong> AED 3500 (including allowances)</li>
+        <li><strong>Commissions:</strong> Up to AED 2000+ per month</li>
+        <li><strong>Visa:</strong> Provided</li>
+        <li><strong>Health Insurance:</strong> Provided</li>
+        <li>Training and on site assistance provided</li>
+        <li><strong>Other Benefits:</strong> As per UAE labor law</li>
+      </ul>
+
+      <p><strong>Interview Notice:</strong> Date and location will be notified by email if shortlisted.</p>
+
+      <h4>Application Process:</h4>
+      <p>Please apply via email to <strong>admin@nearbys.online</strong>. Attach your cover letter and CV. This application step is part of your evaluation — use this chance to showcase your talent and convince us why you're the best fit!</p>
+
+      <a href="mailto:admin@nearbys.online?subject=Application%20for%20Area%20Sales%20Executive" class="btn">Apply Now</a>
+      <a href="https://wa.me/?text=Check%20this%20job%20vacancy:%20Area%20Sales%20Executive%20by%20nearbys%20-%20https://nearbys.online/pages/vacancies" class="btn">Share</a>
+      <a href="#" class="btn" id="hideDetails">Hide Details</a>
+    </div>
+  </div>
+
+  <script>
+    const toggleBtn = document.getElementById("toggleDetails");
+    const hideBtn = document.getElementById("hideDetails");
+    const details = document.getElementById("details");
+
+    toggleBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      details.style.display = "block";
+      toggleBtn.style.display = "none";
+    });
+
+    hideBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      details.style.display = "none";
+      toggleBtn.style.display = "inline-block";
+    });
+  </script>
+<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
+<footer class="footer">
+    <div style="padding: 10px; font-family: 'Righteous', cursive; font-style:italic;">
+  <b>nearby<span style="color:#A0D6B4;">s</span></b> ⓒ 2025 <br>
+  All rights reserved</div>
+</footer>  
+<!-- xxxxxxxxxxxxxxxxxx -->
+</body>
+</html>
