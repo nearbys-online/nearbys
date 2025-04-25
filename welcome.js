@@ -1,29 +1,42 @@
-document.addEventListener("DOMContentLoaded", function () {
-const welcomeScreen = document.getElementById("welcome");
-const mainContent = document.getElementById("main-content");
-const now = new Date().getTime();
-const lastVisit = localStorage.getItem("lastVisit");
+let index = 0;
+    const slides = document.querySelectorAll(".slide");
+    const totalSlides = slides.length;
 
-function showMainContent() {  
-    welcomeScreen.style.display = "none";  
-    mainContent.style.display = "block";  
-}  
+    function showSlide() {
+        slides.forEach(slide => slide.classList.remove("active"));
+        slides[index].classList.add("active");
 
-// Check if running as a PWA  
-const isPWA = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;  
+        let delay = index === 0 ? 4000 : 3000;
+        index = (index + 1) % totalSlides;
 
-if (isPWA || (lastVisit && now - lastVisit < 60 * 60 * 1000)) {    
-    // Skip welcome screen if PWA or revisited within 01 hour 
-    showMainContent();  
-} else {  
-    // Show welcome screen for 20 seconds, then hide  
-    welcomeScreen.style.display = "block";  
-    mainContent.style.display = "none";  
+        setTimeout(showSlide, delay);
+    }
 
-    setTimeout(() => {  
-        showMainContent();  
-        localStorage.setItem("lastVisit", now);  
-    }, 20000);  
-}
+    showSlide();
 
-});
+    // Move this function here to make it global
+    function showMainContent() {
+        document.getElementById("welcome").style.display = "none";
+        document.getElementById("main-content").style.display = "block";
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const welcomeScreen = document.getElementById("welcome");
+        const mainContent = document.getElementById("main-content");
+        const now = new Date().getTime();
+        const lastVisit = localStorage.getItem("lastVisit");
+
+        const isPWA = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
+
+        if (isPWA || (lastVisit && now - lastVisit < 1 * 60 * 1000)) {
+            showMainContent();
+        } else {
+            welcomeScreen.style.display = "block";
+            mainContent.style.display = "none";
+
+            setTimeout(() => {
+                showMainContent();
+                localStorage.setItem("lastVisit", now);
+            }, 20000);
+        }
+    });
