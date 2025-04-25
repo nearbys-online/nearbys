@@ -411,3 +411,159 @@ function searchStores(stores) {
   }
 }
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxx 
+
+// Leave a space here to add more custom words:
+let customWords = [];
+
+// Track search history from localStorage
+function getSearchHistory() {
+  const history = localStorage.getItem("searchHistory");
+  return history ? JSON.parse(history) : [];
+}
+
+function saveSearchTerm(term) {
+  let history = getSearchHistory();
+  if (!history.includes(term.toLowerCase())) {
+    history.unshift(term.toLowerCase());
+    if (history.length > 20) history = history.slice(0, 20); // limit history
+    localStorage.setItem("searchHistory", JSON.stringify(history));
+  }
+}
+
+// Show suggestion list
+function showSuggestions(input) {
+  const suggestionBox = document.getElementById("suggestionBox");
+  const rect = input.getBoundingClientRect();
+
+  // Update box position based on input position
+  suggestionBox.style.top = (rect.bottom + window.scrollY + 5) + "px";
+  suggestionBox.style.left = (rect.left + window.scrollX) + "px";
+
+  const searchTerm = input.value.trim().toLowerCase();
+  if (!searchTerm) {
+    suggestionBox.style.display = "none";
+    suggestionBox.innerHTML = "";
+    return;
+  }
+
+  const history = getSearchHistory();
+  const allSuggestions = [...new Set([...history, ...presetWords, ...customWords])];
+  const matches = allSuggestions.filter(word => word.toLowerCase().startsWith(searchTerm));
+
+  if (matches.length > 0) {
+    suggestionBox.innerHTML = matches
+      .map(word => `<div onclick="selectSuggestion('${word}')">${word}</div>`)
+      .join("");
+    suggestionBox.style.display = "block";
+  } else {
+    suggestionBox.style.display = "none";
+    suggestionBox.innerHTML = "";
+  }
+}
+
+function selectSuggestion(word) {
+  const input = document.getElementById("searchInput");
+  input.value = word;
+  document.getElementById("suggestionBox").style.display = "none";
+  handleSearch(); // auto search on selection
+}
+
+// Search handler with vendor filtering
+function handleSearch() {
+  const input = document.getElementById("searchInput");
+  const searchValue = input.value.trim();
+  if (!searchValue) return;
+
+  saveSearchTerm(searchValue);
+
+  const userLocation = getActiveLocation();
+  if (!userLocation) {
+    showSelectLocationPopup();
+    return;
+  }
+
+  const radii = [1, 2, 3, 4, 5];
+  let nearbyVendors = [];
+
+  for (let i = 0; i < radii.length && nearbyVendors.length === 0; i++) {
+    const radius = radii[i];
+    nearbyVendors = [];
+
+    for (const vendor in vendors) {
+      let distance = getDistance(
+        userLocation.lat, userLocation.lon,
+        vendors[vendor].lat, vendors[vendor].lng
+      );
+      if (distance <= radius) {
+        nearbyVendors.push(`vendor:${vendor}`);
+      }
+    }
+  }
+
+  const query = encodeURIComponent(searchValue);
+
+  if (nearbyVendors.length > 0) {
+    window.location.href = `https://nearbysx.myshopify.com/search?q=${query}+${nearbyVendors.join(" OR ")}`;
+  } else {
+    const popup = document.getElementById("noItemPopup");
+    if (popup) popup.style.display = "block";
+  }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const input = document.getElementById("searchInput");
+  const searchButton = document.querySelector(".search-icon-button");
+
+  input.addEventListener("input", () => showSuggestions(input));
+
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSearch();
+    }
+  });
+
+  if (searchButton) {
+    searchButton.addEventListener("click", function (e) {
+      e.preventDefault();
+      handleSearch();
+    });
+  }
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const input = document.getElementById("searchInput");
+  input.addEventListener("input", () => showSuggestions(input));
+
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSearch();
+    }
+  });
+});
+
+// Utility functions
+function getDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+if (!userLocation) {
+  showSelectLocationPopup();
+}
+
+// Input key listener
+document.addEventListener("DOMContentLoaded", function () {
+  const input = document.getElementById("searchInput");
+  input.addEventListener("input", () => showSuggestions(input));
+});
+
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
