@@ -28,7 +28,7 @@ let index = 0;
 
         const isPWA = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
 
-        if (isPWA || (lastVisit && now - lastVisit < 1 * 60 * 1000)) {
+        if (isPWA || (lastVisit && now - lastVisit < 60 * 60 * 1000)) {
             showMainContent();
         } else {
             welcomeScreen.style.display = "block";
