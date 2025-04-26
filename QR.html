@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QR Code Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">   
+  <style>
+    body {
+      background-color: #ffffff;
+      color: #000000;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 30px;
+    }
+    h1 {
+      color: #555;
+      margin-top: 40px;
+      margin-bottom: 50px;
+    }
+    input[type="text"] {
+      width: 80%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+      border: 2px solid #009500;
+      border-radius: 5px;
+    }
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    button {
+      background-color: #009500;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #007f00;
+    }
+    #qrcode-container {
+      margin-top: 30px;
+      background-color: #ffffff;
+      padding: 30px; /* Thick white border */
+      display: inline-block;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .footer {
+      background: #000;
+      color: #fff;
+      text-align: center;
+      font-size: 10px;
+      bottom:0;
+      left: 0;
+      position: fixed;
+      width: 100vw;
+    }
+    .footer b {
+      font-size: 12px;
+      color: #009500;
+      margin-top: 10px;
+    }    
+  </style>
+</head>
+<body>
+<!-- Header -->
+<header style="position: fixed; top: 0; left: 0; width: 100vw; height: 50px;background-color: #000; display: flex; justify-content: center; align-items: center;z-index: 1000;">
+  <a href="" style="display: inline-block; text-decoration: none;">
+    <img src="https://cdn.shopify.com/s/files/1/0664/3751/3414/files/nearbys-logo.webp?v=1741177270" alt="nearbys Logo" style="width: 150px; height: auto; display: block;">
+  </a>
+</header>
+
+<h1>QR Code Generator</h1>
+
+<input type="text" id="refInput" placeholder="Enter Ref Link" />
+
+<div class="button-group">
+  <button onclick="generateQR()">Generate QR</button>
+  <button onclick="downloadQR()">Download</button>
+</div>
+
+<div id="qrcode-container" style="display: none;">
+  <div id="qrcode"></div>
+</div>
+
+<script>
+  let qrCodeInstance;
+
+  function generateQR() {
+    const ref = document.getElementById("refInput").value.trim();
+
+    if (!ref) {
+      alert("Please enter the ref link.");
+      return;
+    }
+
+    const fullUrl = `https://nearbys.online?bg_ref=${encodeURIComponent(ref)}`;
+
+    // Clear previous QR code
+    document.getElementById("qrcode").innerHTML = "";
+    document.getElementById("qrcode-container").style.display = "inline-block";
+
+    qrCodeInstance = new QRCode(document.getElementById("qrcode"), {
+      text: fullUrl,
+      width: 200,
+      height: 200,
+      colorDark: "#000000",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  }
+
+  function downloadQR() {
+    const qrCanvas = document.querySelector("#qrcode canvas");
+
+    if (!qrCanvas) {
+      alert("Please generate a QR code first.");
+      return;
+    }
+
+    // Create a new canvas with extra space for the white border
+    const borderSize = 60; // adjust for thicker border
+    const newCanvas = document.createElement('canvas');
+    const size = qrCanvas.width + borderSize * 2;
+
+    newCanvas.width = size;
+    newCanvas.height = size;
+
+    const ctx = newCanvas.getContext('2d');
+
+    // Fill background with white
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, size, size);
+
+    // Draw the QR code in the center
+    ctx.drawImage(qrCanvas, borderSize, borderSize);
+
+    // Create link to download
+    const link = document.createElement('a');
+    link.download = 'qr-code.jpg';
+    link.href = newCanvas.toDataURL("image/jpeg");
+    link.click();
+  }
+</script>
+
+<!-- Footer -->
+<footer class="footer">
+  <div style="padding: 10px; font-family: 'Righteous', cursive; font-style:italic;">
+    <b>nearby<span style="color:#A0D6B4;">s</span></b> ⓒ 2025 <br>
+    All rights reserved
+  </div>
+</footer>
+
+</body>
+</html>
