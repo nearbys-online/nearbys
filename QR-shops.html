@@ -93,7 +93,7 @@
     <div id="qrcode"></div>
   </div>
 
-  <script>
+<script>
     let qrCodeInstance;
 
     function generateQR() {
@@ -122,22 +122,37 @@
     }
 
     function downloadQR() {
-      if (!qrCodeInstance) {
+      const qrCanvas = document.querySelector("#qrcode canvas");
+
+      if (!qrCanvas) {
         alert("Please generate a QR code first.");
         return;
       }
 
-      const qrCanvas = document.querySelector("#qrcode canvas");
-      if (qrCanvas) {
-        const link = document.createElement('a');
-        link.download = 'qr-code.jpg';
-        link.href = qrCanvas.toDataURL("image/jpeg");
-        link.click();
-      } else {
-        alert("QR code not found!");
-      }
+      // Create a new canvas with extra space for the white border
+      const borderSize = 60; // adjust for thicker border
+      const newCanvas = document.createElement('canvas');
+      const size = qrCanvas.width + borderSize * 2;
+
+      newCanvas.width = size;
+      newCanvas.height = size;
+
+      const ctx = newCanvas.getContext('2d');
+
+      // Fill background with white
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, size, size);
+
+      // Draw the QR code in the center
+      ctx.drawImage(qrCanvas, borderSize, borderSize);
+
+      // Create link to download
+      const link = document.createElement('a');
+      link.download = 'qr-code.jpg';
+      link.href = newCanvas.toDataURL("image/jpeg");
+      link.click();
     }
-  </script>
+</script>
 <!-- xxxxxxxxxxxxxxxxxx -->
 <footer class="footer">
     <div style="padding: 10px; font-family: 'Righteous', cursive; font-style:italic;">
