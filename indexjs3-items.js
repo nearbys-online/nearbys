@@ -1,3 +1,4 @@
+
 // Function to show devices based on category
 function showDevices(category) {
     const popup = document.getElementById('devicesPopup');
@@ -175,7 +176,7 @@ function showNoItemPopup() {
   }, 2000);
 }
         
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+//xxxxxxxxxxxxxxxxxxxxxxxxxx
 
 function showItems(category) {
     fetch(categoryUrls[category])
@@ -251,53 +252,7 @@ if (nearbyVendors.length > 0) {
 }
 }    
 
-//xxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-function getActiveLocation() {
-    const selectedLocation = localStorage.getItem('selectedLocation');
-    const selectedLocationCoords = localStorage.getItem('selectedLocationCoords');
-    const currentLocation = localStorage.getItem('currentLocation');
-    const locationExpiry = localStorage.getItem('locationExpiry');
-
-    // If the last active location was "Current Location"
-    if (selectedLocation === "Current Location") {
-        if (currentLocation && locationExpiry) {
-            // Check if the location has expired
-            if (Date.now() > parseInt(locationExpiry)) {
-                // Clear expired location data
-                localStorage.removeItem('currentLocation');
-                localStorage.removeItem('locationExpiry');
-                localStorage.removeItem('selectedLocation');
-                localStorage.removeItem('selectedLocationCoords');
-
-                // Reset displayed location text
-                document.querySelector('.replaceable-text').textContent = "Select Location";
-
-                return null; // No active location
-            } else {
-                return JSON.parse(currentLocation); // Return valid current location
-            }
-        } else {
-            // If no valid current location, reset text
-            document.querySelector('.replaceable-text').textContent = "Select Location";
-            return null;
-        }
-    }
-
-    // If a saved location exists and isn't "Current Location," return it
-    if (selectedLocation && selectedLocationCoords) {
-        return JSON.parse(selectedLocationCoords);
-    }
-
-    return null; // No active location
-}
-
-// Call getActiveLocation on page load
-document.addEventListener("DOMContentLoaded", function () {
-    getActiveLocation();
-});
-
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+//xxxxxxxxxxxxxxxxxxxxxxxx
 
 function showSelectLocationPopup() {
   const selectLocationPopup = document.getElementById("selectLocationPopup");
@@ -318,7 +273,7 @@ function getDistance(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }        
 
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
   function showStores(category) {
     // Open storesPopup first
@@ -410,6 +365,3 @@ function searchStores(stores) {
     document.getElementById("noItemPopup").style.display = "block";
   }
 }
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxx 
-
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
