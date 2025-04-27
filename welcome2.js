@@ -12,7 +12,7 @@ function showMainContent() {
 // Check if running as a PWA  
 const isPWA = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;  
 
-if (isPWA || (lastVisit && now - lastVisit < 60 * 60 * 1000)) {    
+if (isPWA || (lastVisit && now - lastVisit < 1 * 60 * 1000)) {    
     // Skip welcome screen if PWA or revisited within 01 hour 
     showMainContent();  
 } else {  
