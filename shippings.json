@@ -1,0 +1,31 @@
+{
+  "Grocery": {
+    "Grocery 1": {
+      "name": "Grocery 1",
+      "stores": [
+        { "name": "FreshMart", "lat": 12.9716, "lng": 77.5946 },
+        { "name": "DailyNeeds", "lat": 12.9737, "lng": 77.5952 }
+      ]
+    },
+    "Grocery 2": {
+      "name": "Grocery 2",
+      "stores": [
+        { "name": "GreenGrocer", "lat": 12.9352, "lng": 77.6141 }
+      ]
+    }
+  },
+  "Cafeteria": {
+    "Cafeteria 1": {
+      "stores": [
+        { "name": "CoffeeTime", "lat": 12.9612, "lng": 77.6001 }
+      ]
+    }
+  },
+  "Store": {
+    "Store 1": {
+      "stores": [
+        { "name": "ElectroWorld", "lat": 12.9455, "lng": 77.5912 }
+      ]
+    }
+  }
+}
