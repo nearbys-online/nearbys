@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shipping Profile Selector</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 1rem;
+      background: #ffffff;
+      color: #333;
+    }
+
+    h2, h3 {
+      color: #009500;
+    }
+
+    select, textarea, button {
+      width: 100%;
+      max-width: 100%;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    
+    select {
+      top : 10px;
+    }
+
+    button {
+      background-color: #009500;
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #007c00;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    li {
+      background: #f0f0f0;
+      margin: 0.5rem 0;
+      padding: 0.75rem;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Select Vendor Category</h2>
+  <select id="category">
+    <option value="Grocery">Grocery</option>
+    <option value="Cafeteria">Cafeteria</option>
+    <option value="Store">Store</option>
+  </select>
+
+  <h3>Paste Your Coordinate Object</h3>
+  <textarea id="coordPaste" rows="4" placeholder='"e": { lat: 24.3935708, lng: 54.5843787, categories: ["t"] }'></textarea>
+  <button onclick="parseAndUseCoordinates()">Paste & Check Shipping</button>
+
+  <h3>Matching Shipping Profiles:</h3>
+  <ul id="resultList"></ul>
+
+  <script>
+    const EARTH_RADIUS_KM = 6371;
+
+    function getDistanceKm(lat1, lng1, lat2, lng2) {
+      const toRad = angle => angle * Math.PI / 180;
+      const dLat = toRad(lat2 - lat1);
+      const dLng = toRad(lng2 - lng1);
+      const a = Math.sin(dLat / 2) ** 2 +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                Math.sin(dLng / 2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return EARTH_RADIUS_KM * c;
+    }
+
+    async function parseAndUseCoordinates() {
+      const input = document.getElementById('coordPaste').value;
+      const list = document.getElementById('resultList');
+      list.innerHTML = '';
+
+      try {
+        const coordMatch = input.match(/lat\s*:\s*([\d.]+)\s*,\s*lng\s*:\s*([\d.]+)/);
+        if (!coordMatch) throw new Error("Invalid input format");
+        const userLat = parseFloat(coordMatch[1]);
+        const userLng = parseFloat(coordMatch[2]);
+        const category = document.getElementById('category').value;
+
+        const res = await fetch('https://nearbysx.pages.dev/shippings.json');
+        const data = await res.json();
+        const profiles = data[category] || {};
+
+        for (const [profileName, profile] of Object.entries(profiles)) {
+          const allStoresFar = profile.stores.every(store => {
+            const dist = getDistanceKm(userLat, userLng, store.lat, store.lng);
+            return dist > 4;
+          });
+
+          if (allStoresFar) {
+            const li = document.createElement('li');
+            li.textContent = profileName;
+            list.appendChild(li);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        list.innerHTML = '<li>Failed to parse input or load shipping data</li>';
+      }
+    }
+  </script>
+</body>
+</html>
