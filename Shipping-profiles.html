@@ -73,7 +73,13 @@
 
   <h3>Matching Shipping Profiles:</h3>
   <ul id="resultList"></ul>
-
+<!-- xxxxxxxxxx -->
+<div style="outline: 2px solid red; border-radius:15px; background:pink; padding:10px; margin-top:50px;">
+  <h3 style="color:blue; text-align:center;">Search Shipping Profile by Name</h3>
+<input type="text" style="height:25px; border-radius:5px; margin-left:10px;" id="profileSearch" placeholder="Enter store name (e.g., CoffeeTime)" />
+<button style="margin-top:20px;" onclick="searchShippingProfileByStore()">Find Shipping Profile</button>
+<ul id="searchResultList"></ul>
+</div>
   <script>
     const EARTH_RADIUS_KM = 6371;
 
@@ -121,6 +127,48 @@
         list.innerHTML = '<li>Failed to parse input or load shipping data</li>';
       }
     }
+    
+//xxxxxxxxxxxxxxxxxxxxxxx
+
+async function searchShippingProfileByStore() {
+  const inputName = document.getElementById('profileSearch').value.trim().toLowerCase();
+  const resultList = document.getElementById('searchResultList');
+  resultList.innerHTML = '';
+
+  if (!inputName) {
+    resultList.innerHTML = '<li>Please enter a store name.</li>';
+    return;
+  }
+
+  try {
+    const res = await fetch('https://nearbysx.pages.dev/shippings.json');
+    const data = await res.json();
+
+    let found = false;
+
+    for (const [categoryName, profiles] of Object.entries(data)) {
+      for (const [profileKey, profileData] of Object.entries(profiles)) {
+        for (const store of profileData.stores) {
+          if (store.name.toLowerCase() === inputName) {
+            const li = document.createElement('li');
+            li.innerHTML = `<strong>Shipping Profile:</strong> ${profileKey} <br/>
+                            <strong>Category:</strong> ${categoryName} <br/>
+                            <strong>Store:</strong> ${store.name} (Lat: ${store.lat}, Lng: ${store.lng})`;
+            resultList.appendChild(li);
+            found = true;
+          }
+        }
+      }
+    }
+
+    if (!found) {
+      resultList.innerHTML = '<li>No matching shipping profile found for that store.</li>';
+    }
+  } catch (err) {
+    console.error(err);
+    resultList.innerHTML = '<li>Error fetching shipping data.</li>';
+  }
+}    
   </script>
 </body>
 </html>
