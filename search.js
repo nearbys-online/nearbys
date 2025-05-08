@@ -169,9 +169,9 @@ function closePopup() {
 
 function showNoItemPopup() {
   const noItemPopup = document.getElementById("noItemPopup");
-  selectNoItemPopup.style.display = "block";
+  NoItemPopup.style.display = "block";
   setTimeout(() => {
-    selectNoItemPopup.style.display = "none";
+    NoItemPopup.style.display = "none";
   }, 2000);
 }
         
