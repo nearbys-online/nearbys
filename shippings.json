@@ -4,6 +4,7 @@
       "name": "Grocery 1",
       "stores": [
         { "name": "FreshMart", "lat": 12.9716, "lng": 77.5946 },
+        { "name": "Aj 1st", "lat": 24.3935772, "lng": 54.5843331 }, 
         { "name": "DailyNeeds", "lat": 12.9737, "lng": 77.5952 }
       ]
     },
