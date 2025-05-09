@@ -3,16 +3,7 @@
     "Grocery 1": {
       "name": "Grocery 1",
       "stores": [
-        {
-          "name": "FreshMart",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Aj 1st",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Grocery 2": {
