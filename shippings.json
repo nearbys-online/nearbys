@@ -3,435 +3,165 @@
     "Grocery 1": {
       "name": "Grocery 1",
       "stores": [
-        {
-          "name": "Don",
-          "lat": 24.3935847,
-          "lng": 54.5843349
-        }
+
       ]
     },
     "Grocery 2": {
       "name": "Grocery 2",
       "stores": [
-        {
-          "name": "DailyNeeds",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Organic Basket",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Grocery 3": {
       "name": "Grocery 3",
       "stores": [
-        {
-          "name": "Nature’s Pick",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Healthy Harvest",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Grocery 4": {
       "name": "Grocery 4",
       "stores": [
-        {
-          "name": "QuickShop",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "BudgetMart",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Grocery 5": {
       "name": "Grocery 5",
       "stores": [
-        {
-          "name": "Grocery Spot",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Market Choice",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Grocery 6": {
       "name": "Grocery 6",
       "stores": [
-        {
-          "name": "Green Basket",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Urban Mart",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Grocery 7": {
       "name": "Grocery 7",
       "stores": [
-        {
-          "name": "Daily Fresh",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Easy Grocery",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Grocery 8": {
       "name": "Grocery 8",
       "stores": [
-        {
-          "name": "ValueMart",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Go Grocery",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Grocery 9": {
       "name": "Grocery 9",
       "stores": [
-        {
-          "name": "FoodVille",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "SmartCart",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Grocery 10": {
       "name": "Grocery 10",
       "stores": [
-        {
-          "name": "Neighborhood Mart",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Super Basket",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     }
   },
   "Cafeteria": {
     "Cafeteria 1": {
       "stores": [
-        {
-          "name": "CoffeeTime",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Cafe Corner",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Cafeteria 2": {
       "stores": [
-        {
-          "name": "BrewBuzz",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Bean Central",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Cafeteria 3": {
       "stores": [
-        {
-          "name": "The Break Room",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Java Hub",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Cafeteria 4": {
       "stores": [
-        {
-          "name": "Mocha Place",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Cafe & Co.",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Cafeteria 5": {
       "stores": [
-        {
-          "name": "Espresso Bay",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Latte Lane",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Cafeteria 6": {
       "stores": [
-        {
-          "name": "Cup O' Joy",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Cafe Bloom",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Cafeteria 7": {
       "stores": [
-        {
-          "name": "Perk Up",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Morning Roast",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Cafeteria 8": {
       "stores": [
-        {
-          "name": "The Coffee House",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Barista Blend",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Cafeteria 9": {
       "stores": [
-        {
-          "name": "Steamy Mugs",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Cup & Saucer",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Cafeteria 10": {
       "stores": [
-        {
-          "name": "Rise & Grind",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Bistro Beans",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     }
   },
   "Store": {
     "Store 1": {
       "stores": [
-        {
-          "name": "ElectroWorld",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Gadget Town",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Jithu",
-          "lat": 24.3897597,
-          "lng": 54.5798558
-        }
+
       ]
     },
     "Store 2": {
       "stores": [
-        {
-          "name": "Tech Depot",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Digital Planet",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Store 3": {
       "stores": [
-        {
-          "name": "ElectroSpot",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Gizmo Zone",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Store 4": {
       "stores": [
-        {
-          "name": "SmartHub",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "PowerUp",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Store 5": {
       "stores": [
-        {
-          "name": "Device Den",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "FutureTech",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Store 6": {
       "stores": [
-        {
-          "name": "NextGen Store",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Digital Docks",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Store 7": {
       "stores": [
-        {
-          "name": "Electro Express",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Volt Market",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Store 8": {
       "stores": [
-        {
-          "name": "Gadget Grid",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Smart Choice",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Store 9": {
       "stores": [
-        {
-          "name": "Plug & Play",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Innovate Store",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     },
     "Store 10": {
       "stores": [
-        {
-          "name": "Byte Bazaar",
-          "lat": 0,
-          "lng": 0
-        },
-        {
-          "name": "Techie Stop",
-          "lat": 0,
-          "lng": 0
-        }
+
       ]
     }
   }
