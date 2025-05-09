@@ -60,19 +60,33 @@
   </style>
 </head>
 <body>
-  <h2>Select Vendor Category</h2>
+   <h1 style="text-align:center;">SHIPPING Profiles</h1> 
+    
+  <div style="outline: 2px solid #009500; border-radius:15px; background:#00950050; padding:10px; margin-top:50px;">
+      
+  <h3>Paste Your Coordinate Object</h3>
+  <textarea id="coordPaste" rows="4" placeholder='"e": { lat: 24.3935708, lng: 54.5843787, categories: ["t"] }'></textarea>
+  
+  <h3>Select Vendor Category</h3>
   <select id="category">
     <option value="Grocery">Grocery</option>
     <option value="Cafeteria">Cafeteria</option>
     <option value="Store">Store</option>
   </select>
-
-  <h3>Paste Your Coordinate Object</h3>
-  <textarea id="coordPaste" rows="4" placeholder='"e": { lat: 24.3935708, lng: 54.5843787, categories: ["t"] }'></textarea>
+  
   <button onclick="parseAndUseCoordinates()">Paste & Check Shipping</button>
+  
+  </div>
+  <div style="outline: 2px solid blue; border-radius:15px; background:lightblue; padding:10px; margin-top:50px;">
+  <h3 style="display:none;">Matching Shipping Profiles:</h3>
+  <ul style="display:none;" id="resultList"></ul>
 
-  <h3>Matching Shipping Profiles:</h3>
-  <ul id="resultList"></ul>
+<h3>Select a matched profile to add the store:</h3>
+<select id="profileSelector" style="display: none"></select>
+<button id="addToProfileBtn" style="display: none">Add Store to Selected Profile</button>
+<a id="downloadLink" style="display: none" download="shippings.json">Download Updated JSON</a>
+
+  </div>
 <!-- xxxxxxxxxx -->
 <div style="outline: 2px solid red; border-radius:15px; background:pink; padding:10px; margin-top:50px;">
   <h3 style="color:blue; text-align:center;">Search Shipping Profile by Name</h3>
@@ -80,55 +94,127 @@
 <button style="margin-top:20px;" onclick="searchShippingProfileByStore()">Find Shipping Profile</button>
 <ul id="searchResultList"></ul>
 </div>
-  <script>
-    const EARTH_RADIUS_KM = 6371;
 
-    function getDistanceKm(lat1, lng1, lat2, lng2) {
-      const toRad = angle => angle * Math.PI / 180;
-      const dLat = toRad(lat2 - lat1);
-      const dLng = toRad(lng2 - lng1);
-      const a = Math.sin(dLat / 2) ** 2 +
-                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-                Math.sin(dLng / 2) ** 2;
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return EARTH_RADIUS_KM * c;
-    }
+<script>
+let shippingData = {};
+let matchedProfiles = [];
+let userCoords = {};
+let selectedCategory = '';
 
-    async function parseAndUseCoordinates() {
-      const input = document.getElementById('coordPaste').value;
-      const list = document.getElementById('resultList');
-      list.innerHTML = '';
+function getDistanceKm(lat1, lng1, lat2, lng2) {
+  const toRad = angle => angle * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2 +
+            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+            Math.sin(dLng / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return 6371 * c;
+}
 
-      try {
-        const coordMatch = input.match(/lat\s*:\s*([\d.]+)\s*,\s*lng\s*:\s*([\d.]+)/);
-        if (!coordMatch) throw new Error("Invalid input format");
-        const userLat = parseFloat(coordMatch[1]);
-        const userLng = parseFloat(coordMatch[2]);
-        const category = document.getElementById('category').value;
+async function parseAndUseCoordinates() {
+  const input = document.getElementById('coordPaste').value;
+  const list = document.getElementById('resultList');
+  const selector = document.getElementById('profileSelector');
+  const addBtn = document.getElementById('addToProfileBtn');
+  const downloadLink = document.getElementById('downloadLink');
+  selectedCategory = document.getElementById('category').value;
 
-        const res = await fetch('https://nearbysx.pages.dev/shippings.json');
-        const data = await res.json();
-        const profiles = data[category] || {};
+  list.innerHTML = '';
+  selector.innerHTML = '';
+  selector.style.display = 'none';
+  addBtn.style.display = 'none';
+  downloadLink.style.display = 'none';
 
-        for (const [profileName, profile] of Object.entries(profiles)) {
-          const allStoresFar = profile.stores.every(store => {
-            const dist = getDistanceKm(userLat, userLng, store.lat, store.lng);
-            return dist > 4;
-          });
+  try {
+    const jsonMatch = input.match(/"([^"]+)"\s*:\s*\{([^}]+)\}/);
+    if (!jsonMatch) throw new Error("Invalid format");
 
-          if (allStoresFar) {
-            const li = document.createElement('li');
-            li.textContent = profileName;
-            list.appendChild(li);
-          }
-        }
-      } catch (err) {
-        console.error(err);
-        list.innerHTML = '<li>Failed to parse input or load shipping data</li>';
+    const storeName = jsonMatch[1];
+    const props = `{${jsonMatch[2]}}`.replace(/(\w+)\s*:/g, '"$1":');
+    const parsed = JSON.parse(props);
+
+    userCoords = {
+      name: storeName,
+      lat: parsed.lat,
+      lng: parsed.lng
+    };
+
+    const res = await fetch('https://nearbysx.pages.dev/shippings.json');
+    shippingData = await res.json();
+
+    const profiles = shippingData[selectedCategory] || {};
+    matchedProfiles = [];
+
+    for (const [profileName, profile] of Object.entries(profiles)) {
+      const allStoresFar = profile.stores.every(store => {
+        const dist = getDistanceKm(userCoords.lat, userCoords.lng, store.lat, store.lng);
+        return dist > 4;
+      });
+
+      if (allStoresFar) {
+        const li = document.createElement('li');
+        li.textContent = profileName;
+        list.appendChild(li);
+        matchedProfiles.push(profileName);
+
+        const option = document.createElement('option');
+        option.value = profileName;
+        option.textContent = profileName;
+        selector.appendChild(option);
       }
     }
-    
-//xxxxxxxxxxxxxxxxxxxxxxx
+
+    if (matchedProfiles.length > 0) {
+      selector.style.display = 'inline-block';
+      addBtn.style.display = 'inline-block';
+    } else {
+      list.innerHTML = '<li>No matching profiles found (all within 4km). Creating new profile...</li>';
+
+      // Determine new profile name
+      const profileNames = Object.keys(profiles);
+      const numbers = profileNames
+        .map(name => parseInt(name.split(' ').pop()))
+        .filter(n => !isNaN(n));
+      const nextNumber = Math.max(0, ...numbers) + 1;
+      const newProfileName = `${selectedCategory} ${nextNumber}`;
+
+      // Create and assign new profile
+      if (!shippingData[selectedCategory]) {
+        shippingData[selectedCategory] = {};
+      }
+      shippingData[selectedCategory][newProfileName] = {
+        stores: [userCoords]
+      };
+
+      // Show download link
+      const blob = new Blob([JSON.stringify(shippingData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      downloadLink.href = url;
+      downloadLink.style.display = 'inline-block';
+      downloadLink.textContent = `Download Updated JSON (New profile: ${newProfileName})`;
+    }
+
+  } catch (err) {
+    console.error(err);
+    list.innerHTML = '<li>Error: Invalid input or failed to fetch JSON.</li>';
+  }
+}
+
+document.getElementById('addToProfileBtn').addEventListener('click', () => {
+  const selected = document.getElementById('profileSelector').value;
+  if (!selected || !shippingData[selectedCategory] || !shippingData[selectedCategory][selected]) return;
+
+  shippingData[selectedCategory][selected].stores.push(userCoords);
+
+  const blob = new Blob([JSON.stringify(shippingData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  const downloadLink = document.getElementById('downloadLink');
+  downloadLink.href = url;
+  downloadLink.style.display = 'inline-block';
+  downloadLink.textContent = 'Download Updated JSON';
+});
 
 async function searchShippingProfileByStore() {
   const inputName = document.getElementById('profileSearch').value.trim().toLowerCase();
@@ -168,7 +254,8 @@ async function searchShippingProfileByStore() {
     console.error(err);
     resultList.innerHTML = '<li>Error fetching shipping data.</li>';
   }
-}    
-  </script>
+}
+</script>
+
 </body>
 </html>
