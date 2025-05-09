@@ -3,7 +3,11 @@
     "Grocery 1": {
       "name": "Grocery 1",
       "stores": [
-
+        {
+          "name": "Don",
+          "lat": 24.3935847,
+          "lng": 54.5843349
+        }
       ]
     },
     "Grocery 2": {
