@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 10px; margin: 0; background: #fff; }
+    .category-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px; }
+    .category-buttons button { border-radius: 50%; padding: 10px 15px; border: none; background: #eee; cursor: pointer; }
+    .product-card { border: 1px solid #ddd; border-radius: 10px; margin-bottom: 15px; padding: 10px; display: flex; gap: 10px; }
+    .product-card img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
+    .product-info { flex: 1; }
+    .cart-section { margin-top: 30px; border-top: 2px solid #333; padding-top: 10px; }
+    .cart-item { display: flex; justify-content: space-between; border-bottom: 1px solid #ccc; padding: 5px 0; }
+    input, select { padding: 5px; margin-top: 5px; width: 100%; }
+    button.add-btn { background: #000; color: #fff; padding: 5px 10px; border: none; margin-top: 5px; width: 100%; }
+    button.order-btn { background: green; color: #fff; padding: 10px; border: none; width: 100%; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<h2>Menu</h2>
+<div class="category-buttons">
+  <button onclick="loadProducts('starter-R1')">Starters</button>
+  <button onclick="loadProducts('breakfast-R1')">Breakfast</button>
+  <button onclick="loadProducts('lunch-R1')">Lunch</button>
+  <button onclick="loadProducts('dinner-R1')">Dinner</button>
+  <button onclick="loadProducts('juice-R1')">Juice</button>
+  <button onclick="loadProducts('dessert-R1')">Desserts</button>
+</div>
+
+<div id="product-list"></div>
+
+<div class="cart-section">
+  <h3>Your Order</h3>
+  <div id="cart-items"></div>
+  <input type="text" id="table-number" placeholder="Enter Table Number" required>
+  <button class="order-btn" onclick="submitOrder()">Place Order</button>
+</div>
+
+<script>
+  emailjs.init("YJvEHRHWMsYz9rvxk"); // Your EmailJS public key
+
+  const serviceID = "service_o4am8ls";
+  const templateID = "template_2qisjx5";
+  const restaurantName = "Miamix";
+  const vendorEmail = "ajanth988@gmail.com";
+
+  let cart = [];
+
+  async function loadProducts(tag) {
+    const res = await fetch(`/search?q=tag:${tag}&view=json`);
+    const html = await res.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const products = [...doc.querySelectorAll('.product-item')];
+
+    const productCards = await Promise.all(products.map(async productEl => {
+      const handle = productEl.getAttribute('data-handle');
+      const prodData = await fetch(`/products/${handle}.js`).then(res => res.json());
+
+      let variantOptions = prodData.variants.map(v =>
+        `<option value="${v.id}" data-price="${v.price / 100}">${v.title} - $${(v.price / 100).toFixed(2)}</option>`).join('');
+
+      return `
+        <div class="product-card">
+          <img src="${prodData.images[0] || ''}" />
+          <div class="product-info">
+            <strong>${prodData.title}</strong><br>
+            <select class="variant-select">${variantOptions}</select>
+            <input type="number" class="qty-input" min="1" value="1">
+            <button class="add-btn" onclick='addToCart(${JSON.stringify(prodData) }, this)'>Add</button>
+          </div>
+        </div>
+      `;
+    }));
+
+    document.getElementById('product-list').innerHTML = productCards.join('');
+  }
+
+  function addToCart(product, btn) {
+    const container = btn.closest('.product-info');
+    const select = container.querySelector('.variant-select');
+    const variantText = select.options[select.selectedIndex].text;
+    const price = parseFloat(select.options[select.selectedIndex].dataset.price);
+    const qty = parseInt(container.querySelector('.qty-input').value);
+    const image = product.images[0] || '';
+
+    cart.push({ name: product.title, variant: variantText, price, quantity: qty, total: price * qty, image });
+    renderCart();
+  }
+
+  function renderCart() {
+    const html = cart.map(item =>
+      `<div class="cart-item">
+        <span>${item.name} (${item.variant}) x ${item.quantity}</span>
+        <span>$${item.total.toFixed(2)}</span>
+      </div>`
+    ).join('');
+    document.getElementById("cart-items").innerHTML = html;
+  }
+
+function submitOrder() {
+  const tableNumber = document.getElementById("table-number").value.trim();
+  if (!tableNumber) return alert("Please enter your table number.");
+  if (cart.length === 0) return alert("Please add items to your order.");
+
+  const total = cart.reduce((sum, item) => sum + item.total, 0);
+
+  const itemList = cart.map(item =>
+    `${item.name} (${item.variant}) x${item.quantity} - $${item.total.toFixed(2)}`
+  ).join('\n');
+
+  const templateParams = {
+    restaurant_name: restaurantName,
+    table_number: tableNumber,
+    order_id: "R1-" + Date.now(),
+    cart_items: itemList,
+    total_cost: total.toFixed(2),
+    to_email: vendorEmail
+  };
+
+  emailjs.send(serviceID, templateID, templateParams)
+    .then(() => {
+      alert("Order sent successfully!");
+      cart = [];
+      renderCart();
+      document.getElementById("table-number").value = '';
+    }, (err) => {
+      console.error('EmailJS error:', err);
+      alert("Failed to send order. Try again.");
+    });
+}               
+</script>
+
+</body>
+</html>
