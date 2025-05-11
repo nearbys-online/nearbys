@@ -49,7 +49,7 @@
   let cart = [];
 
   async function loadProducts(tag) {
-    const res = await fetch(`https://nearbys.online/search?q=tag:${tag}`);
+    const res = await fetch(`https://nearbys.online/search?q=tag:$lunch`);
     const html = await res.text();
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
