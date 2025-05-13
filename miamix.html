@@ -42,12 +42,19 @@
     }
 
     async function markStatus(orderNumber, status) {
-      await fetch("https://citrine-flint-sea.glitch.me/update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderNumber, status })
-      });
-    }
+  // Send update to backend
+  await fetch("https://citrine-flint-sea.glitch.me/update", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ orderNumber, status })
+  });
+
+  // Update local status immediately
+  if (orders[orderNumber]) {
+    orders[orderNumber].status = status;
+    renderOrders();
+  }
+}
     
     // Receive incoming order via POST
     window.addEventListener("message", async (event) => {
