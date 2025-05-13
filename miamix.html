@@ -23,22 +23,32 @@
     }
 
     function renderOrders() {
-      const container = document.getElementById("orders");
-      container.innerHTML = "";
-      Object.values(orders).forEach(order => {
-        const div = document.createElement("div");
-        div.className = `order ${order.status.toLowerCase()}`;
-        div.innerHTML = `
-          <p><strong>Table:</strong> ${order.table}</p>
-          <p><strong>Order #:</strong> ${order.orderNumber}</p>
-          <ul>${order.cart.map(item => `<li>${item.name} x ${item.quantity} - $${item.total.toFixed(2)}</li>`).join("")}</ul>
-          <p><strong>Total:</strong> $${order.total}</p>
-          <p>Status: ${order.status}</p>
-          <button onclick="markStatus('${order.orderNumber}', 'Confirmed')">Confirm</button>
-          <button onclick="markStatus('${order.orderNumber}', 'Delivered')">Deliver</button>
-        `;
-        container.appendChild(div);
-      });
+  const container = document.getElementById("orders");
+  container.innerHTML = "";
+
+  const sortedOrders = Object.values(orders).sort((a, b) => {
+    const statusPriority = { "Ordered": 0, "Confirmed": 1, "Delivered": 2 };
+    // First by status, then by latest order on top
+    const statusCompare = statusPriority[a.status] - statusPriority[b.status];
+    if (statusCompare !== 0) return statusCompare;
+    // Assuming later orders have higher order numbers
+    return b.orderNumber - a.orderNumber;
+  });
+
+  sortedOrders.forEach(order => {
+    const div = document.createElement("div");
+    div.className = `order ${order.status.toLowerCase()}`;
+    div.innerHTML = `
+      <p><strong>Table:</strong> ${order.table}</p>
+      <p><strong>Order #:</strong> ${order.orderNumber}</p>
+      <ul>${order.cart.map(item => `<li>${item.name} x ${item.quantity} - $${item.total.toFixed(2)}</li>`).join("")}</ul>
+      <p><strong>Total:</strong> $${order.total}</p>
+      <p>Status: ${order.status}</p>
+      <button onclick="markStatus('${order.orderNumber}', 'Confirmed')">Confirm</button>
+      <button onclick="markStatus('${order.orderNumber}', 'Delivered')">Deliver</button>
+    `;
+    container.appendChild(div);
+  });
     }
 
     async function markStatus(orderNumber, status) {
