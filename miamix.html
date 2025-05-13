@@ -42,19 +42,20 @@
     }
 
     async function markStatus(orderNumber, status) {
-  // Send update to backend
-  await fetch("https://citrine-flint-sea.glitch.me/update", {
+  const res = await fetch("https://citrine-flint-sea.glitch.me/update", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ orderNumber, status })
   });
 
-  // Update local status immediately
-  if (orders[orderNumber]) {
-    orders[orderNumber].status = status;
-    renderOrders();
+  if (res.ok) {
+    // Update local data
+    if (orders[orderNumber]) {
+      orders[orderNumber].status = status;
+      renderOrders(); // Update the UI immediately
+    }
   }
-}
+    }
     
     // Receive incoming order via POST
     window.addEventListener("message", async (event) => {
@@ -76,6 +77,7 @@
 // Poll every 1 minute
 setInterval(fetchOrders, 60000);
 fetchOrders(); // Initial fetch
+
   </script>
 </body>
 </html>
