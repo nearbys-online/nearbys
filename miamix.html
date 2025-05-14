@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Live Orders - Greenleaf Bistro</title>
+ <title>Live Orders - Greenleaf Bistro</title>
+ <link href="https://fonts.googleapis.com/css2?family=Righteous&amp;display=swap" rel="stylesheet">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
@@ -187,7 +188,7 @@
 
     #enable-sound {
       position: fixed;
-      bottom: 30px;
+      bottom: 60px;
       right: 30px;
       background: #10b981;
       color: white;
@@ -204,6 +205,31 @@
       background: #059669;
       transform: scale(1.05);
     }
+    
+    .footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100vw;
+  background: rgba(0,0,0,0.9);
+  color: #fff;
+  text-align: center;
+  z-index: 1000;
+  letter-spacing: 1px;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+  font-size: 1rem;
+  line-height: 1;
+  }
+  .footer b {
+    color: #009500;
+    font-family: 'Righteous', cursive;
+    font-style: italic;
+    font-size: 1.5em;
+  }
+  
+  @media (max-width: 700px) {
+  .footer { font-size: 0.8rem; }
+  }
   </style>
 </head>
 <body>
@@ -222,6 +248,13 @@
 
   <button id="enable-sound">🔔 Enable Sound Notifications</button>
   <audio id="notif-sound" src="https://cdn.shopify.com/s/files/1/0947/2340/8240/files/water_drop_tone.mp3?v=1747184325" preload="auto"></audio>
+<div style="margin-bottom:100px;"></div>
+<footer class="footer">
+  <div style="padding: 10px;">
+    <b>nearby<span style="color:#A0D6B4;">s</span></b> ⓒ 2025 <br>
+    All rights reserved
+  </div>
+</footer>  
 
   <script>
 const orders = {};
