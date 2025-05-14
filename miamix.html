@@ -293,10 +293,10 @@ const orders = {};
         <ul>${order.cart.map(item => `
           <li>
             <span>${item.name} x ${item.quantity}</span>
-            <span>$${item.total.toFixed(2)}</span>
+            <span>${item.total.toFixed(2)} dhs</span>
           </li>
         `).join("")}</ul>
-        <div class="total-price">Total: $${order.total}</div>
+        <div class="total-price">Total: ${order.total} dhs</div>
         ${order.status === 'Delivered' ? `
           <div class="delivered-text">Delivered</div>
         ` : `
