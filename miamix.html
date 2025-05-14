@@ -72,16 +72,17 @@
     const bStatus = statusPriority[b.status];
 
     if (aStatus !== bStatus) {
-      return aStatus - bStatus; // Order by status first
+      return aStatus - bStatus;
     }
 
     if (aStatus === statusPriority["Delivered"]) {
-      // For delivered orders, show latest first
-      return b.orderNumber - a.orderNumber;
+      const aTime = new Date(`${a.date} ${a.time}`).getTime();
+      const bTime = new Date(`${b.date} ${b.time}`).getTime();
+      return bTime - aTime;
     }
 
-    // For Ordered and Confirmed, older orders first
-    return a.orderNumber - b.orderNumber;
+    // For Ordered and Confirmed, older first
+    return new Date(`${a.date} ${a.time}`).getTime() - new Date(`${b.date} ${b.time}`).getTime();
   });
 
   sortedOrders.forEach(order => {
