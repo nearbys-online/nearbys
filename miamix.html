@@ -319,6 +319,7 @@
   <audio id="notif-sound" src="https://cdn.shopify.com/s/files/1/0947/2340/8240/files/water_drop_tone.mp3?v=1747184325" preload="auto"></audio>  
 
   <script>
+      
   const orders = {};
   let soundEnabled = false;
   let lastOrderCount = 0;
@@ -335,12 +336,8 @@
     // Check if sound was previously enabled
     if (localStorage.getItem("soundEnabled") === "true") {
       soundEnabled = true;
-      const btn = document.getElementById("enable-sound");
-      if (btn) btn.style.display = "none";
+      document.getElementById("enable-sound").style.display = "none";
     }
-
-    fetchOrders();
-    setInterval(fetchOrders, 60000);
   });
 
   // Save orders to localStorage
@@ -395,20 +392,20 @@
             <div class="table-label">Table</div>
           </div>
         </div>
-
+        
         <ul class="order-items">${order.cart.map(item => `
           <li>${item.name} <span style="color: var(--text-light)">× ${item.quantity}</span> - $${item.total.toFixed(2)}</li>
         `).join("")}</ul>
-
+        
         <div class="order-total">Total: $${order.total}</div>
-
-        <div class="order-actions">
+        
+        <div class="order-actions" id="actions-${order.orderNumber}">
           ${order.status === 'Ordered' ? `
             <button class="action-btn confirm-btn" onclick="markStatus('${order.orderNumber}', 'Confirmed')">
               <i class="fas fa-check"></i> Confirm
             </button>
           ` : ''}
-
+          
           ${order.status === 'Confirmed' ? `
             <button class="action-btn deliver-btn" onclick="markStatus('${order.orderNumber}', 'Delivered')">
               <i class="fas fa-truck"></i> Deliver
@@ -422,22 +419,29 @@
 
   async function markStatus(orderNumber, status) {
     if (orders[orderNumber]) {
+      const originalStatus = orders[orderNumber].status;
       orders[orderNumber].status = status;
       saveOrdersToStorage();
       renderOrders();
-    }
 
-    const res = await fetch("https://citrine-flint-sea.glitch.me/update", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderNumber, status })
-    });
+      const res = await fetch("https://citrine-flint-sea.glitch.me/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderNumber, status })
+      });
 
-    if (!res.ok && orders[orderNumber]) {
-      orders[orderNumber].status = status === 'Confirmed' ? 'Ordered' : 'Confirmed';
-      saveOrdersToStorage();
-      renderOrders();
-      alert("Failed to update status. Please try again.");
+      if (!res.ok) {
+        orders[orderNumber].status = originalStatus;
+        saveOrdersToStorage();
+
+        // Replace buttons with cancelled
+        const actionsDiv = document.getElementById(`actions-${orderNumber}`);
+        if (actionsDiv) {
+          actionsDiv.innerHTML = `
+            <button class="action-btn" style="background-color: grey; color: white;" disabled>Cancelled</button>
+          `;
+        }
+      }
     }
   }
 
@@ -460,6 +464,9 @@
     saveOrdersToStorage();
     renderOrders();
   }
+
+  setInterval(fetchOrders, 60000);
+  fetchOrders();
 
   document.getElementById("enable-sound").addEventListener("click", () => {
     const audio = document.getElementById("notif-sound");
@@ -526,6 +533,8 @@
   }
 
   window.downloadStoredOrders = downloadStoredOrders;
+  
 </script>
+  
 </body>
 </html>
