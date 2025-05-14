@@ -62,33 +62,45 @@
   }
 
   function renderOrders() {
-    const container = document.getElementById("orders");
-    container.innerHTML = "";
+  const container = document.getElementById("orders");
+  container.innerHTML = "";
 
-    const sortedOrders = Object.values(orders).sort((a, b) => {
-      const statusPriority = { "Ordered": 0, "Confirmed": 1, "Delivered": 2 };
-      const statusCompare = statusPriority[a.status] - statusPriority[b.status];
-      if (statusCompare !== 0) return statusCompare;
+  const statusPriority = { "Ordered": 0, "Confirmed": 1, "Delivered": 2 };
+
+  const sortedOrders = Object.values(orders).sort((a, b) => {
+    const aStatus = statusPriority[a.status];
+    const bStatus = statusPriority[b.status];
+
+    if (aStatus !== bStatus) {
+      return aStatus - bStatus; // Order by status first
+    }
+
+    if (aStatus === statusPriority["Delivered"]) {
+      // For delivered orders, show latest first
       return b.orderNumber - a.orderNumber;
-    });
+    }
 
-    sortedOrders.forEach(order => {
-      const div = document.createElement("div");
-      div.className = `order ${order.status.toLowerCase()}`;
-      div.innerHTML = `
-        <p><strong>Date:</strong> ${order.date || 'N/A'} &nbsp; <strong>Time:</strong> ${order.time || 'N/A'}</p>
-        <hr>
-        <p><strong>Table:</strong> ${order.table}</p>
-        <p><strong>Order #:</strong> ${order.orderNumber}</p>
-        <ul>${order.cart.map(item => `<li>${item.name} x ${item.quantity} - $${item.total.toFixed(2)}</li>`).join("")}</ul>
-        <p><strong>Total:</strong> $${order.total}</p>
-        <p>Status: ${order.status}</p>
-        <button onclick="markStatus('${order.orderNumber}', 'Confirmed')">Confirm</button>
-        <button onclick="markStatus('${order.orderNumber}', 'Delivered')">Deliver</button>
-      `;
-      container.appendChild(div);
-    });
-  }
+    // For Ordered and Confirmed, older orders first
+    return a.orderNumber - b.orderNumber;
+  });
+
+  sortedOrders.forEach(order => {
+    const div = document.createElement("div");
+    div.className = `order ${order.status.toLowerCase()}`;
+    div.innerHTML = `
+      <p><strong>Date:</strong> ${order.date || 'N/A'} &nbsp; <strong>Time:</strong> ${order.time || 'N/A'}</p>
+      <hr>
+      <p><strong>Table:</strong> ${order.table}</p>
+      <p><strong>Order #:</strong> ${order.orderNumber}</p>
+      <ul>${order.cart.map(item => `<li>${item.name} x ${item.quantity} - $${item.total.toFixed(2)}</li>`).join("")}</ul>
+      <p><strong>Total:</strong> $${order.total}</p>
+      <p>Status: ${order.status}</p>
+      <button onclick="markStatus('${order.orderNumber}', 'Confirmed')">Confirm</button>
+      <button onclick="markStatus('${order.orderNumber}', 'Delivered')">Deliver</button>
+    `;
+    container.appendChild(div);
+  });
+}
 
   async function markStatus(orderNumber, status) {
     const res = await fetch("https://citrine-flint-sea.glitch.me/update", {
