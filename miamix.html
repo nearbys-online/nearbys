@@ -84,7 +84,7 @@
     .order {
       background-color: var(--card-bg);
       border-radius: var(--border-radius);
-      padding: 15px;
+      padding: 20px;
       box-shadow: var(--box-shadow);
       transition: all 0.3s ease;
       border-left: 5px solid var(--ordered);
@@ -106,15 +106,15 @@
     .order-header {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 10px;
-      padding-bottom: 8px;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
       border-bottom: 1px dashed #e0e0e0;
     }
     
     .order-meta {
       color: var(--text-light);
       font-size: 14px;
-      margin-bottom: 3px;
+      margin-bottom: 5px;
     }
     
     .order-number {
@@ -149,12 +149,12 @@
 }
     
     .order-items {
-      margin: 10px 0;
+      margin: 15px 0;
       padding-left: 20px;
     }
     
     .order-items li {
-      margin-bottom: 5px;
+      margin-bottom: 8px;
       position: relative;
     }
     
@@ -169,7 +169,7 @@
     .order-total {
       font-weight: 600;
       font-size: 18px;
-      margin: 10px 0;
+      margin: 15px 0;
       text-align: right;
     }
     
@@ -181,7 +181,7 @@
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
     }
     
     .ordered .order-status {
@@ -202,12 +202,12 @@
     .order-actions {
       display: flex;
       gap: 10px;
-      margin-top: 10px;
+      margin-top: 15px;
     }
     
     .action-btn {
       flex: 1;
-      padding: 8px;
+      padding: 10px;
       border: none;
       border-radius: var(--border-radius);
       font-weight: 500;
@@ -367,40 +367,40 @@
       sortedOrders.forEach(order => {
         const div = document.createElement("div");
         div.className = `order ${order.status.toLowerCase()}`;
-      div.innerHTML = `
-  <div class="order-header">
-    <div>
-      <div class="order-meta">${order.date || 'N/A'} • ${order.time || 'N/A'}</div>
-      <div class="order-number">Order #${order.orderNumber}</div>
-    </div>
-    <div class="order-table">
-      <div class="table-circle">${order.table}</div>
-      <div class="table-label">Table</div>
-    </div>
-  </div>
-  
-  <div class="order-status">${order.status}</div>
-  
-  <ul class="order-items">${order.cart.map(item => `
-    <li>${item.name} <span style="color: var(--text-light)">× ${item.quantity}</span> - $${item.total.toFixed(2)}</li>
-  `).join("")}</ul>
-  
-  <div class="order-total">Total: $${order.total}</div>
-  
-  <div class="order-actions">
-    ${order.status === 'Ordered' ? `
-      <button class="action-btn confirm-btn" onclick="markStatus('${order.orderNumber}', 'Confirmed')">
-        <i class="fas fa-check"></i> Confirm
-      </button>
-    ` : ''}
-    
-    ${order.status !== 'Delivered' ? `
-      <button class="action-btn deliver-btn" onclick="markStatus('${order.orderNumber}', 'Delivered')">
-        <i class="fas fa-truck"></i> Deliver
-      </button>
-    ` : ''}
-  </div>
-`;
+        div.innerHTML = `
+          <div class="order-header">
+            <div>
+              <div class="order-meta">${order.date || 'N/A'} • ${order.time || 'N/A'}</div>
+              <div class="order-number">Order #${order.orderNumber}</div>
+            </div>
+            <div class="order-table">
+  <div class="table-circle">${order.table}</div>
+  <div class="table-label">Table</div>
+          </div>
+          </div>
+          
+          <div class="order-status">${order.status}</div>
+          
+          <ul class="order-items">${order.cart.map(item => `
+            <li>${item.name} <span style="color: var(--text-light)">× ${item.quantity}</span> - $${item.total.toFixed(2)}</li>
+          `).join("")}</ul>
+          
+          <div class="order-total">Total: $${order.total}</div>
+          
+          <div class="order-actions">
+            ${order.status === 'Ordered' ? `
+              <button class="action-btn confirm-btn" onclick="markStatus('${order.orderNumber}', 'Confirmed')">
+                <i class="fas fa-check"></i> Confirm
+              </button>
+            ` : ''}
+            
+            ${order.status !== 'Delivered' ? `
+              <button class="action-btn deliver-btn" onclick="markStatus('${order.orderNumber}', 'Delivered')">
+                <i class="fas fa-truck"></i> Deliver
+              </button>
+            ` : ''}
+          </div>
+        `;
         container.appendChild(div);
       });
     }
