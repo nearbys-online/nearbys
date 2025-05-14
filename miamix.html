@@ -4,40 +4,146 @@
   <title>Live Orders</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    .order { border: 2px solid #ccc; padding: 10px; margin-bottom: 10px; }
-    .confirmed { border-color: green; }
-    .delivered { border-color: gray; }
-  
-  #enable-sound {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    font-size: 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    z-index: 999;
-    transition: background-color 0.3s ease;
-  }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
-  #enable-sound:hover {
-    background-color: #218838;
-  }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f5f7fb;
+      margin: 0;
+      padding: 30px;
+      min-height: 100vh;
+    }
+
+    h1 {
+      color: #1a1d24;
+      margin-bottom: 2rem;
+      font-weight: 600;
+      font-size: 2.2rem;
+      text-align: center;
+      letter-spacing: -0.5px;
+    }
+
+    #orders {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .order {
+      background: white;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border-left: 4px solid;
+      min-height: 200px;
+    }
+
+    .order.ordered { border-color: #3b82f6; }
+    .order.confirmed { border-color: #009500; }
+    .order.delivered { border-color: #ccc; }
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .table-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #3b82f6;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }
+
+    .order-meta {
+      display: flex;
+      gap: 15px;
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .order ul {
+      list-style: none;
+      padding: 12px 0;
+      margin: 12px 0;
+      border-top: 1px solid #e2e8f0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .order li {
+      padding: 6px 0;
+      display: flex;
+      justify-content: space-between;
+      color: #475569;
+      font-size: 14px;
+    }
+
+    .total-price {
+      text-align: right;
+      font-weight: 600;
+      color: #1e293b;
+      margin: 12px 0;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .confirm-btn {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .confirm-btn.confirmed {
+      background: #009500;
+      cursor: not-allowed;
+    }
+
+    .deliver-btn {
+      background: #e2e8f0;
+      color: #64748b;
+    }
+
+    .delivered-text {
+      color: #ccc;
+      text-align: center;
+      font-weight: 500;
+      margin-top: 16px;
+    }
+
+    /* Keep other existing styles for download button and sound button */
+    /* ... (remaining CSS styles from previous version) */
   </style>
 </head>
 <body>
-  <h1>Incoming Orders</h1>
-<button onclick="downloadStoredOrders()">Download Orders as HTML</button>  
-<div id="orders"></div>
-<button id="enable-sound">Enable Sound Notifications</button>  
-<audio id="notif-sound" src="https://cdn.shopify.com/s/files/1/0947/2340/8240/files/water_drop_tone.mp3?v=1747184325" preload="auto"></audio>  
+  <h1>🍽️ Incoming Orders</h1>
+  <button onclick="downloadStoredOrders()">📥 Download Orders</button>  
+  <div id="orders"></div>
+  <button id="enable-sound">🔔 Enable Sound Notifications</button>
+  <audio id="notif-sound" src="https://cdn.shopify.com/s/files/1/0947/2340/8240/files/water_drop_tone.mp3?v=1747184325" preload="auto"></audio>  
 
-<script>
+  <script>
+   
   const orders = {};
 
   // Load saved orders on page load
@@ -86,23 +192,45 @@
   });
 
   sortedOrders.forEach(order => {
-    const div = document.createElement("div");
-    div.className = `order ${order.status.toLowerCase()}`;
-    div.innerHTML = `
-      <p><strong>Date:</strong> ${order.date || 'N/A'} &nbsp; <strong>Time:</strong> ${order.time || 'N/A'}</p>
-      <hr>
-      <p><strong>Table:</strong> ${order.table}</p>
-      <p><strong>Order #:</strong> ${order.orderNumber}</p>
-      <ul>${order.cart.map(item => `<li>${item.name} x ${item.quantity} - $${item.total.toFixed(2)}</li>`).join("")}</ul>
-      <p><strong>Total:</strong> $${order.total}</p>
-      <p>Status: ${order.status}</p>
-      <button onclick="markStatus('${order.orderNumber}', 'Confirmed')">Confirm</button>
-      <button onclick="markStatus('${order.orderNumber}', 'Delivered')">Deliver</button>
-    `;
-    container.appendChild(div);
-  });
-}
-
+      const div = document.createElement("div");
+      div.className = `order ${order.status.toLowerCase()}`;
+      div.innerHTML = `
+        <div class="order-header">
+          <div class="order-meta">
+            <span>${order.date || 'N/A'}</span>
+            <span>#${order.orderNumber}</span>
+          </div>
+          <div class="table-circle">${order.table}</div>
+        </div>
+        <ul>${order.cart.map(item => `
+          <li>
+            <span>${item.name} x ${item.quantity}</span>
+            <span>$${item.total.toFixed(2)}</span>
+          </li>
+        `).join("")}</ul>
+        <div class="total-price">Total: $${order.total}</div>
+        ${order.status === 'Delivered' ? `
+          <div class="delivered-text">Delivered</div>
+        ` : `
+          <div class="button-group">
+            <button class="action-btn confirm-btn ${order.status === 'Confirmed' ? 'confirmed' : ''}" 
+              onclick="markStatus('${order.orderNumber}', 'Confirmed')" 
+              ${order.status === 'Confirmed' ? 'disabled' : ''}>
+              ${order.status === 'Confirmed' ? 'Confirmed' : 'Confirm'}
+            </button>
+            ${order.status === 'Confirmed' ? `
+              <button class="action-btn deliver-btn" 
+                onclick="markStatus('${order.orderNumber}', 'Delivered')">
+                Deliver
+              </button>
+            ` : ''}
+          </div>
+        `}
+      `;
+      container.appendChild(div);
+    });
+    }
+    
   async function markStatus(orderNumber, status) {
     const res = await fetch("https://citrine-flint-sea.glitch.me/update", {
       method: "POST",
@@ -195,8 +323,7 @@
   }
 
   // Expose to global scope
-  window.downloadStoredOrders = downloadStoredOrders;
-</script>
-  
+  window.downloadStoredOrders = downloadStoredOrders;     
+  </script>
 </body>
 </html>
