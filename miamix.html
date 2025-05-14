@@ -32,7 +32,8 @@
 </head>
 <body>
   <h1>Incoming Orders</h1>
-  <div id="orders"></div>
+<button onclick="downloadStoredOrders()">Download Orders as HTML</button>  
+<div id="orders"></div>
 <button id="enable-sound">Enable Sound Notifications</button>  
 <audio id="notif-sound" src="https://cdn.shopify.com/s/files/1/0947/2340/8240/files/water_drop_tone.mp3?v=1747184325" preload="auto"></audio>  
 
@@ -136,6 +137,77 @@ document.getElementById("enable-sound").addEventListener("click", () => {
   });
 });
   
+ </script>
+  
+  <script>
+// Save orders to localStorage
+function saveOrdersToStorage() {
+  localStorage.setItem('storedOrders', JSON.stringify(orders));
+}
+
+// Load orders from localStorage
+function loadOrdersFromStorage() {
+  const stored = localStorage.getItem('storedOrders');
+  if (stored) {
+    const parsed = JSON.parse(stored);
+    for (const orderNumber in parsed) {
+      orders[orderNumber] = parsed[orderNumber];
+    }
+    renderOrders();
+  }
+}
+
+// Modify handleOrder to save to storage
+const originalHandleOrder = handleOrder;
+handleOrder = async function (order) {
+  await originalHandleOrder(order);
+  saveOrdersToStorage();
+};
+
+// Modify fetchOrders to save to storage
+const originalFetchOrders = fetchOrders;
+fetchOrders = async function () {
+  await originalFetchOrders();
+  saveOrdersToStorage();
+};
+
+// Load from localStorage on page load
+window.addEventListener("DOMContentLoaded", loadOrdersFromStorage);
+
+// Download button functionality
+function downloadStoredOrders() {
+  const stored = localStorage.getItem('storedOrders');
+  if (!stored) return alert("No orders to download.");
+
+  const ordersData = JSON.parse(stored);
+  const htmlContent = `
+    <html>
+    <head><title>Stored Orders</title></head>
+    <body>
+      <h1>Order List</h1>
+      ${Object.values(ordersData).map(order => `
+        <div>
+          <p><strong>Date:</strong> ${order.date || 'N/A'} - <strong>Time:</strong> ${order.time || 'N/A'}</p>
+          <p><strong>Table:</strong> ${order.table}</p>
+          <p><strong>Order #:</strong> ${order.orderNumber}</p>
+          <ul>${order.cart.map(item => `<li>${item.name} x ${item.quantity} - $${item.total.toFixed(2)}</li>`).join('')}</ul>
+          <p><strong>Total:</strong> $${order.total}</p>
+          <p>Status: ${order.status}</p>
+          <hr>
+        </div>
+      `).join('')}
+    </body>
+    </html>
+  `;
+
+  const blob = new Blob([htmlContent], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "stored-orders.html";
+  a.click();
+  URL.revokeObjectURL(url);
+}
   </script>
 </body>
 </html>
