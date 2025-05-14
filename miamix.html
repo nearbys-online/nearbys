@@ -259,25 +259,23 @@ const orders = {};
   const statusPriority = { "Ordered": 0, "Confirmed": 1, "Delivered": 2 };
 
   const sortedOrders = Object.values(orders).sort((a, b) => {
+  const statusPriority = { "Ordered": 0, "Confirmed": 1, "Delivered": 2 };
+
   const aStatus = statusPriority[a.status];
   const bStatus = statusPriority[b.status];
 
-  // Sort by status first: Ordered (0), Confirmed (1), Delivered (2)
   if (aStatus !== bStatus) {
-    return aStatus - bStatus;
+    return aStatus - bStatus; // Ordered/Confirmed first, Delivered last
   }
 
-  // If both orders are Delivered, show newest first
-  if (a.status === 'Delivered' && b.status === 'Delivered') {
-    const aTime = new Date(`${a.date} ${a.time}`).getTime();
-    const bTime = new Date(`${b.date} ${b.time}`).getTime();
-    return bTime - aTime; // newest on top
-  }
-
-  // For Ordered and Confirmed, show oldest first
   const aTime = new Date(`${a.date} ${a.time}`).getTime();
   const bTime = new Date(`${b.date} ${b.time}`).getTime();
-  return aTime - bTime;
+
+  if (a.status === "Delivered") {
+    return bTime - aTime; // Newest Delivered first
+  } else {
+    return aTime - bTime; // Oldest Ordered/Confirmed first
+  }
 });
 
   sortedOrders.forEach(order => {
