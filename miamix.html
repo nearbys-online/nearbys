@@ -222,7 +222,7 @@
   </style>
 </head>
 <body>
-  <h1>🍽️ Incoming Orders</h1>
+  <h1>🍽️ Orders</h1>
   <button onclick="downloadStoredOrders()">📥 Download Orders</button>  
   <div id="orders"></div>
   <button id="enable-sound">🔔 Enable Sound Notifications</button>
@@ -259,22 +259,26 @@ const orders = {};
   const statusPriority = { "Ordered": 0, "Confirmed": 1, "Delivered": 2 };
 
   const sortedOrders = Object.values(orders).sort((a, b) => {
-    const aStatus = statusPriority[a.status];
-    const bStatus = statusPriority[b.status];
+  const aStatus = statusPriority[a.status];
+  const bStatus = statusPriority[b.status];
 
-    if (aStatus !== bStatus) {
-      return aStatus - bStatus;
-    }
+  // Sort by status first: Ordered (0), Confirmed (1), Delivered (2)
+  if (aStatus !== bStatus) {
+    return aStatus - bStatus;
+  }
 
-    if (aStatus === statusPriority["Delivered"]) {
-      const aTime = new Date(`${a.date} ${a.time}`).getTime();
-      const bTime = new Date(`${b.date} ${b.time}`).getTime();
-      return bTime - aTime;
-    }
+  // If both orders are Delivered, show newest first
+  if (a.status === 'Delivered' && b.status === 'Delivered') {
+    const aTime = new Date(`${a.date} ${a.time}`).getTime();
+    const bTime = new Date(`${b.date} ${b.time}`).getTime();
+    return bTime - aTime; // newest on top
+  }
 
-    // For Ordered and Confirmed, older first
-    return new Date(`${a.date} ${a.time}`).getTime() - new Date(`${b.date} ${b.time}`).getTime();
-  });
+  // For Ordered and Confirmed, show oldest first
+  const aTime = new Date(`${a.date} ${a.time}`).getTime();
+  const bTime = new Date(`${b.date} ${b.time}`).getTime();
+  return aTime - bTime;
+});
 
   sortedOrders.forEach(order => {
       const div = document.createElement("div");
