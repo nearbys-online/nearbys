@@ -1,43 +1,60 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Live Orders</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Live Orders - Greenleaf Bistro</title>
+  <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
     body {
       font-family: 'Inter', sans-serif;
-      background: #f5f7fb;
+      background: linear-gradient(to right, #ffffff, #f0fff4);
       margin: 0;
-      padding: 30px;
-      min-height: 100vh;
+      padding: 0;
+      color: #1a1d24;
     }
 
-    h1 {
-      color: #1a1d24;
-      margin-bottom: 2rem;
-      font-weight: 600;
-      font-size: 2.2rem;
+    .header {
+      background: linear-gradient(to right, #009500, #000);
+      color: white;
       text-align: center;
-      letter-spacing: -0.5px;
+      padding: 20px 20px 20px;
+      position: relative;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .cover-img {
+      width: 100%;
+      max-height: 220px;
+      object-fit: cover;
+      border-bottom: 5px solid #009500;
+    }
+
+    #orders-section {
+      padding: 20px 30px 60px;
+      max-width: 1440px;
+      margin: auto;
     }
 
     #orders {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 16px;
-      max-width: 1400px;
-      margin: 0 auto;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 18px;
     }
 
     .order {
       background: white;
       border-radius: 12px;
       padding: 18px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      border-left: 4px solid;
-      min-height: 200px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+      border-left: 5px solid;
     }
 
     .order.ordered { border-color: #009500; }
@@ -47,83 +64,72 @@
     .order-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
       margin-bottom: 12px;
     }
 
-.date-time {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
+    .date-time span:first-child {
+      font-weight: 600;
+    }
 
-.date-time span:first-child {
-  font-weight: 500;
-  color: #1e293b;
-}
+    .date-time span:last-child {
+      font-size: 13px;
+      color: #6b7280;
+    }
 
-.date-time span:last-child {
-  font-size: 13px;
-  color: #64748b;
-}
-
-.order-meta {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  font-size: 14px;
-  font-weight: bold;
-}
+    .order-meta {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      font-weight: bold;
+      margin-right: 15px;
+    }
 
     .table-circle {
       width: 36px;
       height: 36px;
       border-radius: 50%;
-      background: #483C32;
+      background: #000;
       color: white;
       display: flex;
-      align-items: center;
       justify-content: center;
-      font-weight: 600;
+      align-items: center;
     }
 
     .order ul {
       list-style: none;
-      padding: 12px 0;
-      margin: 12px 0;
-      border-top: 1px solid #e2e8f0;
-      border-bottom: 1px solid #e2e8f0;
+      padding: 10px 0;
+      margin: 10px 0;
+      border-top: 1px solid #e5e7eb;
+      border-bottom: 1px solid #e5e7eb;
     }
 
     .order li {
-      padding: 6px 0;
       display: flex;
       justify-content: space-between;
-      color: #475569;
       font-size: 14px;
+      padding: 6px 0;
     }
 
     .total-price {
       text-align: right;
       font-weight: 600;
-      color: #1e293b;
-      margin: 12px 0;
+      font-size: 15px;
     }
 
     .button-group {
       display: flex;
-      gap: 8px;
-      margin-top: 16px;
+      gap: 10px;
+      margin-top: 14px;
     }
 
     .action-btn {
       flex: 1;
-      padding: 8px 12px;
-      border-radius: 6px;
+      padding: 8px;
       border: none;
+      border-radius: 6px;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: 0.2s;
     }
 
     .confirm-btn {
@@ -137,48 +143,46 @@
     }
 
     .deliver-btn {
-      background: #e2e8f0;
-      color: #64748b;
+      background: #f3f4f6;
+      color: #374151;
     }
 
     .delivered-text {
-      color: #ccc;
       text-align: center;
-      font-weight: 500;
-      margin-top: 16px;
+      color: #6b7280;
+      font-weight: 600;
     }
 
-    button {
+    .status-indicator {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .ordered .status-indicator { background: #d1fae5; color: #065f46; }
+    .confirmed .status-indicator { background: #fef3c7; color: #92400e; }
+    .delivered .status-indicator { background: #e5e7eb; color: #6b7280; }
+
+    .top-controls {
+      text-align: center;
+      margin: 5px auto 30px;
+    }
+
+    .top-controls button {
+      background: #009500;
+      color: white;
       padding: 10px 20px;
       border-radius: 8px;
       border: none;
-      font-weight: 500;
+      font-size: 16px;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
-      margin: 4px;
     }
 
-    button[onclick^="markStatus"] {
-      background: #009500;
-      color: white;
-    }
-
-    button[onclick^="markStatus"]:hover {
-      background: #000;
-    }
-
-    button[onclick="downloadStoredOrders()"] {
-      background: #009500;
-      color: white;
-      margin-bottom: 2rem;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-      padding: 12px 24px;
-    }
-
-    button[onclick="downloadStoredOrders()"]:hover {
-      background: #7c3aed;
+    .top-controls button:hover {
+      background: #005000;
     }
 
     #enable-sound {
@@ -200,33 +204,24 @@
       background: #059669;
       transform: scale(1.05);
     }
-
-    .status-indicator {
-      display: inline-block;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .ordered .status-indicator { background: #bfdbfe; color: #1e40af; }
-    .confirmed .status-indicator { background: #a7f3d0; color: #065f46; }
-    .delivered .status-indicator { background: #cbd5e1; color: #334155; }
-
-    hr {
-      border: 0;
-      height: 1px;
-      background: #e2e8f0;
-      margin: 16px 0;
-    }
   </style>
 </head>
 <body>
-  <h1>🍽️ Orders</h1>
-  <button onclick="downloadStoredOrders()">📥 Download Orders</button>  
-  <div id="orders"></div>
+
+  <div class="header">
+    <h1>Greenleaf Bistro Orders</h1>
+  </div>
+  <img src="https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1950&q=80" alt="Restaurant Cover" class="cover-img" />
+
+  <div id="orders-section">
+    <div class="top-controls">
+      <button onclick="downloadStoredOrders()">📥 Download Orders</button>
+    </div>
+    <div id="orders"></div>
+  </div>
+
   <button id="enable-sound">🔔 Enable Sound Notifications</button>
-  <audio id="notif-sound" src="https://cdn.shopify.com/s/files/1/0947/2340/8240/files/water_drop_tone.mp3?v=1747184325" preload="auto"></audio>  
+  <audio id="notif-sound" src="https://cdn.shopify.com/s/files/1/0947/2340/8240/files/water_drop_tone.mp3?v=1747184325" preload="auto"></audio>
 
   <script>
 const orders = {};
