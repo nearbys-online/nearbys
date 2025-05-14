@@ -38,176 +38,152 @@
 <audio id="notif-sound" src="https://cdn.shopify.com/s/files/1/0947/2340/8240/files/water_drop_tone.mp3?v=1747184325" preload="auto"></audio>  
 
 <script>
-    const orders = {};
+  const orders = {};
 
-    async function handleOrder(order) {
-      orders[order.orderNumber] = order;
+  // Load saved orders on page load
+  window.addEventListener("DOMContentLoaded", () => {
+    const stored = localStorage.getItem("storedOrders");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      Object.assign(orders, parsed);
       renderOrders();
     }
-
-    function renderOrders() {
-  const container = document.getElementById("orders");
-  container.innerHTML = "";
-
-  const sortedOrders = Object.values(orders).sort((a, b) => {
-    const statusPriority = { "Ordered": 0, "Confirmed": 1, "Delivered": 2 };
-    // First by status, then by latest order on top
-    const statusCompare = statusPriority[a.status] - statusPriority[b.status];
-    if (statusCompare !== 0) return statusCompare;
-    // Assuming later orders have higher order numbers
-    return b.orderNumber - a.orderNumber;
   });
 
-  sortedOrders.forEach(order => {
-    const div = document.createElement("div");
-    div.className = `order ${order.status.toLowerCase()}`;
-    div.innerHTML = `
-  <p><strong>Date:</strong> ${order.date || 'N/A'} &nbsp; <strong>Time:</strong> ${order.time || 'N/A'}</p>
-  <hr>
-  <p><strong>Table:</strong> ${order.table}</p>
-  <p><strong>Order #:</strong> ${order.orderNumber}</p>
-  <ul>${order.cart.map(item => `<li>${item.name} x ${item.quantity} - $${item.total.toFixed(2)}</li>`).join("")}</ul>
-  <p><strong>Total:</strong> $${order.total}</p>
-  <p>Status: ${order.status}</p>
-  <button onclick="markStatus('${order.orderNumber}', 'Confirmed')">Confirm</button>
-  <button onclick="markStatus('${order.orderNumber}', 'Delivered')">Deliver</button>
-`;
-    container.appendChild(div);
-  });
-    }
-
-    async function markStatus(orderNumber, status) {
-  const res = await fetch("https://citrine-flint-sea.glitch.me/update", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ orderNumber, status })
-  });
-
-  if (res.ok) {
-    // Update local data
-    if (orders[orderNumber]) {
-      orders[orderNumber].status = status;
-      renderOrders(); // Update the UI immediately
-    }
-  }
-    }
-    
-    // Receive incoming order via POST
-    window.addEventListener("message", async (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.orderNumber) handleOrder(data);
-      } catch (e) {}
-    });
-
-    let lastOrderIds = [];
-
-async function fetchOrders() {
-  const res = await fetch("https://citrine-flint-sea.glitch.me/orders");
-  const orderList = await res.json();
-
-  // Check for new orders
-  if (soundEnabled && orderList.length > lastOrderCount) {
-    document.getElementById("notif-sound").play();
+  // Save orders to localStorage
+  function saveOrdersToStorage() {
+    localStorage.setItem("storedOrders", JSON.stringify(orders));
   }
 
-  // Save new count
-  lastOrderCount = orderList.length;
-
-  // Update orders object
-  orderList.forEach(order => {
+  async function handleOrder(order) {
     orders[order.orderNumber] = order;
-  });
-  renderOrders();
-}
-
-// Poll every 1 minute
-setInterval(fetchOrders, 60000);
-fetchOrders(); // Initial fetch
-
-let soundEnabled = false;
-
-document.getElementById("enable-sound").addEventListener("click", () => {
-  const audio = document.getElementById("notif-sound");
-  audio.play().then(() => {
-    soundEnabled = true;
-    document.getElementById("enable-sound").style.display = "none";
-  }).catch((e) => {
-    console.error("Audio failed to play:", e);
-  });
-});
-  
- </script>
-  
-  <script>
-// Save orders to localStorage
-function saveOrdersToStorage() {
-  localStorage.setItem('storedOrders', JSON.stringify(orders));
-}
-
-// Load orders from localStorage
-function loadOrdersFromStorage() {
-  const stored = localStorage.getItem('storedOrders');
-  if (stored) {
-    const parsed = JSON.parse(stored);
-    for (const orderNumber in parsed) {
-      orders[orderNumber] = parsed[orderNumber];
-    }
+    saveOrdersToStorage();
     renderOrders();
   }
-}
 
-// Modify handleOrder to save to storage
-const originalHandleOrder = handleOrder;
-handleOrder = async function (order) {
-  await originalHandleOrder(order);
-  saveOrdersToStorage();
-};
+  function renderOrders() {
+    const container = document.getElementById("orders");
+    container.innerHTML = "";
 
-// Modify fetchOrders to save to storage
-const originalFetchOrders = fetchOrders;
-fetchOrders = async function () {
-  await originalFetchOrders();
-  saveOrdersToStorage();
-};
+    const sortedOrders = Object.values(orders).sort((a, b) => {
+      const statusPriority = { "Ordered": 0, "Confirmed": 1, "Delivered": 2 };
+      const statusCompare = statusPriority[a.status] - statusPriority[b.status];
+      if (statusCompare !== 0) return statusCompare;
+      return b.orderNumber - a.orderNumber;
+    });
 
-// Load from localStorage on page load
-window.addEventListener("DOMContentLoaded", loadOrdersFromStorage);
+    sortedOrders.forEach(order => {
+      const div = document.createElement("div");
+      div.className = `order ${order.status.toLowerCase()}`;
+      div.innerHTML = `
+        <p><strong>Date:</strong> ${order.date || 'N/A'} &nbsp; <strong>Time:</strong> ${order.time || 'N/A'}</p>
+        <hr>
+        <p><strong>Table:</strong> ${order.table}</p>
+        <p><strong>Order #:</strong> ${order.orderNumber}</p>
+        <ul>${order.cart.map(item => `<li>${item.name} x ${item.quantity} - $${item.total.toFixed(2)}</li>`).join("")}</ul>
+        <p><strong>Total:</strong> $${order.total}</p>
+        <p>Status: ${order.status}</p>
+        <button onclick="markStatus('${order.orderNumber}', 'Confirmed')">Confirm</button>
+        <button onclick="markStatus('${order.orderNumber}', 'Delivered')">Deliver</button>
+      `;
+      container.appendChild(div);
+    });
+  }
 
-// Download button functionality
-function downloadStoredOrders() {
-  const stored = localStorage.getItem('storedOrders');
-  if (!stored) return alert("No orders to download.");
+  async function markStatus(orderNumber, status) {
+    const res = await fetch("https://citrine-flint-sea.glitch.me/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderNumber, status })
+    });
 
-  const ordersData = JSON.parse(stored);
-  const htmlContent = `
-    <html>
-    <head><title>Stored Orders</title></head>
-    <body>
-      <h1>Order List</h1>
-      ${Object.values(ordersData).map(order => `
-        <div>
-          <p><strong>Date:</strong> ${order.date || 'N/A'} - <strong>Time:</strong> ${order.time || 'N/A'}</p>
-          <p><strong>Table:</strong> ${order.table}</p>
-          <p><strong>Order #:</strong> ${order.orderNumber}</p>
-          <ul>${order.cart.map(item => `<li>${item.name} x ${item.quantity} - $${item.total.toFixed(2)}</li>`).join('')}</ul>
-          <p><strong>Total:</strong> $${order.total}</p>
-          <p>Status: ${order.status}</p>
-          <hr>
-        </div>
-      `).join('')}
-    </body>
-    </html>
-  `;
+    if (res.ok && orders[orderNumber]) {
+      orders[orderNumber].status = status;
+      saveOrdersToStorage();
+      renderOrders();
+    }
+  }
 
-  const blob = new Blob([htmlContent], { type: "text/html" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "stored-orders.html";
-  a.click();
-  URL.revokeObjectURL(url);
-}
-  </script>
+  // Handle postMessage order receiving
+  window.addEventListener("message", async (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.orderNumber) handleOrder(data);
+    } catch (e) {}
+  });
+
+  let lastOrderCount = 0;
+  let soundEnabled = false;
+
+  async function fetchOrders() {
+    const res = await fetch("https://citrine-flint-sea.glitch.me/orders");
+    const orderList = await res.json();
+
+    if (soundEnabled && orderList.length > lastOrderCount) {
+      document.getElementById("notif-sound").play();
+    }
+
+    lastOrderCount = orderList.length;
+
+    orderList.forEach(order => {
+      orders[order.orderNumber] = order;
+    });
+
+    saveOrdersToStorage();
+    renderOrders();
+  }
+
+  setInterval(fetchOrders, 60000);
+  fetchOrders();
+
+  document.getElementById("enable-sound").addEventListener("click", () => {
+    const audio = document.getElementById("notif-sound");
+    audio.play().then(() => {
+      soundEnabled = true;
+      document.getElementById("enable-sound").style.display = "none";
+    }).catch((e) => {
+      console.error("Audio failed to play:", e);
+    });
+  });
+
+  // Download as HTML
+  function downloadStoredOrders() {
+    const stored = localStorage.getItem("storedOrders");
+    if (!stored) return alert("No orders to download.");
+
+    const ordersData = JSON.parse(stored);
+    const htmlContent = `
+      <html>
+      <head><title>Stored Orders</title></head>
+      <body>
+        <h1>Order List</h1>
+        ${Object.values(ordersData).map(order => `
+          <div>
+            <p><strong>Date:</strong> ${order.date || 'N/A'} - <strong>Time:</strong> ${order.time || 'N/A'}</p>
+            <p><strong>Table:</strong> ${order.table}</p>
+            <p><strong>Order #:</strong> ${order.orderNumber}</p>
+            <ul>${order.cart.map(item => `<li>${item.name} x ${item.quantity} - $${item.total.toFixed(2)}</li>`).join('')}</ul>
+            <p><strong>Total:</strong> $${order.total}</p>
+            <p>Status: ${order.status}</p>
+            <hr>
+          </div>
+        `).join('')}
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([htmlContent], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "stored-orders.html";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // Expose to global scope
+  window.downloadStoredOrders = downloadStoredOrders;
+</script>
+  
 </body>
 </html>
