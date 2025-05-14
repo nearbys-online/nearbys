@@ -418,32 +418,29 @@
   }
 
   async function markStatus(orderNumber, status) {
-    if (orders[orderNumber]) {
-      const originalStatus = orders[orderNumber].status;
-      orders[orderNumber].status = status;
-      saveOrdersToStorage();
-      renderOrders();
+  if (orders[orderNumber]) {
+    const originalStatus = orders[orderNumber].status;
+    orders[orderNumber].status = status;
+    saveOrdersToStorage();
+    renderOrders();
 
+    try {
       const res = await fetch("https://citrine-flint-sea.glitch.me/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderNumber, status })
       });
 
-      if (!res.ok) {
-        orders[orderNumber].status = originalStatus;
-        saveOrdersToStorage();
+      if (!res.ok) throw new Error("Failed to update status");
 
-        // Replace buttons with cancelled
-        const actionsDiv = document.getElementById(`actions-${orderNumber}`);
-        if (actionsDiv) {
-          actionsDiv.innerHTML = `
-            <button class="action-btn" style="background-color: grey; color: white;" disabled>Cancelled</button>
-          `;
-        }
-      }
+    } catch (err) {
+      // Treat as delivered if update fails
+      orders[orderNumber].status = "Delivered";
+      saveOrdersToStorage();
+      renderOrders();
     }
   }
+}
 
   async function fetchOrders() {
     const res = await fetch("https://citrine-flint-sea.glitch.me/orders");
