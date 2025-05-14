@@ -367,40 +367,40 @@
       sortedOrders.forEach(order => {
         const div = document.createElement("div");
         div.className = `order ${order.status.toLowerCase()}`;
-        div.innerHTML = `
-          <div class="order-header">
-            <div>
-              <div class="order-meta">${order.date || 'N/A'} • ${order.time || 'N/A'}</div>
-              <div class="order-number">Order #${order.orderNumber}</div>
-            </div>
-            <div class="order-table">
-  <div class="table-circle">${order.table}</div>
-  <div class="table-label">Table</div>
-          </div>
-          </div>
-          
-          <div class="order-status">${order.status}</div>
-          
-          <ul class="order-items">${order.cart.map(item => `
-            <li>${item.name} <span style="color: var(--text-light)">× ${item.quantity}</span> - $${item.total.toFixed(2)}</li>
-          `).join("")}</ul>
-          
-          <div class="order-total">Total: $${order.total}</div>
-          
-          <div class="order-actions">
-            ${order.status === 'Ordered' ? `
-              <button class="action-btn confirm-btn" onclick="markStatus('${order.orderNumber}', 'Confirmed')">
-                <i class="fas fa-check"></i> Confirm
-              </button>
-            ` : ''}
-            
-            ${order.status !== 'Delivered' ? `
-              <button class="action-btn deliver-btn" onclick="markStatus('${order.orderNumber}', 'Delivered')">
-                <i class="fas fa-truck"></i> Deliver
-              </button>
-            ` : ''}
-          </div>
-        `;
+      div.innerHTML = `
+  <div class="order-header">
+    <div>
+      <div class="order-meta">${order.date || 'N/A'} • ${order.time || 'N/A'}</div>
+      <div class="order-number">Order #${order.orderNumber}</div>
+    </div>
+    <div class="order-table">
+      <div class="table-circle">${order.table}</div>
+      <div class="table-label">Table</div>
+    </div>
+  </div>
+  
+  <div class="order-status">${order.status}</div>
+  
+  <ul class="order-items">${order.cart.map(item => `
+    <li>${item.name} <span style="color: var(--text-light)">× ${item.quantity}</span> - $${item.total.toFixed(2)}</li>
+  `).join("")}</ul>
+  
+  <div class="order-total">Total: $${order.total}</div>
+  
+  <div class="order-actions">
+    ${order.status === 'Ordered' ? `
+      <button class="action-btn confirm-btn" onclick="markStatus('${order.orderNumber}', 'Confirmed')">
+        <i class="fas fa-check"></i> Confirm
+      </button>
+    ` : ''}
+    
+    ${order.status !== 'Delivered' ? `
+      <button class="action-btn deliver-btn" onclick="markStatus('${order.orderNumber}', 'Delivered')">
+        <i class="fas fa-truck"></i> Deliver
+      </button>
+    ` : ''}
+  </div>
+`;
         container.appendChild(div);
       });
     }
