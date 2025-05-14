@@ -3,12 +3,12 @@
 <head>
   <title>Live Orders</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
+<style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
     body {
       font-family: 'Inter', sans-serif;
-      background: #ffff;
+      background: #f5f7fb;
       margin: 0;
       padding: 30px;
       min-height: 100vh;
@@ -40,8 +40,8 @@
       min-height: 200px;
     }
 
-    .order.ordered { border-color: #ff0000; }
-    .order.confirmed { border-color: #009500; }
+    .order.ordered { border-color: #009500; }
+    .order.confirmed { border-color: #000; }
     .order.delivered { border-color: #ccc; }
 
     .order-header {
@@ -50,7 +50,7 @@
       align-items: center;
       margin-bottom: 12px;
     }
-    
+
 .date-time {
   display: flex;
   flex-direction: column;
@@ -72,13 +72,14 @@
   gap: 12px;
   align-items: center;
   font-size: 14px;
+  font-weight: bold;
 }
 
     .table-circle {
       width: 36px;
       height: 36px;
       border-radius: 50%;
-      background: #AA6C39;
+      background: #483C32;
       color: white;
       display: flex;
       align-items: center;
@@ -126,12 +127,12 @@
     }
 
     .confirm-btn {
-      background: #009500;
+      background: #000;
       color: white;
     }
 
     .confirm-btn.confirmed {
-      background: #000;
+      background: #ccc;
       cursor: not-allowed;
     }
 
@@ -146,6 +147,7 @@
       font-weight: 500;
       margin-top: 16px;
     }
+
     button {
       padding: 10px 20px;
       border-radius: 8px;
@@ -217,7 +219,6 @@
       background: #e2e8f0;
       margin: 16px 0;
     }
-    
   </style>
 </head>
 <body>
@@ -228,8 +229,7 @@
   <audio id="notif-sound" src="https://cdn.shopify.com/s/files/1/0947/2340/8240/files/water_drop_tone.mp3?v=1747184325" preload="auto"></audio>  
 
   <script>
-
-  const orders = {};
+const orders = {};
 
   // Load saved orders on page load
   window.addEventListener("DOMContentLoaded", () => {
@@ -253,36 +253,71 @@
   }
 
   function renderOrders() {
-    const container = document.getElementById("orders");
-    container.innerHTML = "";
+  const container = document.getElementById("orders");
+  container.innerHTML = "";
 
-    // Updated sorting logic
-    const sortedOrders = Object.values(orders).sort((a, b) => {
-      const statusPriority = { "Ordered": 0, "Confirmed": 1, "Delivered": 2 };
-      const aStatus = statusPriority[a.status];
-      const bStatus = statusPriority[b.status];
+  const statusPriority = { "Ordered": 0, "Confirmed": 1, "Delivered": 2 };
 
-      // First sort by status priority
-      if (aStatus !== bStatus) return aStatus - bStatus;
+  const sortedOrders = Object.values(orders).sort((a, b) => {
+    const aStatus = statusPriority[a.status];
+    const bStatus = statusPriority[b.status];
 
-      // For delivered orders: sort by delivery time (newest first)
-      if (a.status === "Delivered" && b.status === "Delivered") {
-        const aTime = a.deliveredTimestamp || new Date(`${a.date} ${a.time}`).getTime();
-        const bTime = b.deliveredTimestamp || new Date(`${b.date} ${b.time}`).getTime();
-        return bTime - aTime;
-      }
+    if (aStatus !== bStatus) {
+      return aStatus - bStatus;
+    }
 
-      // For non-delivered orders: sort by original order time (oldest first)
+    if (aStatus === statusPriority["Delivered"]) {
       const aTime = new Date(`${a.date} ${a.time}`).getTime();
       const bTime = new Date(`${b.date} ${b.time}`).getTime();
-      return aTime - bTime;
-    });
+      return bTime - aTime;
+    }
 
-    // Rest of your render code...
-    sortedOrders.forEach(order => {
-      // Your existing rendering code here
+    // For Ordered and Confirmed, older first
+    return new Date(`${a.date} ${a.time}`).getTime() - new Date(`${b.date} ${b.time}`).getTime();
+  });
+
+  sortedOrders.forEach(order => {
+      const div = document.createElement("div");
+      div.className = `order ${order.status.toLowerCase()}`;
+      div.innerHTML = `
+        <div class="order-header">
+          <div class="order-meta">
+  <div class="date-time">
+    <span>${order.date || 'N/A'}</span>
+    <span>${order.time || 'N/A'}</span>
+  </div>
+  <span>#${order.orderNumber}</span>
+        </div>
+          <div class="table-circle">${order.table}</div>
+        </div>
+        <ul>${order.cart.map(item => `
+          <li>
+            <span>${item.name} x ${item.quantity}</span>
+            <span>$${item.total.toFixed(2)}</span>
+          </li>
+        `).join("")}</ul>
+        <div class="total-price">Total: $${order.total}</div>
+        ${order.status === 'Delivered' ? `
+          <div class="delivered-text">Delivered</div>
+        ` : `
+          <div class="button-group">
+            <button class="action-btn confirm-btn ${order.status === 'Confirmed' ? 'confirmed' : ''}" 
+              onclick="markStatus('${order.orderNumber}', 'Confirmed')" 
+              ${order.status === 'Confirmed' ? 'disabled' : ''}>
+              ${order.status === 'Confirmed' ? 'Confirmed' : 'Confirm'}
+            </button>
+            ${order.status === 'Confirmed' ? `
+              <button class="action-btn deliver-btn" 
+                onclick="markStatus('${order.orderNumber}', 'Delivered')">
+                Deliver
+              </button>
+            ` : ''}
+          </div>
+        `}
+      `;
+      container.appendChild(div);
     });
-  }
+}
 
   async function markStatus(orderNumber, status) {
     const res = await fetch("https://citrine-flint-sea.glitch.me/update", {
@@ -293,12 +328,6 @@
 
     if (res.ok && orders[orderNumber]) {
       orders[orderNumber].status = status;
-      
-      // Add timestamp when marking as delivered
-      if (status === 'Delivered') {
-        orders[orderNumber].deliveredTimestamp = Date.now();
-      }
-      
       saveOrdersToStorage();
       renderOrders();
     }
@@ -382,7 +411,7 @@
   }
 
   // Expose to global scope
-  window.downloadStoredOrders = downloadStoredOrders;     
+  window.downloadStoredOrders = downloadStoredOrders; 
   </script>
 </body>
 </html>
