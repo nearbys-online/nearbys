@@ -76,12 +76,27 @@
       } catch (e) {}
     });
 
-    async function fetchOrders() {
+    let lastOrderIds = [];
+
+async function fetchOrders() {
   const res = await fetch("https://citrine-flint-sea.glitch.me/orders");
   const orderList = await res.json();
+
+  const newOrderIds = orderList.map(order => order.orderNumber);
+  const isNew = newOrderIds.some(id => !lastOrderIds.includes(id));
+
   orderList.forEach(order => {
     orders[order.orderNumber] = order;
   });
+
+  if (isNew) {
+    const sound = document.getElementById("notif-sound");
+    sound.play().catch(() => {
+      console.log("Notification sound blocked. Requires user interaction.");
+    });
+  }
+
+  lastOrderIds = newOrderIds;
   renderOrders();
 }
 
