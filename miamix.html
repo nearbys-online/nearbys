@@ -443,38 +443,32 @@
 }
 
   async function fetchOrders() {
+  try {
     const res = await fetch("https://citrine-flint-sea.glitch.me/orders");
     const orderList = await res.json();
 
-    if (soundEnabled && orderList.length > lastOrderCount) {
-      document.getElementById("notif-sound").play();
-    }
-
-    lastOrderCount = orderList.length;
+    let newOrderDetected = false;
 
     orderList.forEach(order => {
       if (!orders[order.orderNumber]) {
         orders[order.orderNumber] = order;
+        newOrderDetected = true;
       }
     });
 
+    if (soundEnabled && newOrderDetected) {
+      const audio = document.getElementById("notif-sound");
+      audio.play().catch(err => {
+        console.error("Error playing sound:", err);
+      });
+    }
+
     saveOrdersToStorage();
     renderOrders();
+  } catch (error) {
+    console.error("Failed to fetch orders:", error);
   }
-
-  setInterval(fetchOrders, 60000);
-  fetchOrders();
-
-  document.getElementById("enable-sound").addEventListener("click", () => {
-    const audio = document.getElementById("notif-sound");
-    audio.play().then(() => {
-      soundEnabled = true;
-      document.getElementById("enable-sound").style.display = "none";
-      localStorage.setItem("soundEnabled", "true");
-    }).catch((e) => {
-      console.error("Audio failed to play:", e);
-    });
-  });
+}
 
   function downloadStoredOrders() {
     const stored = localStorage.getItem("storedOrders");
