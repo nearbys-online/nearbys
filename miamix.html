@@ -50,6 +50,29 @@
       align-items: center;
       margin-bottom: 12px;
     }
+    
+.date-time {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.date-time span:first-child {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.date-time span:last-child {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.order-meta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 14px;
+}
 
     .table-circle {
       width: 36px;
@@ -61,13 +84,6 @@
       align-items: center;
       justify-content: center;
       font-weight: 600;
-    }
-
-    .order-meta {
-      display: flex;
-      gap: 15px;
-      color: #483C32;
-      font-size: 14px;
     }
 
     .order ul {
@@ -141,12 +157,12 @@
     }
 
     button[onclick^="markStatus"] {
-      background: #3b82f6;
+      background: #009500;
       color: white;
     }
 
     button[onclick^="markStatus"]:hover {
-      background: #2563eb;
+      background: #000;
     }
 
     button[onclick="downloadStoredOrders()"] {
@@ -266,8 +282,11 @@
       div.innerHTML = `
         <div class="order-header">
           <div class="order-meta">
-            <span>${order.date || 'N/A'}</span>
-            <span>#${order.orderNumber}</span>
+  <div class="date-time">
+    <span>${order.date || 'N/A'}</span>
+    <span>${order.time || 'N/A'}</span>
+  </div>
+  <span>#${order.orderNumber}</span>
           </div>
           <div class="table-circle">${order.table}</div>
         </div>
