@@ -40,8 +40,8 @@
       min-height: 200px;
     }
 
-    .order.ordered { border-color: #009500; }
-    .order.confirmed { border-color: #000; }
+    .order.ordered { border-color: #ff0000; }
+    .order.confirmed { border-color: #009500; }
     .order.delivered { border-color: #ccc; }
 
     .order-header {
@@ -55,7 +55,7 @@
       width: 36px;
       height: 36px;
       border-radius: 50%;
-      background: ##D29F51;
+      background: #AA6C39;
       color: white;
       display: flex;
       align-items: center;
@@ -66,7 +66,7 @@
     .order-meta {
       display: flex;
       gap: 15px;
-      color: #ff0000;
+      color: #483C32;
       font-size: 14px;
     }
 
@@ -110,12 +110,12 @@
     }
 
     .confirm-btn {
-      background: #3b82f6;
+      background: #009500;
       color: white;
     }
 
     .confirm-btn.confirmed {
-      background: #009500;
+      background: #000;
       cursor: not-allowed;
     }
 
@@ -130,9 +130,78 @@
       font-weight: 500;
       margin-top: 16px;
     }
+    button {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin: 4px;
+    }
 
-    /* Keep other existing styles for download button and sound button */
-    /* ... (remaining CSS styles from previous version) */
+    button[onclick^="markStatus"] {
+      background: #3b82f6;
+      color: white;
+    }
+
+    button[onclick^="markStatus"]:hover {
+      background: #2563eb;
+    }
+
+    button[onclick="downloadStoredOrders()"] {
+      background: #8b5cf6;
+      color: white;
+      margin-bottom: 2rem;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 12px 24px;
+    }
+
+    button[onclick="downloadStoredOrders()"]:hover {
+      background: #7c3aed;
+    }
+
+    #enable-sound {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #10b981;
+      color: white;
+      padding: 14px 28px;
+      border-radius: 50px;
+      font-weight: 600;
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #enable-sound:hover {
+      background: #059669;
+      transform: scale(1.05);
+    }
+
+    .status-indicator {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .ordered .status-indicator { background: #bfdbfe; color: #1e40af; }
+    .confirmed .status-indicator { background: #a7f3d0; color: #065f46; }
+    .delivered .status-indicator { background: #cbd5e1; color: #334155; }
+
+    hr {
+      border: 0;
+      height: 1px;
+      background: #e2e8f0;
+      margin: 16px 0;
+    }
+    
   </style>
 </head>
 <body>
