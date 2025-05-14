@@ -8,11 +8,32 @@
     .order { border: 2px solid #ccc; padding: 10px; margin-bottom: 10px; }
     .confirmed { border-color: green; }
     .delivered { border-color: gray; }
+  
+  #enable-sound {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 999;
+    transition: background-color 0.3s ease;
+  }
+
+  #enable-sound:hover {
+    background-color: #218838;
+  }
   </style>
 </head>
 <body>
   <h1>Incoming Orders</h1>
   <div id="orders"></div>
+<button id="enable-sound">Enable Sound Notifications</button>  
 <audio id="notif-sound" src="https://cdn.shopify.com/s/files/1/0947/2340/8240/files/water_drop_tone.mp3?v=1747184325" preload="auto"></audio>  
 
 <script>
@@ -82,21 +103,18 @@ async function fetchOrders() {
   const res = await fetch("https://citrine-flint-sea.glitch.me/orders");
   const orderList = await res.json();
 
-  const newOrderIds = orderList.map(order => order.orderNumber);
-  const isNew = newOrderIds.some(id => !lastOrderIds.includes(id));
+  // Check for new orders
+  if (soundEnabled && orderList.length > lastOrderCount) {
+    document.getElementById("notif-sound").play();
+  }
 
+  // Save new count
+  lastOrderCount = orderList.length;
+
+  // Update orders object
   orderList.forEach(order => {
     orders[order.orderNumber] = order;
   });
-
-  if (isNew) {
-    const sound = document.getElementById("notif-sound");
-    sound.play().catch(() => {
-      console.log("Notification sound blocked. Requires user interaction.");
-    });
-  }
-
-  lastOrderIds = newOrderIds;
   renderOrders();
 }
 
@@ -104,6 +122,18 @@ async function fetchOrders() {
 setInterval(fetchOrders, 60000);
 fetchOrders(); // Initial fetch
 
+let soundEnabled = false;
+
+document.getElementById("enable-sound").addEventListener("click", () => {
+  const audio = document.getElementById("notif-sound");
+  audio.play().then(() => {
+    soundEnabled = true;
+    document.getElementById("enable-sound").style.display = "none";
+  }).catch((e) => {
+    console.error("Audio failed to play:", e);
+  });
+});
+  
   </script>
 </body>
 </html>
