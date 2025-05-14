@@ -124,13 +124,28 @@
     }
     
     .order-table {
-      background-color: var(--primary);
-      color: white;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: 500;
-    }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.table-circle {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--table-circle);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: var(--table-circle);
+}
+
+.table-label {
+  font-size: 12px;
+  color: var(--text-light);
+}
     
     .order-items {
       margin: 15px 0;
@@ -357,7 +372,10 @@
               <div class="order-meta">${order.date || 'N/A'} • ${order.time || 'N/A'}</div>
               <div class="order-number">Order #${order.orderNumber}</div>
             </div>
-            <div class="order-table">Table ${order.table}</div>
+            <div class="order-table">
+  <div class="table-circle">${order.table}</div>
+  <div class="table-label">Table</div>
+          </div>
           </div>
           
           <div class="order-status">${order.status}</div>
