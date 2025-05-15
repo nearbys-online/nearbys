@@ -1,30 +1,155 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Business Images</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Business Profile Viewer</title>
   <style>
-    img {
-      max-width: 100%;
-      height: auto;
-      margin-bottom: 20px;
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 500px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .cover {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .profile-section {
+      position: relative;
+      top: -40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .profile {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 4px solid white;
+      object-fit: cover;
+    }
+
+    .details {
+      text-align: center;
+      padding: 0 20px 20px;
+      margin-top: -20px;
+    }
+
+    .details h2 {
+      margin: 10px 0 5px;
+      color: #333;
+    }
+
+    .details p {
+      margin: 4px 0;
+      color: #666;
+    }
+
+    .background {
+      margin: 20px auto;
+      max-width: 90%;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .background img {
+      width: 100%;
+      border-radius: 10px;
+    }
+
+    #businessIdInput {
+      width: 100%;
+      max-width: 300px;
+      padding: 10px;
+      margin: 10px auto;
+      display: block;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    #loadBtn {
+      padding: 10px 20px;
+      background-color: #006aff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      display: block;
+      margin: 10px auto;
+    }
+
+    #loadBtn:hover {
+      background-color: #0051cc;
     }
   </style>
 </head>
 <body>
-  <h1>Business Images</h1>
 
-  <div id="images">
-    <img id="background" alt="Background Image">
-    <img id="profile" alt="Profile Image">
+  <div>
+    <input type="text" id="businessIdInput" placeholder="Enter Business ID">
+    <button id="loadBtn">Load Business</button>
+
+    <div class="card" id="businessCard" style="display:none;">
+      <img id="coverImg" class="cover" src="" alt="Cover Image">
+      <div class="profile-section">
+        <img id="profileImg" class="profile" src="" alt="Profile Image">
+      </div>
+      <div class="details">
+        <h2 id="name">Business Name</h2>
+        <p id="address">Address</p>
+        <p id="email">Email</p>
+        <p id="contact">Contact</p>
+      </div>
+      <div class="background">
+        <img id="backgroundImg" src="" alt="Background Image">
+      </div>
+    </div>
   </div>
 
   <script>
-    const businessId = "9880117"; // Replace with dynamic ID if needed
-    const baseUrl = "https://res.cloudinary.com/dhekmzldg/image/upload/businesses";
-    const timestamp = Date.now();
+    const loadBtn = document.getElementById('loadBtn');
+    const card = document.getElementById('businessCard');
 
-    document.getElementById('background').src = `${baseUrl}/${businessId}_background.webp?t=${timestamp}`;
-    document.getElementById('profile').src = `${baseUrl}/${businessId}_profile.webp?t=${timestamp}`;
+    loadBtn.addEventListener('click', async () => {
+      const businessId = document.getElementById('businessIdInput').value.trim();
+      if (!businessId) return alert('Please enter a Business ID');
+
+      try {
+        const res = await fetch(`https://enormous-cream-transport.glitch.me/businesses/${businessId}.json`);
+        if (!res.ok) throw new Error('Business not found');
+        const data = await res.json();
+
+        document.getElementById('name').textContent = data.name || '—';
+        document.getElementById('address').textContent = data.address || '—';
+        document.getElementById('email').textContent = data.email || '—';
+        document.getElementById('contact').textContent = data.contact || '—';
+
+        document.getElementById('coverImg').src = data.coverUrl || '';
+        document.getElementById('profileImg').src = data.profileUrl || '';
+        document.getElementById('backgroundImg').src = data.backgroundUrl || '';
+
+        card.style.display = 'block';
+      } catch (err) {
+        alert('Failed to load business data.');
+        card.style.display = 'none';
+      }
+    });
   </script>
+
 </body>
 </html>
