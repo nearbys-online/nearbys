@@ -1,92 +1,50 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Submit Business Details</title>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-        input, textarea {
-            margin-bottom: 10px;
-            width: 100%;
-            padding: 8px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #218838;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Submit Business Details</title>
 </head>
 <body>
-
-<h1>Submit Business Details</h1>
-
-<form id="businessForm">
-    <label for="id">Business ID:</label>
-    <input type="text" id="id" name="id" required>
-
-    <label for="businessName">Business Name:</label>
-    <input type="text" id="businessName" name="businessName" required>
-
-    <label for="website">Website:</label>
-    <input type="url" id="website" name="website" required>
-
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email" required>
-
-    <label for="address">Address:</label>
-    <textarea id="address" name="address" required></textarea>
-
-    <label for="contact">Contact Number:</label>
-    <input type="tel" id="contact" name="contact" required>
-
-    <label for="coverImage">Cover Image:</label>
-    <input type="file" id="coverImage" name="coverImage" accept="image/*" required>
-
-    <label for="profileImage">Profile Image:</label>
-    <input type="file" id="profileImage" name="profileImage" accept="image/*" required>
-
+  <h2>Business Registration Form</h2>
+  <form id="businessForm" enctype="multipart/form-data">
+    <input type="text" name="id" placeholder="Business ID" required><br><br>
+    <input type="text" name="name" placeholder="Business Name" required><br><br>
+    <input type="url" name="website" placeholder="Website"><br><br>
+    <input type="email" name="email" placeholder="Email"><br><br>
+    <input type="text" name="address" placeholder="Address"><br><br>
+    <input type="text" name="contact" placeholder="Contact Number"><br><br>
+    
+    Background Image: <input type="file" name="background"><br><br>
+    Profile Image: <input type="file" name="profile"><br><br>
+    
     <button type="submit">Submit</button>
-</form>
+  </form>
 
-<script>
-document.getElementById('businessForm').addEventListener('submit', async (event) => {
-    event.preventDefault();
+  <div id="status" style="margin-top:20px;"></div>
 
-    const formData = new FormData();
-    formData.append('id', document.getElementById('id').value);
-    formData.append('businessName', document.getElementById('businessName').value);
-    formData.append('website', document.getElementById('website').value);
-    formData.append('email', document.getElementById('email').value);
-    formData.append('address', document.getElementById('address').value);
-    formData.append('contact', document.getElementById('contact').value);
-    formData.append('coverImage', document.getElementById('coverImage').files[0]);
-    formData.append('profileImage', document.getElementById('profileImage').files[0]);
+  <script>
+    const form = document.getElementById('businessForm');
+    const status = document.getElementById('status');
 
-    try {
-        const response = await axios.post('https://useful-telling-shroud.glitch.me/submit', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      status.innerText = 'Submitting...';
+
+      try {
+        const res = await fetch('https://useful-telling-shroud.glitch.me/submit', {
+          method: 'POST',
+          body: formData
         });
 
-        alert('Business details submitted successfully!');
-    } catch (error) {
-        alert('Error submitting business details');
-        console.error(error);
-    }
-});
-</script>
-
+        const result = await res.json();
+        status.innerText = result.message || 'Submitted successfully!';
+      } catch (err) {
+        console.error(err);
+        status.innerText = 'Submission failed.';
+      }
+    });
+  </script>
 </body>
 </html>
