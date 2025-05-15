@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Business Info Upload</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    input, textarea { display: block; margin-bottom: 10px; width: 100%; padding: 8px; }
+    label { font-weight: bold; margin-top: 10px; display: block; }
+    .form-container { max-width: 600px; margin: auto; }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Submit Business Details</h2>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <label>Business ID (unique)</label>
+      <input type="text" name="businessId" required>
+
+      <label>Business Name</label>
+      <input type="text" name="businessName" required>
+
+      <label>Address</label>
+      <input type="text" name="address">
+
+      <label>Website</label>
+      <input type="url" name="website">
+
+      <label>Email</label>
+      <input type="email" name="email">
+
+      <label>Contact</label>
+      <input type="text" name="contact">
+
+      <label>Profile Picture</label>
+      <input type="file" name="profilePic" accept="image/*">
+
+      <label>Cover Image</label>
+      <input type="file" name="coverPic" accept="image/*">
+
+      <label>Background Image</label>
+      <input type="file" name="backgroundPic" accept="image/*">
+
+      <button type="submit">Submit</button>
+    </form>
+
+    <div id="result" style="margin-top: 20px; font-weight: bold;"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const result = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const businessId = formData.get('businessId');
+      const url = `https://fluff-nettle-marscapone.glitch.me/submit/${encodeURIComponent(businessId)}`;
+
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          body: formData
+        });
+
+        const text = await res.text();
+        result.innerText = text;
+      } catch (err) {
+        console.error(err);
+        result.innerText = 'Error submitting form.';
+      }
+    });
+  </script>
+</body>
+</html>
