@@ -6,9 +6,8 @@
 <body>
   <h1>Upload Business Background and Profile Images</h1>
   <form id="uploadForm" enctype="multipart/form-data">
-    <label>Business ID: <input type="text" name="businessId" required></label><br><br>
-    <label>Background Image: <input type="file" name="background"></label><br><br>
-    <label>Profile Image: <input type="file" name="profile"></label><br><br>
+    <label>Background Image: <input type="file" name="background" required></label><br><br>
+    <label>Profile Image: <input type="file" name="profile" required></label><br><br>
     <button type="submit">Upload</button>
   </form>
 
@@ -18,25 +17,28 @@
     document.getElementById('uploadForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
+      const url = 'https://enormous-cream-transport.glitch.me/upload-images'; 
+      console.log('Uploading to:', url);
 
       try {
-        const response = await fetch('https://your-glitch-project.glitch.me/upload-images', {
+        const response = await fetch(url, {
           method: 'POST',
-          body: formData
+          body: formData,
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-          document.getElementById('result').textContent = 'Upload failed: ' + (data.error || 'Unknown error');
+          const errorData = await response.json();
+          document.getElementById('result').textContent = 'Upload failed: ' + (errorData.error || 'Unknown error');
           return;
         }
 
+        const data = await response.json();
         document.getElementById('result').innerHTML = `
-  <p>Background URL: <a href="${data.backgroundUrl.replace(/\/v\d+\//, '/')}" target="_blank">${data.backgroundUrl.replace(/\/v\d+\//, '/')}</a></p>
-  <p>Profile URL: <a href="${data.profileUrl.replace(/\/v\d+\//, '/')}" target="_blank">${data.profileUrl.replace(/\/v\d+\//, '/')}</a></p>
-`;
+          <p>Background URL: <a href="${data.backgroundUrl}" target="_blank">${data.backgroundUrl}</a></p>
+          <p>Profile URL: <a href="${data.profileUrl}" target="_blank">${data.profileUrl}</a></p>
+        `;
       } catch (err) {
+        console.error(err);
         document.getElementById('result').textContent = 'Upload error: ' + err.message;
       }
     });
