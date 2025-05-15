@@ -2,47 +2,48 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Submit Business Details</title>
+  <title>Upload Images</title>
 </head>
 <body>
-  <h2>Business Registration Form</h2>
-  <form id="businessForm" enctype="multipart/form-data">
+  <h2>Upload Business Images</h2>
+  <form id="uploadForm" enctype="multipart/form-data">
     <input type="text" name="id" placeholder="Business ID" required><br><br>
-    <input type="text" name="name" placeholder="Business Name" required><br><br>
-    <input type="url" name="website" placeholder="Website"><br><br>
-    <input type="email" name="email" placeholder="Email"><br><br>
-    <input type="text" name="address" placeholder="Address"><br><br>
-    <input type="text" name="contact" placeholder="Contact Number"><br><br>
-    
     Background Image: <input type="file" name="background"><br><br>
     Profile Image: <input type="file" name="profile"><br><br>
-    
-    <button type="submit">Submit</button>
+    <button type="submit">Upload</button>
   </form>
 
-  <div id="status" style="margin-top:20px;"></div>
+  <div id="result" style="margin-top:20px;"></div>
 
   <script>
-    const form = document.getElementById('businessForm');
-    const status = document.getElementById('status');
+    const form = document.getElementById('uploadForm');
+    const result = document.getElementById('result');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-
       const formData = new FormData(form);
-      status.innerText = 'Submitting...';
+      result.innerText = 'Uploading...';
 
       try {
-        const res = await fetch('https://useful-telling-shroud.glitch.me/submit', {
+        const res = await fetch('https://useful-telling-shroud.glitch.me/upload-images', {
           method: 'POST',
           body: formData
         });
 
-        const result = await res.json();
-        status.innerText = result.message || 'Submitted successfully!';
+        const data = await res.json();
+
+        if (data.success) {
+          result.innerHTML = `
+            <p><strong>Uploaded Successfully:</strong></p>
+            ${data.backgroundUrl ? `<p>Background: <a href="${data.backgroundUrl}" target="_blank">View</a></p>` : ''}
+            ${data.profileUrl ? `<p>Profile: <a href="${data.profileUrl}" target="_blank">View</a></p>` : ''}
+          `;
+        } else {
+          result.innerText = 'Upload failed.';
+        }
       } catch (err) {
         console.error(err);
-        status.innerText = 'Submission failed.';
+        result.innerText = 'Upload failed.';
       }
     });
   </script>
