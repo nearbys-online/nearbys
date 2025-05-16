@@ -1,0 +1,16 @@
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const userId = window.location.pathname.replace(/^\/+/, ''); // removes leading slash
+    
+    if (!userId) {
+      document.body.innerHTML = "<h2>No User ID provided.</h2>";
+      return;
+    }
+
+    // Show content specific to userId
+    document.body.innerHTML = `<h2>Welcome, ${userId}!</h2>`;
+
+    // Optionally, load user-specific data
+    // fetch(`/data/${userId}.json`).then(...);
+  });
+</script>
