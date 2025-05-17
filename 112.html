@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
- <title>Live Orders - Greenleaf Bistro</title>
+ <title>Live Orders</title>
  <link href="https://fonts.googleapis.com/css2?family=Righteous&amp;display=swap" rel="stylesheet">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
@@ -235,10 +235,10 @@
 <body>
 
   <div class="header">
-    <h1>Greenleaf Bistro Orders</h1>
+    <h1>Live Orders</h1>
   </div>
   <!-- Login Button -->
-<button id="login-btn" style="position: absolute; top: 20px; right: 20px; background: #fff; color: #009500; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">Login</button>
+<button id="login-btn" style="position: absolute; top: 20px; right: 20px; background: #fff; color: #009500; border: none; padding: 5px 10px; border-radius: 6px; font-weight: bold; cursor: pointer;">Login</button>
 
 <!-- Login Modal -->
 <div id="login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
@@ -303,7 +303,7 @@
         userId = input;
         localStorage.setItem("loggedInUserId", userId);
         loginModal.style.display = 'none';
-        loginBtn.textContent = `User: ${userId}`;
+        loginBtn.textContent = `ID: ${userId}`;
         loginBtn.disabled = true;
         loadUserOrders();
         fetchOrders();
@@ -531,7 +531,7 @@
     const storedUserId = localStorage.getItem("loggedInUserId");
     if (storedUserId) {
       userId = storedUserId;
-      loginBtn.textContent = `User: ${userId}`;
+      loginBtn.textContent = `ID: ${userId}`;
       loginBtn.disabled = true;
       loadUserOrders();
       fetchOrders();
