@@ -270,6 +270,7 @@
 
 <script>
   let userId = null;
+  const orders = {};
 
   const loginBtn = document.getElementById('login-btn');
   const loginModal = document.getElementById('login-modal');
@@ -277,7 +278,6 @@
   const submitUserIdBtn = document.getElementById('submit-user-id');
   const loginError = document.getElementById('login-error');
 
-  // Show modal on login button click
   loginBtn.addEventListener('click', () => {
     loginModal.style.display = 'flex';
     userIdInput.value = '';
@@ -285,122 +285,107 @@
     submitUserIdBtn.textContent = 'Submit';
   });
 
-// Handle user ID submission
-submitUserIdBtn.addEventListener('click', async () => {
-  const input = userIdInput.value.trim();
-  if (!/^[A-Za-z0-9]{1,8}$/.test(input)) {
-    loginError.textContent = 'Invalid USER ID!';
-    loginError.style.display = 'block';
-    return;
-  }
-
-  submitUserIdBtn.textContent = 'Submitting...';
-  submitUserIdBtn.disabled = true;
-  loginError.style.display = 'none'; // Hide previous error, if any
-
-  try {
-    const response = await fetch(`https://enormous-cream-transport.glitch.me/businesses/${input}.json`);
-    if (response.ok) {
-      userId = input;
-      localStorage.setItem("loggedInUserId", userId);
-      loginModal.style.display = 'none';
-      loginBtn.textContent = `User: ${userId}`;
-      loginBtn.disabled = true;
-      loadUserOrders();
-    } else {
-      throw new Error('User ID not found');
+  submitUserIdBtn.addEventListener('click', async () => {
+    const input = userIdInput.value.trim();
+    if (!/^[A-Za-z0-9]{1,8}$/.test(input)) {
+      loginError.textContent = 'Invalid USER ID!';
+      loginError.style.display = 'block';
+      return;
     }
-  } catch (error) {
-    loginError.textContent = 'Invalid USER ID!';
-    loginError.style.display = 'block';
-  } finally {
-    submitUserIdBtn.textContent = 'Submit';
-    submitUserIdBtn.disabled = false;
-  }
-});
 
-  // Close modal when clicking outside the modal content
+    submitUserIdBtn.textContent = 'Submitting...';
+    submitUserIdBtn.disabled = true;
+    loginError.style.display = 'none';
+
+    try {
+      const response = await fetch(`https://enormous-cream-transport.glitch.me/businesses/${input}.json`);
+      if (response.ok) {
+        userId = input;
+        localStorage.setItem("loggedInUserId", userId);
+        loginModal.style.display = 'none';
+        loginBtn.textContent = `User: ${userId}`;
+        loginBtn.disabled = true;
+        loadUserOrders();
+        fetchOrders();
+      } else {
+        throw new Error('User ID not found');
+      }
+    } catch (error) {
+      loginError.textContent = 'Invalid USER ID!';
+      loginError.style.display = 'block';
+    } finally {
+      submitUserIdBtn.textContent = 'Submit';
+      submitUserIdBtn.disabled = false;
+    }
+  });
+
   window.addEventListener('click', (event) => {
     if (event.target === loginModal) {
       loginModal.style.display = 'none';
     }
   });
 
-  // Load orders for the logged-in user
   function loadUserOrders() {
     const stored = localStorage.getItem(`storedOrders_${userId}`);
     if (stored) {
       const parsed = JSON.parse(stored);
-      Object.assign(orders, parsed);
+      for (const key in parsed) {
+        if (parsed[key].userId === userId) {
+          orders[key] = parsed[key];
+        }
+      }
       renderOrders();
     }
   }
-</script>
 
-<script>
-           
-const orders = {};
-
-  // Load saved orders on page load
-  window.addEventListener("DOMContentLoaded", () => {
-    const stored = localStorage.getItem("storedOrders");
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      Object.assign(orders, parsed);
-      renderOrders();
-    }
-  });
-
-  // Save orders to localStorage
   function saveOrdersToStorage() {
-  if (!userId) return;
-  localStorage.setItem(`storedOrders_${userId}`, JSON.stringify(orders));
-}
+    if (!userId) return;
+    const userOrders = {};
+    for (const key in orders) {
+      if (orders[key].userId === userId) {
+        userOrders[key] = orders[key];
+      }
+    }
+    localStorage.setItem(`storedOrders_${userId}`, JSON.stringify(userOrders));
+  }
 
   async function handleOrder(order) {
-  if (!userId) return;
-  orders[order.orderNumber] = order;
-  saveOrdersToStorage();
-  renderOrders();
-}
+    if (!userId || order.userId !== userId) return;
+    orders[order.orderNumber] = order;
+    saveOrdersToStorage();
+    renderOrders();
+  }
+
   function renderOrders() {
-  const container = document.getElementById("orders");
-  container.innerHTML = "";
+    const container = document.getElementById("orders");
+    container.innerHTML = "";
 
-  const statusPriority = { "Ordered": 0, "Confirmed": 1, "Delivered": 2 };
+    const statusPriority = { "Ordered": 0, "Confirmed": 1, "Delivered": 2 };
 
-  const sortedOrders = Object.values(orders).sort((a, b) => {
-  const statusPriority = { "Ordered": 0, "Confirmed": 1, "Delivered": 2 };
+    const filteredOrders = Object.values(orders).filter(order => order.userId === userId);
 
-  const aStatus = statusPriority[a.status];
-  const bStatus = statusPriority[b.status];
+    const sortedOrders = filteredOrders.sort((a, b) => {
+      const aStatus = statusPriority[a.status];
+      const bStatus = statusPriority[b.status];
+      if (aStatus !== bStatus) return aStatus - bStatus;
 
-  if (aStatus !== bStatus) {
-    return aStatus - bStatus; // Ordered/Confirmed first, Delivered last
-  }
+      const aTime = new Date(`${a.date} ${a.time}`).getTime();
+      const bTime = new Date(`${b.date} ${b.time}`).getTime();
+      return a.status === "Delivered" ? bTime - aTime : aTime - bTime;
+    });
 
-  const aTime = new Date(`${a.date} ${a.time}`).getTime();
-  const bTime = new Date(`${b.date} ${b.time}`).getTime();
-
-  if (a.status === "Delivered") {
-    return bTime - aTime; // Newest Delivered first
-  } else {
-    return aTime - bTime; // Oldest Ordered/Confirmed first
-  }
-});
-
-  sortedOrders.forEach(order => {
+    sortedOrders.forEach(order => {
       const div = document.createElement("div");
       div.className = `order ${order.status.toLowerCase()}`;
       div.innerHTML = `
         <div class="order-header">
           <div class="order-meta">
-  <div class="date-time">
-    <span>${order.date || 'N/A'}</span>
-    <span>${order.time || 'N/A'}</span>
-  </div>
-  <span>#${order.orderNumber}</span>
-        </div>
+            <div class="date-time">
+              <span>${order.date || 'N/A'}</span>
+              <span>${order.time || 'N/A'}</span>
+            </div>
+            <span>#${order.orderNumber}</span>
+          </div>
           <div class="table-circle">${order.table}</div>
         </div>
         <ul>${order.cart.map(item => `
@@ -430,23 +415,24 @@ const orders = {};
       `;
       container.appendChild(div);
     });
-}
+  }
 
   async function markStatus(orderNumber, status) {
+    if (!orders[orderNumber] || orders[orderNumber].userId !== userId) return;
+
     const res = await fetch("https://citrine-flint-sea.glitch.me/update", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ orderNumber, status })
     });
 
-    if (res.ok && orders[orderNumber]) {
+    if (res.ok) {
       orders[orderNumber].status = status;
       saveOrdersToStorage();
       renderOrders();
     }
   }
 
-  // Handle postMessage order receiving
   window.addEventListener("message", async (event) => {
     try {
       const data = JSON.parse(event.data);
@@ -458,33 +444,32 @@ const orders = {};
   let soundEnabled = false;
 
   async function fetchOrders() {
-  if (!userId) return;
+    if (!userId) return;
 
-  try {
-    const res = await fetch("https://citrine-flint-sea.glitch.me/orders");
-    const orderList = await res.json();
+    try {
+      const res = await fetch("https://citrine-flint-sea.glitch.me/orders");
+      const orderList = await res.json();
 
-    if (soundEnabled && orderList.length > lastOrderCount) {
-      document.getElementById("notif-sound").play();
-    }
-
-    lastOrderCount = orderList.length;
-
-    orderList.forEach(order => {
-      if (order.userId === userId) {
-        orders[order.orderNumber] = order;
+      if (soundEnabled && orderList.length > lastOrderCount) {
+        document.getElementById("notif-sound").play();
       }
-    });
 
-    saveOrdersToStorage();
-    renderOrders();
-  } catch (error) {
-    console.error("Error fetching orders:", error);
+      lastOrderCount = orderList.length;
+
+      orderList.forEach(order => {
+        if (order.userId === userId) {
+          orders[order.orderNumber] = order;
+        }
+      });
+
+      saveOrdersToStorage();
+      renderOrders();
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
   }
-}
 
   setInterval(fetchOrders, 60000);
-  fetchOrders();
 
   document.getElementById("enable-sound").addEventListener("click", () => {
     const audio = document.getElementById("notif-sound");
@@ -496,64 +481,62 @@ const orders = {};
     });
   });
 
-  // Download as HTML
   function downloadStoredOrders() {
-  if (!userId) {
-    alert("Please log in to download orders.");
-    return;
+    if (!userId) {
+      alert("Please log in to download orders.");
+      return;
+    }
+
+    const stored = localStorage.getItem(`storedOrders_${userId}`);
+    if (!stored) {
+      alert("No orders to download.");
+      return;
+    }
+
+    const ordersData = JSON.parse(stored);
+    const htmlContent = `
+      <html>
+      <head><title>Stored Orders</title></head>
+      <body>
+        <h1>Order List for ${userId}</h1>
+        ${Object.values(ordersData).map(order => `
+          <div>
+            <p><strong>Date:</strong> ${order.date || 'N/A'} - <strong>Time:</strong> ${order.time || 'N/A'}</p>
+            <p><strong>Table:</strong> ${order.table}</p>
+            <p><strong>Order #:</strong> ${order.orderNumber}</p>
+            <ul>${order.cart.map(item => `<li>${item.name} x ${item.quantity} - ${item.total.toFixed(2)} dhs</li>`).join('')}</ul>
+            <p><strong>Total:</strong> ${order.total} dhs</p>
+            <p>Status: ${order.status}</p>
+            <hr>
+          </div>
+        `).join('')}
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([htmlContent], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `stored-orders-${userId}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    localStorage.removeItem(`storedOrders_${userId}`);
+    Object.keys(orders).forEach(key => delete orders[key]);
+    renderOrders();
   }
 
-  const stored = localStorage.getItem(`storedOrders_${userId}`);
-  if (!stored) {
-    alert("No orders to download.");
-    return;
-  }
-
-  const ordersData = JSON.parse(stored);
-  const htmlContent = `
-    <html>
-    <head><title>Stored Orders</title></head>
-    <body>
-      <h1>Order List for ${userId}</h1>
-      ${Object.values(ordersData).map(order => `
-        <div>
-          <p><strong>Date:</strong> ${order.date || 'N/A'} - <strong>Time:</strong> ${order.time || 'N/A'}</p>
-          <p><strong>Table:</strong> ${order.table}</p>
-          <p><strong>Order #:</strong> ${order.orderNumber}</p>
-          <ul>${order.cart.map(item => `<li>${item.name} x ${item.quantity} - ${item.total.toFixed(2)} dhs</li>`).join('')}</ul>
-          <p><strong>Total:</strong> ${order.total} dhs</p>
-          <p>Status: ${order.status}</p>
-          <hr>
-        </div>
-      `).join('')}
-    </body>
-    </html>
-  `;
-
-  const blob = new Blob([htmlContent], { type: "text/html" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `stored-orders-${userId}.html`;
-  a.click();
-  URL.revokeObjectURL(url);
-
-  // Clear stored orders after download
-  localStorage.removeItem(`storedOrders_${userId}`);
-  Object.keys(orders).forEach(key => delete orders[key]);
-  renderOrders();
-}
-
-window.addEventListener("DOMContentLoaded", () => {
-  const storedUserId = localStorage.getItem("loggedInUserId");
-  if (storedUserId) {
-    userId = storedUserId;
-    loginBtn.textContent = `User: ${userId}`;
-    loginBtn.disabled = true;
-    loadUserOrders();
-  }
-});
-
-  </script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const storedUserId = localStorage.getItem("loggedInUserId");
+    if (storedUserId) {
+      userId = storedUserId;
+      loginBtn.textContent = `User: ${userId}`;
+      loginBtn.disabled = true;
+      loadUserOrders();
+      fetchOrders();
+    }
+  });
+</script>
 </body>
   </html>
