@@ -207,129 +207,49 @@
     }
     
     .footer {
-      position: fixed;
-      left: 0;
-      bottom: 0;
-      width: 100vw;
-      background: rgba(0,0,0,0.9);
-      color: #fff;
-      text-align: center;
-      z-index: 1000;
-      letter-spacing: 1px;
-      box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
-      font-size: 1rem;
-      line-height: 1;
-    }
-    .footer b {
-      color: #009500;
-      font-family: 'Righteous', cursive;
-      font-style: italic;
-      font-size: 1.5em;
-    }
-    
-    @media (max-width: 700px) {
-      .footer { font-size: 0.8rem; }
-    }
-
-    /* Login Modal Styles */
-    .login-btn {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: white;
-      color: #009500;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.5);
-      z-index: 1001;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal-content {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 400px;
-      text-align: center;
-    }
-
-    .modal h2 {
-      margin-top: 0;
-      color: #009500;
-    }
-
-    .modal input {
-      width: 100%;
-      padding: 12px;
-      margin: 15px 0;
-      border: 2px solid #ddd;
-      border-radius: 5px;
-      font-size: 16px;
-      text-align: center;
-      text-transform: uppercase;
-    }
-
-    .modal input:focus {
-      border-color: #009500;
-      outline: none;
-    }
-
-    .modal button {
-      background: #009500;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 5px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-    }
-
-    .modal button:hover {
-      background: #007700;
-    }
-
-    .error-message {
-      color: red;
-      margin-top: 10px;
-      font-size: 14px;
-      height: 20px;
-    }
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100vw;
+  background: rgba(0,0,0,0.9);
+  color: #fff;
+  text-align: center;
+  z-index: 1000;
+  letter-spacing: 1px;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+  font-size: 1rem;
+  line-height: 1;
+  }
+  .footer b {
+    color: #009500;
+    font-family: 'Righteous', cursive;
+    font-style: italic;
+    font-size: 1.5em;
+  }
+  
+  @media (max-width: 700px) {
+  .footer { font-size: 0.8rem; }
+  }
   </style>
 </head>
 <body>
 
   <div class="header">
     <h1>Greenleaf Bistro Orders</h1>
-    <button class="login-btn" id="loginBtn">LOGIN</button>
   </div>
-  <img src="https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1950&q=80" alt="Restaurant Cover" class="cover-img" />
+  <!-- Login Button -->
+<button id="login-btn" style="position: absolute; top: 20px; right: 20px; background: #fff; color: #009500; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">Login</button>
 
-  <!-- Login Modal -->
-  <div id="loginModal" class="modal">
-    <div class="modal-content">
-      <h2>Business Login</h2>
-      <p>Enter your USER ID to access your orders</p>
-      <input type="text" id="userIdInput" placeholder="USER ID" maxlength="8" pattern="[A-Za-z0-9]+" title="Alphanumeric characters only">
-      <button id="submitLogin">Submit</button>
-      <div class="error-message" id="loginError"></div>
-    </div>
+<!-- Login Modal -->
+<div id="login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+  <div style="background: #fff; padding: 30px; border-radius: 8px; width: 300px; text-align: center;">
+    <h2>Enter User ID</h2>
+    <input type="text" id="user-id-input" maxlength="8" pattern="[A-Za-z0-9]{1,8}" placeholder="Alphanumeric, max 8 chars" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px;" />
+    <button id="submit-user-id" style="background: #009500; color: #fff; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Submit</button>
+    <p id="login-error" style="color: red; margin-top: 10px; display: none;">Invalid USER ID!</p>
   </div>
+</div>
+  <img src="https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1950&q=80" alt="Restaurant Cover" class="cover-img" />
 
   <div id="orders-section">
     <div class="top-controls">
@@ -348,211 +268,260 @@
   </div>
 </footer>  
 
-  <script>
+<script>
+  let userId = null;
+
+  const loginBtn = document.getElementById('login-btn');
+  const loginModal = document.getElementById('login-modal');
+  const userIdInput = document.getElementById('user-id-input');
+  const submitUserIdBtn = document.getElementById('submit-user-id');
+  const loginError = document.getElementById('login-error');
+
+  // Show modal on login button click
+  loginBtn.addEventListener('click', () => {
+    loginModal.style.display = 'flex';
+    userIdInput.value = '';
+    loginError.style.display = 'none';
+    submitUserIdBtn.textContent = 'Submit';
+  });
+
+// Handle user ID submission
+submitUserIdBtn.addEventListener('click', async () => {
+  const input = userIdInput.value.trim();
+  if (!/^[A-Za-z0-9]{1,8}$/.test(input)) {
+    loginError.textContent = 'Invalid USER ID!';
+    loginError.style.display = 'block';
+    return;
+  }
+
+  submitUserIdBtn.textContent = 'Submitting...';
+  submitUserIdBtn.disabled = true;
+  loginError.style.display = 'none'; // Hide previous error, if any
+
+  try {
+    const response = await fetch(`https://enormous-cream-transport.glitch.me/businesses/${input}.json`);
+    if (response.ok) {
+      userId = input;
+      localStorage.setItem("loggedInUserId", userId);
+      loginModal.style.display = 'none';
+      loginBtn.textContent = `User: ${userId}`;
+      loginBtn.disabled = true;
+      loadUserOrders();
+    } else {
+      throw new Error('User ID not found');
+    }
+  } catch (error) {
+    loginError.textContent = 'Invalid USER ID!';
+    loginError.style.display = 'block';
+  } finally {
+    submitUserIdBtn.textContent = 'Submit';
+    submitUserIdBtn.disabled = false;
+  }
+});
+
+  // Close modal when clicking outside the modal content
+  window.addEventListener('click', (event) => {
+    if (event.target === loginModal) {
+      loginModal.style.display = 'none';
+    }
+  });
+
+  // Load orders for the logged-in user
+  function loadUserOrders() {
+    const stored = localStorage.getItem(`storedOrders_${userId}`);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      Object.assign(orders, parsed);
+      renderOrders();
+    }
+  }
+</script>
+
+<script>
+           
 const orders = {};
-let userId = localStorage.getItem("userId") || null;
 
-window.addEventListener("DOMContentLoaded", () => {
-  if (userId) {
-    loadUserOrders();
-  } else {
-    document.getElementById('loginModal').style.display = 'flex';
-  }
-});
+  // Load saved orders on page load
+  window.addEventListener("DOMContentLoaded", () => {
+    const stored = localStorage.getItem("storedOrders");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      Object.assign(orders, parsed);
+      renderOrders();
+    }
+  });
 
-document.getElementById('loginBtn').addEventListener('click', () => {
-  document.getElementById('loginModal').style.display = 'flex';
-  document.getElementById('userIdInput').focus();
-});
-
-document.getElementById('submitLogin').addEventListener('click', () => {
-  const input = document.getElementById('userIdInput').value.trim().toUpperCase();
-  const submitBtn = document.getElementById('submitLogin');
-
-  submitBtn.textContent = "Submitting...";
-  submitBtn.disabled = true;
-
-  userId = input || "GUEST";
-  localStorage.setItem("userId", userId);
-  document.getElementById('loginModal').style.display = 'none';
-document.getElementById('loginBtn').textContent = input || "USER";
-loadUserOrders();
-
-  submitBtn.textContent = "Submit";
-  submitBtn.disabled = false;
-});
-
-window.addEventListener('click', (event) => {
-  if (event.target === document.getElementById('loginModal')) {
-    document.getElementById('loginModal').style.display = 'none';
-  }
-});
-
-function loadUserOrders() {
-  const stored = localStorage.getItem(`storedOrders_${userId}`);
-  if (stored) {
-    const parsed = JSON.parse(stored);
-    Object.assign(orders, parsed);
-    renderOrders();
-  }
-  fetchOrders();
+  // Save orders to localStorage
+  function saveOrdersToStorage() {
+  if (!userId) return;
+  localStorage.setItem(`storedOrders_${userId}`, JSON.stringify(orders));
 }
 
-function saveOrdersToStorage() {
-  if (userId) {
-    localStorage.setItem(`storedOrders_${userId}`, JSON.stringify(orders));
-  }
+  async function handleOrder(order) {
+  if (!userId) return;
+  orders[order.orderNumber] = order;
+  saveOrdersToStorage();
+  renderOrders();
 }
-
-async function handleOrder(order) {
-  if (userId && order.userId === userId) {
-    orders[order.orderNumber] = order;
-    saveOrdersToStorage();
-    renderOrders();
-  }
-}
-
-function renderOrders() {
+  function renderOrders() {
   const container = document.getElementById("orders");
   container.innerHTML = "";
 
   const statusPriority = { "Ordered": 0, "Confirmed": 1, "Delivered": 2 };
 
   const sortedOrders = Object.values(orders).sort((a, b) => {
-    const aStatus = statusPriority[a.status];
-    const bStatus = statusPriority[b.status];
-    if (aStatus !== bStatus) return aStatus - bStatus;
+  const statusPriority = { "Ordered": 0, "Confirmed": 1, "Delivered": 2 };
 
-    const aTime = new Date(`${a.date} ${a.time}`).getTime();
-    const bTime = new Date(`${b.date} ${b.time}`).getTime();
-    return a.status === "Delivered" ? bTime - aTime : aTime - bTime;
-  });
+  const aStatus = statusPriority[a.status];
+  const bStatus = statusPriority[b.status];
+
+  if (aStatus !== bStatus) {
+    return aStatus - bStatus; // Ordered/Confirmed first, Delivered last
+  }
+
+  const aTime = new Date(`${a.date} ${a.time}`).getTime();
+  const bTime = new Date(`${b.date} ${b.time}`).getTime();
+
+  if (a.status === "Delivered") {
+    return bTime - aTime; // Newest Delivered first
+  } else {
+    return aTime - bTime; // Oldest Ordered/Confirmed first
+  }
+});
 
   sortedOrders.forEach(order => {
-    const div = document.createElement("div");
-    div.className = `order ${order.status.toLowerCase()}`;
-    div.innerHTML = `
-      <div class="order-header">
-        <div class="order-meta">
-          <div class="date-time">
-            <span>${order.date || 'N/A'}</span>
-            <span>${order.time || 'N/A'}</span>
-          </div>
-          <span>#${order.orderNumber}</span>
+      const div = document.createElement("div");
+      div.className = `order ${order.status.toLowerCase()}`;
+      div.innerHTML = `
+        <div class="order-header">
+          <div class="order-meta">
+  <div class="date-time">
+    <span>${order.date || 'N/A'}</span>
+    <span>${order.time || 'N/A'}</span>
+  </div>
+  <span>#${order.orderNumber}</span>
         </div>
-        <div class="table-circle">${order.table}</div>
-      </div>
-      <ul>${order.cart.map(item => `
-        <li>
-          <span>${item.name} x ${item.quantity}</span>
-          <span>${item.total.toFixed(2)} dhs</span>
-        </li>
-      `).join("")}</ul>
-      <div class="total-price">Total: ${order.total} dhs</div>
-      ${order.status === 'Delivered' ? `
-        <div class="delivered-text">Delivered</div>
-      ` : `
-        <div class="button-group">
-          <button class="action-btn confirm-btn ${order.status === 'Confirmed' ? 'confirmed' : ''}" 
-            onclick="markStatus('${order.orderNumber}', 'Confirmed')" 
-            ${order.status === 'Confirmed' ? 'disabled' : ''}>
-            ${order.status === 'Confirmed' ? 'Confirmed' : 'Confirm'}
-          </button>
-          ${order.status === 'Confirmed' ? `
-            <button class="action-btn deliver-btn" 
-              onclick="markStatus('${order.orderNumber}', 'Delivered')">
-              Deliver
+          <div class="table-circle">${order.table}</div>
+        </div>
+        <ul>${order.cart.map(item => `
+          <li>
+            <span>${item.name} x ${item.quantity}</span>
+            <span>${item.total.toFixed(2)} dhs</span>
+          </li>
+        `).join("")}</ul>
+        <div class="total-price">Total: ${order.total} dhs</div>
+        ${order.status === 'Delivered' ? `
+          <div class="delivered-text">Delivered</div>
+        ` : `
+          <div class="button-group">
+            <button class="action-btn confirm-btn ${order.status === 'Confirmed' ? 'confirmed' : ''}" 
+              onclick="markStatus('${order.orderNumber}', 'Confirmed')" 
+              ${order.status === 'Confirmed' ? 'disabled' : ''}>
+              ${order.status === 'Confirmed' ? 'Confirmed' : 'Confirm'}
             </button>
-          ` : ''}
-        </div>
-      `}
-    `;
-    container.appendChild(div);
-  });
+            ${order.status === 'Confirmed' ? `
+              <button class="action-btn deliver-btn" 
+                onclick="markStatus('${order.orderNumber}', 'Delivered')">
+                Deliver
+              </button>
+            ` : ''}
+          </div>
+        `}
+      `;
+      container.appendChild(div);
+    });
 }
 
-async function markStatus(orderNumber, status) {
-  const res = await fetch("https://citrine-flint-sea.glitch.me/update", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ orderNumber, status, userId })
-  });
+  async function markStatus(orderNumber, status) {
+    const res = await fetch("https://citrine-flint-sea.glitch.me/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderNumber, status })
+    });
 
-  if (res.ok && orders[orderNumber]) {
-    orders[orderNumber].status = status;
-    saveOrdersToStorage();
-    renderOrders();
+    if (res.ok && orders[orderNumber]) {
+      orders[orderNumber].status = status;
+      saveOrdersToStorage();
+      renderOrders();
+    }
   }
-}
 
-window.addEventListener("message", async (event) => {
-  try {
-    const data = JSON.parse(event.data);
-    if (data.orderNumber && data.userId === userId) handleOrder(data);
-  } catch (e) {}
-});
+  // Handle postMessage order receiving
+  window.addEventListener("message", async (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.orderNumber) handleOrder(data);
+    } catch (e) {}
+  });
 
-let lastOrderCount = 0;
-let soundEnabled = false;
+  let lastOrderCount = 0;
+  let soundEnabled = false;
 
-async function fetchOrders() {
+  async function fetchOrders() {
   if (!userId) return;
 
-  const res = await fetch(`https://citrine-flint-sea.glitch.me/orders?userId=${userId}`);
-  const orderList = await res.json();
+  try {
+    const res = await fetch("https://citrine-flint-sea.glitch.me/orders");
+    const orderList = await res.json();
 
-  if (soundEnabled && orderList.length > lastOrderCount) {
-    document.getElementById("notif-sound").play();
-  }
-
-  lastOrderCount = orderList.length;
-
-  orderList.forEach(order => {
-    if (order.userId === userId) {
-      orders[order.orderNumber] = order;
+    if (soundEnabled && orderList.length > lastOrderCount) {
+      document.getElementById("notif-sound").play();
     }
-  });
 
-  saveOrdersToStorage();
-  renderOrders();
+    lastOrderCount = orderList.length;
+
+    orderList.forEach(order => {
+      if (order.userId === userId) {
+        orders[order.orderNumber] = order;
+      }
+    });
+
+    saveOrdersToStorage();
+    renderOrders();
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+  }
 }
 
-setInterval(fetchOrders, 60000);
-fetchOrders();
+  setInterval(fetchOrders, 60000);
+  fetchOrders();
 
-document.getElementById("enable-sound").addEventListener("click", () => {
-  const audio = document.getElementById("notif-sound");
-  audio.play().then(() => {
-    soundEnabled = true;
-    document.getElementById("enable-sound").style.display = "none";
-  }).catch((e) => {
-    console.error("Audio failed to play:", e);
+  document.getElementById("enable-sound").addEventListener("click", () => {
+    const audio = document.getElementById("notif-sound");
+    audio.play().then(() => {
+      soundEnabled = true;
+      document.getElementById("enable-sound").style.display = "none";
+    }).catch((e) => {
+      console.error("Audio failed to play:", e);
+    });
   });
-});
 
-function downloadStoredOrders() {
+  // Download as HTML
+  function downloadStoredOrders() {
   if (!userId) {
-    alert("Please login first");
-    document.getElementById('loginModal').style.display = 'flex';
+    alert("Please log in to download orders.");
     return;
   }
 
   const stored = localStorage.getItem(`storedOrders_${userId}`);
-  if (!stored) return alert("No orders to download.");
+  if (!stored) {
+    alert("No orders to download.");
+    return;
+  }
 
   const ordersData = JSON.parse(stored);
   const htmlContent = `
     <html>
-    <head><title>Stored Orders - ${userId}</title></head>
+    <head><title>Stored Orders</title></head>
     <body>
-      <h1>Order List - ${userId}</h1>
+      <h1>Order List for ${userId}</h1>
       ${Object.values(ordersData).map(order => `
         <div>
           <p><strong>Date:</strong> ${order.date || 'N/A'} - <strong>Time:</strong> ${order.time || 'N/A'}</p>
           <p><strong>Table:</strong> ${order.table}</p>
           <p><strong>Order #:</strong> ${order.orderNumber}</p>
-          <ul>${order.cart.map(item => `<li>${item.name} x ${item.quantity} - $${item.total.toFixed(2)}</li>`).join('')}</ul>
-          <p><strong>Total:</strong> $${order.total}</p>
+          <ul>${order.cart.map(item => `<li>${item.name} x ${item.quantity} - ${item.total.toFixed(2)} dhs</li>`).join('')}</ul>
+          <p><strong>Total:</strong> ${order.total} dhs</p>
           <p>Status: ${order.status}</p>
           <hr>
         </div>
@@ -565,16 +534,26 @@ function downloadStoredOrders() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `orders-${userId}-${new Date().toISOString().split('T')[0]}.html`;
+  a.download = `stored-orders-${userId}.html`;
   a.click();
   URL.revokeObjectURL(url);
 
+  // Clear stored orders after download
   localStorage.removeItem(`storedOrders_${userId}`);
-  for (let key in orders) delete orders[key];
+  Object.keys(orders).forEach(key => delete orders[key]);
   renderOrders();
 }
 
-window.downloadStoredOrders = downloadStoredOrders;
-</script>
+window.addEventListener("DOMContentLoaded", () => {
+  const storedUserId = localStorage.getItem("loggedInUserId");
+  if (storedUserId) {
+    userId = storedUserId;
+    loginBtn.textContent = `User: ${userId}`;
+    loginBtn.disabled = true;
+    loadUserOrders();
+  }
+});
+
+  </script>
 </body>
   </html>
