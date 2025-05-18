@@ -450,9 +450,14 @@
       const res = await fetch("https://citrine-flint-sea.glitch.me/orders");
       const orderList = await res.json();
 
-      if (soundEnabled && orderList.length > lastOrderCount) {
-        document.getElementById("notif-sound").play();
-      }
+      if (soundEnabled) {
+  const newUserOrders = orderList.filter(order => order.userId === userId);
+  const previousUserOrderCount = Object.values(orders).filter(order => order.userId === userId).length;
+
+  if (newUserOrders.length > previousUserOrderCount) {
+    document.getElementById("notif-sound").play();
+  }
+}
 
       lastOrderCount = orderList.length;
 
