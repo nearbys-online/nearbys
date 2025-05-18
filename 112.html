@@ -230,20 +230,6 @@
   @media (max-width: 700px) {
   .footer { font-size: 0.8rem; }
   }
-  
-  .waiter-call-card {
-  background: #fff0f0;
-  border: 2px solid #ff0000;
-  color: #ff0000;
-  font-weight: bold;
-  padding: 16px 20px;
-  margin-top: 10px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  font-size: 16px;
-  max-width: 300px;
-  transition: opacity 0.3s ease;
-  }
   </style>
 </head>
 <body>
@@ -271,8 +257,6 @@
     <div id="orders"></div>
   </div>
 
-<div id="waiter-alerts" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
-
   <button id="enable-sound">🔔 Enable Sound Notifications</button>
   <audio id="notif-sound" src="https://cdn.shopify.com/s/files/1/0947/2340/8240/files/water_drop_tone.mp3?v=1747184325" preload="auto"></audio>
 <div style="margin-bottom:100px;"></div>
@@ -284,10 +268,6 @@
 </footer>  
 
 <script>
-  // SOUND SOURCES
-  const orderSound = "https://cdn.shopify.com/s/files/1/0947/2340/8240/files/water_drop_tone.mp3?v=1747184325"; // Order alert sound
-  const waiterSound = "https://cdn.shopify.com/s/files/1/0947/2340/8240/files/whistle_notification.mp3?v=1747587812"; // Waiter call sound
-
   let userId = null;
   const orders = {};
 
@@ -296,9 +276,6 @@
   const userIdInput = document.getElementById('user-id-input');
   const submitUserIdBtn = document.getElementById('submit-user-id');
   const loginError = document.getElementById('login-error');
-
-  const orderAudio = new Audio(orderSound);
-  const waiterAudio = new Audio(waiterSound);
 
   loginBtn.addEventListener('click', () => {
     loginModal.style.display = 'flex';
@@ -473,13 +450,13 @@
       const orderList = await res.json();
 
       if (soundEnabled) {
-        const newUserOrders = orderList.filter(order => order.userId === userId);
-        const previousUserOrderCount = Object.values(orders).filter(order => order.userId === userId).length;
+  const newUserOrders = orderList.filter(order => order.userId === userId);
+  const previousUserOrderCount = Object.values(orders).filter(order => order.userId === userId).length;
 
-        if (newUserOrders.length > previousUserOrderCount) {
-          orderAudio.play().catch(e => console.error("Order sound failed:", e));
-        }
-      }
+  if (newUserOrders.length > previousUserOrderCount) {
+    document.getElementById("notif-sound").play();
+  }
+}
 
       lastOrderCount = orderList.length;
 
@@ -499,7 +476,8 @@
   setInterval(fetchOrders, 60000);
 
   document.getElementById("enable-sound").addEventListener("click", () => {
-    orderAudio.play().then(() => {
+    const audio = document.getElementById("notif-sound");
+    audio.play().then(() => {
       soundEnabled = true;
       document.getElementById("enable-sound").style.display = "none";
     }).catch((e) => {
