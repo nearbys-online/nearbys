@@ -249,8 +249,7 @@
     <p id="login-error" style="color: red; margin-top: 10px; display: none;">Invalid USER ID!</p>
   </div>
 </div>
-  <img src="https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1950&q=80" alt="Restaurant Cover" class="cover-img" />
-
+  <img id="coverImage" alt="Restaurant Cover" class="cover-img" />  
   <div id="orders-section">
     <div class="top-controls">
       <button onclick="downloadStoredOrders()">📥 Download Orders</button>
@@ -269,7 +268,6 @@
 </footer>  
 
 <script>
-    
   let userId = null;
   const orders = {};
 
@@ -301,30 +299,14 @@
     try {
       const response = await fetch(`https://enormous-cream-transport.glitch.me/businesses/${input}.json`);
       if (response.ok) {
-  userId = input;
-  localStorage.setItem("loggedInUserId", userId);
-  loginModal.style.display = 'none';
-  loginBtn.textContent = `ID: ${userId}`;
-  loginBtn.disabled = true;
-  loadUserOrders();
-  fetchOrders();
-
-  // Fetch and set cover image
-  try {
-    const resCover = await fetch(`https://enormous-cream-transport.glitch.me/businesses/${userId}.json`);
-    if (!resCover.ok) throw new Error("Failed to fetch cover data");
-
-    const data = await resCover.json();
-    const coverImage = document.querySelector("img.cover-img");
-
-    if (coverImage && data.coverUrl) {
-      coverImage.src = data.coverUrl;
-    }
-  } catch (err) {
-    console.error("Error loading cover image:", err);
-  }
-}
- else {
+        userId = input;
+        localStorage.setItem("loggedInUserId", userId);
+        loginModal.style.display = 'none';
+        loginBtn.textContent = `ID: ${userId}`;
+        loginBtn.disabled = true;
+        loadUserOrders();
+        fetchOrders();
+      } else {
         throw new Error('User ID not found');
       }
     } catch (error) {
@@ -560,5 +542,65 @@
     }
   });
 </script>
+<script>
+// Function to fetch and set the cover image
+async function fetchAndSetCoverImage(userId) {
+  if (!userId) return;
+  
+  try {
+    const response = await fetch(`https://enormous-cream-transport.glitch.me/businesses/${userId}.json`);
+    if (response.ok) {
+      const businessData = await response.json();
+      const coverImage = document.getElementById('coverImage');
+      if (coverImage && businessData.coverUrl) {
+        coverImage.src = businessData.coverUrl;
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching business cover image:", error);
+  }
+}
+
+// Check for existing userId on page load
+document.addEventListener('DOMContentLoaded', () => {
+  const storedUserId = localStorage.getItem("loggedInUserId");
+  if (storedUserId) {
+    fetchAndSetCoverImage(storedUserId);
+  }
+});
+
+// Monitor for userId changes in localStorage
+window.addEventListener('storage', (event) => {
+  if (event.key === "loggedInUserId") {
+    fetchAndSetCoverImage(event.newValue);
+  }
+});
+
+// Alternative: Listen to login success by observing the login button text change
+const observeLoginSuccess = () => {
+  const targetNode = document.getElementById('login-btn');
+  if (!targetNode) return;
+
+  const config = { attributes: true, childList: true, subtree: true };
+  
+  const callback = function(mutationsList) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'childList' || mutation.type === 'characterData') {
+        const userId = localStorage.getItem("loggedInUserId");
+        if (userId && targetNode.textContent.includes(userId)) {
+          fetchAndSetCoverImage(userId);
+        }
+      }
+    }
+  };
+
+  const observer = new MutationObserver(callback);
+  observer.observe(targetNode, config);
+};
+
+// Start observing when DOM is ready
+document.addEventListener('DOMContentLoaded', observeLoginSuccess);
+</script>
+
 </body>
   </html>
