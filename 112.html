@@ -283,6 +283,24 @@
     loginError.style.display = 'none';
     submitUserIdBtn.textContent = 'Submit';
   });
+  
+const CANCEL_TIMEOUT = 15 * 60 * 1000; 
+
+function autoCancelOrders() {
+  const now = Date.now();
+  for (const orderNumber in orders) {
+    const order = orders[orderNumber];
+    if (order.userId !== userId) continue;
+    if (order.status === 'Ordered') {
+      const orderTime = new Date(`${order.date} ${order.time}`).getTime();
+      if (now - orderTime > CANCEL_TIMEOUT) {
+        markStatus(orderNumber, 'Cancelled');
+      }
+    }
+  }
+}
+
+setInterval(autoCancelOrders, 60000);
 
   submitUserIdBtn.addEventListener('click', async () => {
     const input = userIdInput.value.trim();
@@ -374,47 +392,59 @@
     });
 
     sortedOrders.forEach(order => {
-      const div = document.createElement("div");
-      div.className = `order ${order.status.toLowerCase()}`;
-      div.innerHTML = `
-        <div class="order-header">
-          <div class="order-meta">
-            <div class="date-time">
-              <span>${order.date || 'N/A'}</span>
-              <span>${order.time || 'N/A'}</span>
-            </div>
-            <span>#${order.orderNumber}</span>
-          </div>
-          <div class="table-circle">${order.table}</div>
+  const div = document.createElement("div");
+  div.className = `order ${order.status.toLowerCase()}`;
+
+  div.innerHTML = `
+    <div class="order-header">
+      <div class="order-meta">
+        <div class="date-time">
+          <span>${order.date || 'N/A'}</span>
+          <span>${order.time || 'N/A'}</span>
         </div>
-        <ul>${order.cart.map(item => `
-          <li>
-            <span>${item.name} x ${item.quantity}</span>
-            <span>${item.total.toFixed(2)} dhs</span>
-          </li>
-        `).join("")}</ul>
-        <div class="total-price">Total: ${order.total} dhs</div>
-        ${order.status === 'Delivered' ? `
-          <div class="delivered-text">Delivered</div>
-        ` : `
-          <div class="button-group">
-            <button class="action-btn confirm-btn ${order.status === 'Confirmed' ? 'confirmed' : ''}" 
-              onclick="markStatus('${order.orderNumber}', 'Confirmed')" 
-              ${order.status === 'Confirmed' ? 'disabled' : ''}>
-              ${order.status === 'Confirmed' ? 'Confirmed' : 'Confirm'}
-            </button>
-            ${order.status === 'Confirmed' ? `
+        <span>#${order.orderNumber}</span>
+      </div>
+      <div class="table-circle">${order.table}</div>
+    </div>
+    <ul>${order.cart.map(item => `
+      <li>
+        <span>${item.name} x ${item.quantity}</span>
+        <span>${item.total.toFixed(2)} dhs</span>
+      </li>
+    `).join("")}</ul>
+    <div class="total-price">Total: ${order.total} dhs</div>
+    ${
+      order.status === 'Delivered' ? `
+        <div class="delivered-text">Delivered</div>
+      ` : order.status === 'Cancelled' ? `
+        <div class="cancelled-text">Cancelled</div>
+      ` : `
+        <div class="button-group">
+          <button class="action-btn confirm-btn ${order.status === 'Confirmed' ? 'confirmed' : ''}" 
+            onclick="markStatus('${order.orderNumber}', 'Confirmed')" 
+            ${order.status === 'Confirmed' ? 'disabled' : ''}>
+            ${order.status === 'Confirmed' ? 'Confirmed' : 'Confirm'}
+          </button>
+          ${
+            order.status === 'Confirmed' ? `
               <button class="action-btn deliver-btn" 
                 onclick="markStatus('${order.orderNumber}', 'Delivered')">
                 Deliver
               </button>
-            ` : ''}
-          </div>
-        `}
-      `;
-      container.appendChild(div);
-    });
-  }
+            ` : ''
+          }
+          <button class="action-btn cancel-btn" 
+            onclick="markStatus('${order.orderNumber}', 'Cancelled')">
+            Cancel
+          </button>
+        </div>
+      `
+    }
+  `;
+
+  container.appendChild(div);
+}); 
+}
 
   async function markStatus(orderNumber, status) {
     if (!orders[orderNumber] || orders[orderNumber].userId !== userId) return;
