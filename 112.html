@@ -545,28 +545,33 @@
 <script>
 // Function to fetch and set the cover image
 async function fetchAndSetCoverImage(userId) {
-  if (!userId) return;
-  
+  const fallbackUserId = "0000";
+  const idToUse = userId || fallbackUserId;
+
   try {
-    const response = await fetch(`https://enormous-cream-transport.glitch.me/businesses/${userId}.json`);
+    const response = await fetch(`https://enormous-cream-transport.glitch.me/businesses/${idToUse}.json`);
     if (response.ok) {
       const businessData = await response.json();
       const coverImage = document.getElementById('coverImage');
       if (coverImage && businessData.coverUrl) {
         coverImage.src = businessData.coverUrl;
       }
+    } else if (userId && userId !== fallbackUserId) {
+      // Try fallback if original request failed
+      fetchAndSetCoverImage(fallbackUserId);
     }
   } catch (error) {
     console.error("Error fetching business cover image:", error);
+    if (userId && userId !== fallbackUserId) {
+      fetchAndSetCoverImage(fallbackUserId);
+    }
   }
 }
 
 // Check for existing userId on page load
 document.addEventListener('DOMContentLoaded', () => {
   const storedUserId = localStorage.getItem("loggedInUserId");
-  if (storedUserId) {
-    fetchAndSetCoverImage(storedUserId);
-  }
+  fetchAndSetCoverImage(storedUserId);
 });
 
 // Monitor for userId changes in localStorage
@@ -601,6 +606,5 @@ const observeLoginSuccess = () => {
 // Start observing when DOM is ready
 document.addEventListener('DOMContentLoaded', observeLoginSuccess);
 </script>
-
 </body>
   </html>
