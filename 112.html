@@ -374,77 +374,79 @@ setInterval(autoCancelOrders, 60000);
     renderOrders();
   }
 
-  function renderOrders() {
-    const container = document.getElementById("orders");
-    container.innerHTML = "";
+function renderOrders() {
+  const container = document.getElementById("orders");
+  container.innerHTML = "";
 
-    const statusPriority = { "Ordered": 0, "Confirmed": 1, "Delivered": 2 };
+  const filteredOrders = Object.values(orders).filter(order => order.userId === userId);
 
-    const filteredOrders = Object.values(orders).filter(order => order.userId === userId);
+  // Separate active vs. completed (Delivered/Cancelled)
+  const activeStatuses = ["Ordered", "Confirmed"];
+  const completedStatuses = ["Delivered", "Cancelled"];
 
-    const sortedOrders = filteredOrders.sort((a, b) => {
-      const aStatus = statusPriority[a.status];
-      const bStatus = statusPriority[b.status];
-      if (aStatus !== bStatus) return aStatus - bStatus;
+  const activeOrders = filteredOrders
+    .filter(order => activeStatuses.includes(order.status))
+    .sort((a, b) => new Date(`${b.date} ${b.time}`) - new Date(`${a.date} ${a.time}`));
 
-      const aTime = new Date(`${a.date} ${a.time}`).getTime();
-      const bTime = new Date(`${b.date} ${b.time}`).getTime();
-      return a.status === "Delivered" ? bTime - aTime : aTime - bTime;
-    });
+  const completedOrders = filteredOrders
+    .filter(order => completedStatuses.includes(order.status))
+    .sort((a, b) => new Date(`${b.date} ${b.time}`) - new Date(`${a.date} ${a.time}`));
 
-    sortedOrders.forEach(order => {
-  const div = document.createElement("div");
-  div.className = `order ${order.status.toLowerCase()}`;
+  const sortedOrders = [...activeOrders, ...completedOrders];
 
-  div.innerHTML = `
-    <div class="order-header">
-      <div class="order-meta">
-        <div class="date-time">
-          <span>${order.date || 'N/A'}</span>
-          <span>${order.time || 'N/A'}</span>
+  sortedOrders.forEach(order => {
+    const div = document.createElement("div");
+    div.className = `order ${order.status.toLowerCase()}`;
+
+    div.innerHTML = `
+      <div class="order-header">
+        <div class="order-meta">
+          <div class="date-time">
+            <span>${order.date || 'N/A'}</span>
+            <span>${order.time || 'N/A'}</span>
+          </div>
+          <span>#${order.orderNumber}</span>
         </div>
-        <span>#${order.orderNumber}</span>
+        <div class="table-circle">${order.table}</div>
       </div>
-      <div class="table-circle">${order.table}</div>
-    </div>
-    <ul>${order.cart.map(item => `
-      <li>
-        <span>${item.name} x ${item.quantity}</span>
-        <span>${item.total.toFixed(2)} dhs</span>
-      </li>
-    `).join("")}</ul>
-    <div class="total-price">Total: ${order.total} dhs</div>
-    ${
-      order.status === 'Delivered' ? `
-        <div class="delivered-text">Delivered</div>
-      ` : order.status === 'Cancelled' ? `
-        <div class="cancelled-text">Cancelled</div>
-      ` : `
-        <div class="button-group">
-          <button class="action-btn confirm-btn ${order.status === 'Confirmed' ? 'confirmed' : ''}" 
-            onclick="markStatus('${order.orderNumber}', 'Confirmed')" 
-            ${order.status === 'Confirmed' ? 'disabled' : ''}>
-            ${order.status === 'Confirmed' ? 'Confirmed' : 'Confirm'}
-          </button>
-          ${
-            order.status === 'Confirmed' ? `
-              <button class="action-btn deliver-btn" 
-                onclick="markStatus('${order.orderNumber}', 'Delivered')">
-                Deliver
-              </button>
-            ` : ''
-          }
-          <button class="action-btn cancel-btn" 
-            onclick="markStatus('${order.orderNumber}', 'Cancelled')">
-            Cancel
-          </button>
-        </div>
-      `
-    }
-  `;
+      <ul>${order.cart.map(item => `
+        <li>
+          <span>${item.name} x ${item.quantity}</span>
+          <span>${item.total.toFixed(2)} dhs</span>
+        </li>
+      `).join("")}</ul>
+      <div class="total-price">Total: ${order.total} dhs</div>
+      ${
+        order.status === 'Delivered' ? `
+          <div class="delivered-text">Delivered</div>
+        ` : order.status === 'Cancelled' ? `
+          <div class="cancelled-text">Cancelled</div>
+        ` : `
+          <div class="button-group">
+            <button class="action-btn confirm-btn ${order.status === 'Confirmed' ? 'confirmed' : ''}" 
+              onclick="markStatus('${order.orderNumber}', 'Confirmed')" 
+              ${order.status === 'Confirmed' ? 'disabled' : ''}>
+              ${order.status === 'Confirmed' ? 'Confirmed' : 'Confirm'}
+            </button>
+            ${
+              order.status === 'Confirmed' ? `
+                <button class="action-btn deliver-btn" 
+                  onclick="markStatus('${order.orderNumber}', 'Delivered')">
+                  Deliver
+                </button>
+              ` : ''
+            }
+            <button class="action-btn cancel-btn" 
+              onclick="markStatus('${order.orderNumber}', 'Cancelled')">
+              Cancel
+            </button>
+          </div>
+        `
+      }
+    `;
 
-  container.appendChild(div);
-}); 
+    container.appendChild(div);
+  });
 }
 
   async function markStatus(orderNumber, status) {
