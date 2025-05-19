@@ -470,51 +470,49 @@ setInterval(autoCancelOrders, 60000);
     } catch (e) {}
   });
 
-  let lastOrderCount = 0;
-  let soundEnabled = false;
+let lastOrderCount = 0;
+let soundEnabled = false;
 
-  async function fetchOrders() {
-    if (!userId) return;
+async function fetchOrders() {
+  if (!userId) return;
 
-    try {
-      const res = await fetch("https://citrine-flint-sea.glitch.me/orders");
-      const orderList = await res.json();
+  try {
+    const res = await fetch("https://citrine-flint-sea.glitch.me/orders");
+    const orderList = await res.json();
 
-      if (soundEnabled) {
-  const newUserOrders = orderList.filter(order => order.userId === userId);
-  const previousUserOrderCount = Object.values(orders).filter(order => order.userId === userId).length;
+    const newOrders = orderList.filter(order =>
+      order.userId === userId && !orders[order.orderNumber]
+    );
 
-  if (newUserOrders.length > previousUserOrderCount) {
-    document.getElementById("notif-sound").play();
+    if (soundEnabled && newOrders.length > 0) {
+      document.getElementById("notif-sound").play();
+    }
+
+    let userOrders = orderList.filter(order => order.userId === userId);
+    lastOrderCount = userOrders.length;
+
+    userOrders.forEach(order => {
+      orders[order.orderNumber] = order;
+    });
+
+    saveOrdersToStorage();
+    renderOrders();
+  } catch (error) {
+    console.error("Error fetching orders:", error);
   }
 }
 
-      lastOrderCount = orderList.length;
+setInterval(fetchOrders, 60000);
 
-      orderList.forEach(order => {
-        if (order.userId === userId) {
-          orders[order.orderNumber] = order;
-        }
-      });
-
-      saveOrdersToStorage();
-      renderOrders();
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-    }
-  }
-
-  setInterval(fetchOrders, 60000);
-
-  document.getElementById("enable-sound").addEventListener("click", () => {
-    const audio = document.getElementById("notif-sound");
-    audio.play().then(() => {
-      soundEnabled = true;
-      document.getElementById("enable-sound").style.display = "none";
-    }).catch((e) => {
-      console.error("Audio failed to play:", e);
-    });
+document.getElementById("enable-sound").addEventListener("click", () => {
+  const audio = document.getElementById("notif-sound");
+  audio.play().then(() => {
+    soundEnabled = true;
+    document.getElementById("enable-sound").style.display = "none";
+  }).catch((e) => {
+    console.error("Audio failed to play:", e);
   });
+});
 
   function downloadStoredOrders() {
     if (!userId) {
