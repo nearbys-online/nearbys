@@ -484,26 +484,32 @@ function renderOrders() {
     "Cancelled": 3
   };
 
-  const sortedOrders = filteredOrders.sort((a, b) => {
-    const statusA = (a.status || "").trim();
-    const statusB = (b.status || "").trim();
+  const normalizeStatus = (status) => {
+    const trimmed = status.trim().toLowerCase();
+    if (trimmed.startsWith("ready in")) return "Confirmed";
+    return status.trim();
+  };
 
-    const priorityA = statusPriority[statusA] || 4;
-    const priorityB = statusPriority[statusB] || 4;
+  const sortedOrders = filteredOrders.sort((a, b) => {
+    const priorityA = statusPriority[normalizeStatus(a.status)] || 4;
+    const priorityB = statusPriority[normalizeStatus(b.status)] || 4;
 
     if (priorityA !== priorityB) {
       return priorityA - priorityB;
     }
 
-    // Same group, sort by date + time (latest first)
     const timeA = new Date(`${a.date} ${a.time}`);
     const timeB = new Date(`${b.date} ${b.time}`);
     return timeB - timeA;
   });
 
   sortedOrders.forEach(order => {
+    const normalized = normalizeStatus(order.status);
+
     const div = document.createElement("div");
-    div.className = `order ${order.status.toLowerCase().trim()}`;
+    div.className = `order ${normalized.toLowerCase()}`;
+
+    const isConfirmed = normalized === "Confirmed";
 
     div.innerHTML = `
       <div class="order-header">
@@ -524,19 +530,19 @@ function renderOrders() {
       `).join("")}</ul>
       <div class="total-price">Total: ${order.total} dhs</div>
       ${
-        order.status.trim() === 'Delivered' ? `
+        normalized === 'Delivered' ? `
           <div class="delivered-text">Delivered</div>
-        ` : order.status.trim() === 'Cancelled' ? `
+        ` : normalized === 'Cancelled' ? `
           <div class="cancelled-text">Cancelled</div>
         ` : `
           <div class="button-group">
-            <button class="action-btn confirm-btn ${order.status === 'Confirmed' ? 'confirmed' : ''}" 
-  onclick="${order.status === 'Confirmed' ? '' : `openReadyTimeModal('${order.orderNumber}')`}" 
-  ${order.status === 'Confirmed' ? 'disabled' : ''}>
-  ${order.status === 'Confirmed' ? 'Confirmed' : 'Confirm'}
-</button>
+            <button class="action-btn confirm-btn ${isConfirmed ? 'confirmed' : ''}" 
+              onclick="${isConfirmed ? '' : `openReadyTimeModal('${order.orderNumber}')`}" 
+              ${isConfirmed ? 'disabled' : ''}>
+              ${isConfirmed ? 'Confirmed' : 'Confirm'}
+            </button>
             ${
-              order.status === 'Confirmed' ? `
+              isConfirmed ? `
                 <button class="action-btn deliver-btn" 
                   onclick="markStatus('${order.orderNumber}', 'Delivered')">
                   Deliver
