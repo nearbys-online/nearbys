@@ -380,19 +380,26 @@ function renderOrders() {
 
   const filteredOrders = Object.values(orders).filter(order => order.userId === userId);
 
-  // Separate active vs. completed (Delivered/Cancelled)
-  const activeStatuses = ["Ordered", "Confirmed"];
-  const completedStatuses = ["Delivered", "Cancelled"];
+  const statusPriority = {
+    "Ordered": 1,
+    "Confirmed": 1,
+    "Delivered": 2,
+    "Cancelled": 3
+  };
 
-  const activeOrders = filteredOrders
-    .filter(order => activeStatuses.includes(order.status))
-    .sort((a, b) => new Date(`${b.date} ${b.time}`) - new Date(`${a.date} ${a.time}`));
+  const sortedOrders = filteredOrders.sort((a, b) => {
+    const priorityA = statusPriority[a.status] || 4;
+    const priorityB = statusPriority[b.status] || 4;
 
-  const completedOrders = filteredOrders
-    .filter(order => completedStatuses.includes(order.status))
-    .sort((a, b) => new Date(`${b.date} ${b.time}`) - new Date(`${a.date} ${a.time}`));
+    if (priorityA !== priorityB) {
+      return priorityA - priorityB;
+    }
 
-  const sortedOrders = [...activeOrders, ...completedOrders];
+    // If same group (status), sort by date + time (latest first)
+    const timeA = new Date(`${a.date} ${a.time}`);
+    const timeB = new Date(`${b.date} ${b.time}`);
+    return timeB - timeA;
+  });
 
   sortedOrders.forEach(order => {
     const div = document.createElement("div");
