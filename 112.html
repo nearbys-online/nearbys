@@ -232,6 +232,83 @@
   .footer { font-size: 0.8rem; }
   }
   </style>
+  <style>
+  #ready-time-modal.modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 9999;
+    font-family: 'Arial', sans-serif;
+  }
+
+  #ready-time-modal .modal-content {
+    background: #fff;
+    padding: 30px 25px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    position: relative;
+    animation: fadeIn 0.3s ease;
+    text-align: center;
+  }
+
+  #ready-time-modal .modal-content h3 {
+    color: #009500;
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  #ready-time-modal select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 2px solid #009500;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+  }
+
+  #ready-time-modal select:focus {
+    border-color: black;
+    outline: none;
+  }
+
+  #ready-time-modal button {
+    background-color: #009500;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  #ready-time-modal button:hover {
+    background-color: black;
+  }
+
+  .close-modal {
+    position: absolute;
+    top: 10px;
+    right: 16px;
+    font-size: 22px;
+    font-weight: bold;
+    color: black;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  .close-modal:hover {
+    color: #009500;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
 </head>
 <body>
 
@@ -257,6 +334,26 @@
     </div>
     <div id="orders"></div>
   </div>
+
+<!-- Ready Time Modal -->
+<div id="ready-time-modal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close-modal" onclick="closeReadyTimeModal()">&times;</span>
+    <h3>Select Preparation Time</h3>
+    <select id="prep-time-select">
+      <option value="">-- Select Time --</option>
+      <option value="2 mins">2 mins</option>
+      <option value="5 mins">5 mins</option>
+      <option value="10 mins">10 mins</option>
+      <option value="15 mins">15 mins</option>
+      <option value="20 mins">20 mins</option>
+      <option value="25 mins">25 mins</option>
+      <option value="30 mins">30 mins</option>
+      <option value="45 mins">45 mins</option>
+    </select>
+    <button onclick="submitPrepTime()">Send</button>
+  </div>
+</div>
 
   <button id="enable-sound">🔔 Enable Sound Notifications</button>
   <audio id="notif-sound" src="https://cdn.shopify.com/s/files/1/0947/2340/8240/files/water_drop_tone.mp3?v=1747184325" preload="auto"></audio>
@@ -434,10 +531,10 @@ function renderOrders() {
         ` : `
           <div class="button-group">
             <button class="action-btn confirm-btn ${order.status === 'Confirmed' ? 'confirmed' : ''}" 
-              onclick="markStatus('${order.orderNumber}', 'Confirmed')" 
-              ${order.status === 'Confirmed' ? 'disabled' : ''}>
-              ${order.status === 'Confirmed' ? 'Confirmed' : 'Confirm'}
-            </button>
+  onclick="${order.status === 'Confirmed' ? '' : `openReadyTimeModal('${order.orderNumber}')`}" 
+  ${order.status === 'Confirmed' ? 'disabled' : ''}>
+  ${order.status === 'Confirmed' ? 'Confirmed' : 'Confirm'}
+</button>
             ${
               order.status === 'Confirmed' ? `
                 <button class="action-btn deliver-btn" 
@@ -646,6 +743,40 @@ const observeLoginSuccess = () => {
 
 // Start observing when DOM is ready
 document.addEventListener('DOMContentLoaded', observeLoginSuccess);
+</script>
+<script>
+  let confirmOrderNumber = null;
+
+  function openReadyTimeModal(orderNumber) {
+    confirmOrderNumber = orderNumber;
+    document.getElementById('prep-time-select').value = '';
+    document.getElementById('ready-time-modal').style.display = 'flex';
+  }
+
+  function closeReadyTimeModal() {
+    document.getElementById('ready-time-modal').style.display = 'none';
+    confirmOrderNumber = null;
+  }
+
+  async function submitPrepTime() {
+    const selected = document.getElementById('prep-time-select').value;
+    if (!selected || !confirmOrderNumber) return;
+
+    const status = `ready in - ${selected}`;
+
+    const res = await fetch("https://citrine-flint-sea.glitch.me/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderNumber: confirmOrderNumber, status })
+    });
+
+    if (res.ok) {
+      orders[confirmOrderNumber].status = "Confirmed"; // UI logic still shows "Confirmed"
+      saveOrdersToStorage();
+      renderOrders();
+      closeReadyTimeModal();
+    }
+  }
 </script>
 </body>
   </html>
