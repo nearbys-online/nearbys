@@ -388,14 +388,17 @@ function renderOrders() {
   };
 
   const sortedOrders = filteredOrders.sort((a, b) => {
-    const priorityA = statusPriority[a.status] || 4;
-    const priorityB = statusPriority[b.status] || 4;
+    const statusA = (a.status || "").trim();
+    const statusB = (b.status || "").trim();
+
+    const priorityA = statusPriority[statusA] || 4;
+    const priorityB = statusPriority[statusB] || 4;
 
     if (priorityA !== priorityB) {
       return priorityA - priorityB;
     }
 
-    // If same group (status), sort by date + time (latest first)
+    // Same group, sort by date + time (latest first)
     const timeA = new Date(`${a.date} ${a.time}`);
     const timeB = new Date(`${b.date} ${b.time}`);
     return timeB - timeA;
@@ -403,7 +406,7 @@ function renderOrders() {
 
   sortedOrders.forEach(order => {
     const div = document.createElement("div");
-    div.className = `order ${order.status.toLowerCase()}`;
+    div.className = `order ${order.status.toLowerCase().trim()}`;
 
     div.innerHTML = `
       <div class="order-header">
@@ -424,9 +427,9 @@ function renderOrders() {
       `).join("")}</ul>
       <div class="total-price">Total: ${order.total} dhs</div>
       ${
-        order.status === 'Delivered' ? `
+        order.status.trim() === 'Delivered' ? `
           <div class="delivered-text">Delivered</div>
-        ` : order.status === 'Cancelled' ? `
+        ` : order.status.trim() === 'Cancelled' ? `
           <div class="cancelled-text">Cancelled</div>
         ` : `
           <div class="button-group">
