@@ -17,30 +17,32 @@
     }
     
     :root {
-  --theme: #ff0000;
+  --primary: #ff0000;
   --title: #ff0000;
     }    
 
     .header {
-      background: linear-gradient(to right, #009500, #000);
+      background: linear-gradient(to right, var(--primary), #000);
       color: white;
       text-align: center;
-      padding: 20px 20px 20px;
+      padding: 20px 20px 5px;
       position: relative;
     }
 
     .header h1 {
       font-size: 2.5rem;
-      margin-bottom: 10px;
+      margin-bottom: 5px;
       font-weight: 700;
       letter-spacing: 1px;
+      font-family: 'Righteous', cursive;
+      font-style:italic;
     }
 
     .cover-img {
       width: 100%;
       max-height: 220px;
       object-fit: cover;
-      border-bottom: 5px solid #009500;
+      border-bottom: 5px solid var(--primary);
     }
 
     #orders-section {
@@ -63,7 +65,7 @@
       border-left: 5px solid;
     }
 
-    .order.ordered { border-color: #009500; }
+    .order.ordered { border-color: var(--primary); }
     .order.confirmed { border-color: #000; }
     .order.delivered { border-color: #ccc; }
     .order.cancelled { border-color: #ccc; }
@@ -95,7 +97,7 @@
       width: 36px;
       height: 36px;
       border-radius: 50%;
-      background: #000;
+      background: var(--primary);
       color: white;
       display: flex;
       justify-content: center;
@@ -140,7 +142,7 @@
     }
 
     .confirm-btn {
-      background: #000;
+      background: var(--primary);
       color: white;
     }
 
@@ -150,13 +152,13 @@
     }
 
     .deliver-btn {
-      background: #009500;
+      background: var(--primary);
       color: #fff;
     }
 
     .delivered-text {
       text-align: center;
-      color: #009500;
+      color: var(--primary);
       font-weight: 600;
     }
 
@@ -178,7 +180,7 @@
     }
 
     .top-controls button {
-      background: var(--theme);
+      background: var(--primary);
       color: white;
       padding: 10px 20px;
       border-radius: 8px;
@@ -259,7 +261,7 @@
   }
 
   #ready-time-modal .modal-content h3 {
-    color: #009500;
+    color: var(--primary);
     font-size: 22px;
     margin-bottom: 20px;
   }
@@ -268,7 +270,7 @@
     width: 100%;
     padding: 12px;
     margin-bottom: 20px;
-    border: 2px solid #009500;
+    border: 2px solid var(--primary);
     border-radius: 8px;
     font-size: 16px;
     transition: border-color 0.3s ease;
@@ -280,7 +282,7 @@
   }
 
   #ready-time-modal button {
-    background-color: #009500;
+    background-color: var(--primary);
     color: white;
     border: none;
     padding: 12px 24px;
@@ -306,7 +308,7 @@
   }
 
   .close-modal:hover {
-    color: #009500;
+    color: var(--primary);
   }
 
   @keyframes fadeIn {
@@ -316,12 +318,12 @@
 </style>
 </head>
 <body>
-
-  <div class="header">
-    <h1>Live Orders</h1>
-  </div>
+    
+    <div class="header">
+    <h1 class="restaurant-title"></h1>
+    </div>
   <!-- Login Button -->
-<button id="login-btn" style="position: absolute; top: 20px; right: 20px; background: #fff; color: #009500; border: none; padding: 5px 10px; border-radius: 6px; font-weight: bold; cursor: pointer;">Login</button>  
+<button id="login-btn" style="position: absolute; top: 20px; right: 20px; background: #fff; color: var(--primary); border: none; padding: 5px 10px; border-radius: 6px; font-weight: bold; cursor: pointer;">Login</button>  
   
 <!-- Login Modal -->
 <div id="login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
@@ -329,7 +331,7 @@
     <h2>Login</h2>
     <input type="text" id="user-id-input" maxlength="8" pattern="[A-Za-z0-9]{1,8}" placeholder="User ID" style="width: 100%; padding: 10px 0 10px 2px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px;" />
     <input type="password" id="password-input" placeholder="Password" style="width: 100%; padding: 10px 0 10px 2px; margin-bottom: 10px;l border: 1px solid #ccc; border-radius: 4px;" />
-    <button id="submit-user-id" style="background: #009500; color: #fff; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Submit</button>
+    <button id="submit-user-id" style="background: var(--primary); color: #fff; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Submit</button>
     <p id="login-error" style="color: red; margin-top: 10px; display: none;">Invalid USER ID or Password!</p>
   </div>
 </div>
@@ -416,6 +418,7 @@ submitUserIdBtn.addEventListener('click', async () => {
       loginModal.style.display = 'none';
       loginBtn.textContent = `ID: ${userId}`;
       loginBtn.disabled = true;
+      fetchAndSetCoverImage(userId);
       loadUserOrders();
       fetchOrders();
     } else {
@@ -683,60 +686,24 @@ document.getElementById("enable-sound").addEventListener("click", () => {
   });
 </script>
 <script>
-  let confirmOrderNumber = null;
-
-  function openReadyTimeModal(orderNumber) {
-    confirmOrderNumber = orderNumber;
-    document.getElementById('prep-time-select').value = '';
-    document.getElementById('ready-time-modal').style.display = 'flex';
-  }
-
-  function closeReadyTimeModal() {
-    document.getElementById('ready-time-modal').style.display = 'none';
-    confirmOrderNumber = null;
-  }
-
-  async function submitPrepTime() {
-    const selected = document.getElementById('prep-time-select').value;
-    if (!selected || !confirmOrderNumber) return;
-
-    const status = `ready in - ${selected}`;
-
-    const res = await fetch("https://citrine-flint-sea.glitch.me/update", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderNumber: confirmOrderNumber, status })
-    });
-
-    if (res.ok) {
-      orders[confirmOrderNumber].status = "Confirmed"; // UI logic still shows "Confirmed"
-      saveOrdersToStorage();
-      renderOrders();
-      closeReadyTimeModal();
-    }
-  }
-</script>
-<script>
 // Function to apply dynamic styles
 function applyDynamicStyles(data) {
   const root = document.documentElement;
 
-  // Set --primary from "theme"
+  // Set --primary color
   let themeColor = "#009500"; // default
   if (data.theme && data.theme !== "default") {
     themeColor = data.theme;
   }
   root.style.setProperty('--primary', themeColor);
 
-  // Set --name from businessName (uses same color as theme for now)
-  if (data.businessName) {
-    root.style.setProperty('--name', themeColor);
-  }
-
-  // Set font size from "titleSize"
-  if (data.titleSize) {
-    const title = document.querySelector('.restaurant-title');
-    if (title) {
+  // Update .restaurant-title text and font size
+  const title = document.querySelector('.restaurant-title');
+  if (title) {
+    if (data.name) {
+      title.textContent = data.name;
+    }
+    if (data.titleSize) {
       title.style.fontSize = `${data.titleSize}rem`;
     }
   }
@@ -770,11 +737,6 @@ async function fetchAndSetCoverImage(userId) {
   }
 }
 
-// Check for existing userId on page load
-document.addEventListener('DOMContentLoaded', () => {
-  const storedUserId = localStorage.getItem("loggedInUserId");
-  fetchAndSetCoverImage(storedUserId);
-});
 
 // Monitor for userId changes in localStorage
 window.addEventListener('storage', (event) => {
@@ -805,8 +767,54 @@ const observeLoginSuccess = () => {
   observer.observe(targetNode, config);
 };
 
-// Start observing when DOM is ready
-document.addEventListener('DOMContentLoaded', observeLoginSuccess);
+document.addEventListener('DOMContentLoaded', () => {
+  const storedUserId = localStorage.getItem("loggedInUserId");
+  if (storedUserId) {
+    userId = storedUserId;
+    loginBtn.textContent = `ID: ${userId}`;
+    loginBtn.disabled = true;
+    fetchAndSetCoverImage(userId);
+    loadUserOrders();
+    fetchOrders();
+  }
+
+  observeLoginSuccess(); // Start observing login button
+});
 </script>
+<script>
+  let confirmOrderNumber = null;
+
+  function openReadyTimeModal(orderNumber) {
+    confirmOrderNumber = orderNumber;
+    document.getElementById('prep-time-select').value = '';
+    document.getElementById('ready-time-modal').style.display = 'flex';
+  }
+
+  function closeReadyTimeModal() {
+    document.getElementById('ready-time-modal').style.display = 'none';
+    confirmOrderNumber = null;
+  }
+
+  async function submitPrepTime() {
+    const selected = document.getElementById('prep-time-select').value;
+    if (!selected || !confirmOrderNumber) return;
+
+    const status = `ready in - ${selected}`;
+
+    const res = await fetch("https://citrine-flint-sea.glitch.me/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderNumber: confirmOrderNumber, status })
+    });
+
+    if (res.ok) {
+      orders[confirmOrderNumber].status = "Confirmed"; // UI logic still shows "Confirmed"
+      saveOrdersToStorage();
+      renderOrders();
+      closeReadyTimeModal();
+    }
+  }
+</script>
+
 </body>
 </html>
