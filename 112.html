@@ -776,6 +776,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   observeLoginSuccess(); // Start observing login button
 });
+
+window.addEventListener('DOMContentLoaded', () => {
+  fetchAndSetCoverImage();
+});
+
 </script>
 <script>
   let confirmOrderNumber = null;
