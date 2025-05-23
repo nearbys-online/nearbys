@@ -17,8 +17,7 @@
     }
     
     :root {
-  --primary: #ff0000;
-  --title: #ff0000;
+  --primary: #009500;
     }    
 
     .header {
@@ -710,7 +709,7 @@ function applyDynamicStyles(data) {
 }
 
 // Function to fetch and apply cover image and styles
-async function fetchAndSetCoverImage(userId) {
+async function fetchAndSetCoverImage(userId, triedFallback = false) {
   const fallbackUserId = "0000";
   const idToUse = userId || fallbackUserId;
 
@@ -720,23 +719,20 @@ async function fetchAndSetCoverImage(userId) {
 
     const data = await response.json();
 
-    // Set the cover image
     const coverImage = document.getElementById('coverImage');
     if (coverImage && data.coverUrl) {
       coverImage.src = data.coverUrl;
     }
 
-    // Apply dynamic styles
     applyDynamicStyles(data);
 
   } catch (error) {
     console.error("Error fetching cover image and styles:", error);
-    if (userId && userId !== fallbackUserId) {
-      fetchAndSetCoverImage(fallbackUserId);
+    if (!triedFallback && userId !== fallbackUserId) {
+      fetchAndSetCoverImage(fallbackUserId, true);
     }
   }
 }
-
 
 // Monitor for userId changes in localStorage
 window.addEventListener('storage', (event) => {
