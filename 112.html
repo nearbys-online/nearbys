@@ -314,6 +314,47 @@
     from { opacity: 0; transform: translateY(-20px); }
     to { opacity: 1; transform: translateY(0); }
   }
+
+.search-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+  
+#orderSearchInput {
+  width: 200px;
+  padding: 8px 12px;
+  font-size: 16px;
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+#orderSearchInput:focus {
+  border-color: #007bff;
+}
+
+#searchResults {
+  margin-top: 10px;
+  font-family: Arial, sans-serif;
+}
+
+.matched-order {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.matched-order div {
+  margin-bottom: 4px;
+  font-size: 14px;
+}
 </style>
 </head>
 <body>
@@ -336,6 +377,12 @@
 </div>
 
   <img id="coverImage" alt="Restaurant Cover" class="cover-img" />  
+  
+  <div class="search-container">
+  <input type="text" id="orderSearchInput" maxlength="3" placeholder="Search Order Number" />
+  <div id="searchResults"></div>
+  </div>
+  
   <div id="orders-section">
     <div class="top-controls">
       <button onclick="downloadStoredOrders()">📥 Download Orders</button>
@@ -811,6 +858,46 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }
 </script>
+<script>
+    function searchOrderByDigits() {
+  const input = document.getElementById("orderSearchInput").value.trim();
+  const resultsContainer = document.getElementById("searchResults");
+  resultsContainer.innerHTML = "";
 
+  if (input.length !== 3 || isNaN(input)) {
+    resultsContainer.textContent = "Please enter a valid 3-digit number.";
+    return;
+  }
+
+  const matches = Object.values(orders).filter(order => 
+    order.userId === userId &&
+    order.orderNumber.slice(-3) === input
+  );
+
+  if (matches.length === 0) {
+    resultsContainer.textContent = "No matching order found.";
+    return;
+  }
+
+  matches.forEach(order => {
+    const div = document.createElement("div");
+    div.className = "matched-order";
+    div.innerHTML = `
+      <div>#${order.orderNumber} - Table ${order.table}</div>
+      <div>${order.date} ${order.time}</div>
+      <div>Status: ${order.status}</div>
+    `;
+    resultsContainer.appendChild(div);
+  });
+}
+
+document.getElementById("orderSearchInput").addEventListener("input", function () {
+  if (this.value.length === 3) {
+    searchOrderByDigits();
+  } else {
+    document.getElementById("searchResults").innerHTML = "";
+  }
+});
+</script>
 </body>
 </html>
