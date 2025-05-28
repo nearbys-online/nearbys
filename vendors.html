@@ -1,10 +1,12 @@
+<html>
 <body>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vendors</title>
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#009500">
+<meta name="theme-color" content="#000000">
+<link rel="apple-touch-icon" href="https://cdn.shopify.com/s/files/1/0947/2340/8240/files/icon_512.png?v=1748402101">
     <style>
         html, body {
             height: 100%;
@@ -257,9 +259,7 @@ label {
        <p style="position:absolute; left: 10%;">not yet registered ?</p>
         <button id="addShopBtn" style="border-radius:5px; padding:10px 10px; position:absolute; right:10%;">Add your Store</button>
         </div>                
-<button id="installBtn" style="position: fixed; bottom: 10px; left: 10px; z-index: 9999; padding: 10px 20px; background-color: #009500; color: white; border: none; border-radius: 8px;">
-  📲 Install App
-</button>
+<button id="installBtn">Install App</button>
         
     </div> 
 
@@ -1001,37 +1001,45 @@ async function submitUser() {
 document.querySelector("button[onclick='submitUser()']").addEventListener("click", submitUser);
 });  
 </script>
-
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+      .then(function () {
+        console.log('Service Worker Registered');
+      });
+  }
+</script>
 <script>
   let deferredPrompt;
   const installBtn = document.getElementById('installBtn');
-  installBtn.style.display = 'block';
 
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
+    installBtn.style.display = 'inline-block';
   });
 
   installBtn.addEventListener('click', () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(choice => {
-        if (choice.outcome === 'accepted') {
-          console.log('✅ App installed');
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the A2HS prompt');
         }
         deferredPrompt = null;
       });
     } else {
-      alert("To install, open and tap browser menu > 'Install App'");
+      // Fallback for iOS
+      window.location.href = 'https://www.youtube.com/watch?v=VIDEO_ID';
     }
   });
-</script>
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-      .then(() => console.log('✅ Service Worker Registered'))
-      .catch(err => console.error('❌ SW registration failed:', err));
-  }
+  
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent.toLowerCase());
+const isInStandaloneMode = ('standalone' in window.navigator) && window.navigator.standalone;
+
+if (isIOS && !isInStandaloneMode) {
+  installBtn.textContent = 'How to Add to Home Screen (iOS)';
+}
 </script>
 <footer class="footer">
     <div style="padding: 10px; font-family: 'Righteous', cursive; font-style:italic;">
@@ -1039,4 +1047,5 @@ document.querySelector("button[onclick='submitUser()']").addEventListener("click
   All rights reserved</div>
 </footer>  
 
-</body>
+    </body>
+</html>
