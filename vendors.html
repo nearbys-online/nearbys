@@ -442,12 +442,11 @@ label {
   </div>
 </div>
 <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-      .then(function () {
-        console.log('Service Worker Registered');
-      });
-  }
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(() => console.log('SW registered'))
+    .catch(err => console.error('SW registration failed:', err));
+}
 </script>
 <script>
   let deferredPrompt;
