@@ -1,7 +1,7 @@
 {
   "name": "Vendors Dashboard",
   "short_name": "Vendors",
-  "start_url": "/pages/join",
+  "start_url": "https://nearbysx.pages.dev/vendors",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
