@@ -3,7 +3,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vendors</title>
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <link rel="manifest" href="https://nearbys.pages.dev/manifest.json">
+    <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#009500">
     <style>
         html, body {
@@ -1004,12 +1004,9 @@ document.querySelector("button[onclick='submitUser()']").addEventListener("click
 
 <script>
   let deferredPrompt;
-
-  // Show the button immediately
   const installBtn = document.getElementById('installBtn');
   installBtn.style.display = 'block';
 
-  // Catch the install prompt event if supported
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
@@ -1018,22 +1015,22 @@ document.querySelector("button[onclick='submitUser()']").addEventListener("click
   installBtn.addEventListener('click', () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(choiceResult => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('User accepted the install');
+      deferredPrompt.userChoice.then(choice => {
+        if (choice.outcome === 'accepted') {
+          console.log('✅ App installed');
         }
         deferredPrompt = null;
       });
     } else {
-      alert("To install this app, tap the browser's share menu and choose 'Add to Home Screen'.");
+      alert("To install, open and tap browser menu > 'Install App'");
     }
   });
-</script>  
+</script>
 <script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('https://nearbys.pages.dev/sw.js')
-      .then(() => console.log('Service Worker Registered'))
-      .catch(err => console.error('SW registration failed:', err));
+    navigator.serviceWorker.register('/sw.js')
+      .then(() => console.log('✅ Service Worker Registered'))
+      .catch(err => console.error('❌ SW registration failed:', err));
   }
 </script>
 <footer class="footer">
@@ -1042,4 +1039,4 @@ document.querySelector("button[onclick='submitUser()']").addEventListener("click
   All rights reserved</div>
 </footer>  
 
-                                                     </body>
+</body>
