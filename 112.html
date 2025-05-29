@@ -14,7 +14,6 @@
       margin: 0;
       padding: 0;
       color: #1a1d24;
-      -webkit-tap-highlight-color: transparent;
     }
     
     :root {
@@ -356,6 +355,17 @@
   margin-bottom: 4px;
   font-size: 14px;
 }
+
+#downloadQrBtn {
+   background: var(--primary);
+   color: white;
+   padding: 4px 10px;
+   font-weight: bold;
+   border: none;
+   cursor: pointer;
+   margin: 2px; 
+}
+
 </style>
 </head>
 <body>
@@ -376,6 +386,12 @@
     <p id="login-error" style="color: red; margin-top: 10px; display: none;">Invalid USER ID or Password!</p>
   </div>
 </div>
+
+<!-- QR Code Button -->
+<button id="downloadQrBtn">Download QR Code</button>
+<canvas id="qrCanvas" width="300" height="300" style="display:none;"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
   <img id="coverImage" alt="Restaurant Cover" class="cover-img" />  
   
@@ -898,6 +914,42 @@ document.getElementById("orderSearchInput").addEventListener("input", function (
   } else {
     document.getElementById("searchResults").innerHTML = "";
   }
+});
+</script>
+<script> 
+const canvas = document.getElementById('qrCanvas');
+const ctx = canvas.getContext('2d');
+const downloadBtn = document.getElementById('downloadQrBtn');
+
+downloadBtn.addEventListener('click', () => {
+  const userId = localStorage.getItem("loggedInUserId");
+  if (!userId) {
+    console.error("userId is not defined or is null");
+    return;
+  }
+
+  const qrUrl = `https://nearbys.online/pages/order#${userId}`;
+
+  // Generate QR code to a temporary canvas
+  QRCode.toCanvas(canvas, qrUrl, { width: 300, margin: 3 }, function (error) {
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    // Add userId text to canvas
+    ctx.font = "bold 20px Arial";
+    ctx.fillStyle = "black";
+    ctx.textAlign = "right"; // For bottom-right position
+    ctx.textBaseline = "bottom";
+    ctx.fillText(userId, canvas.width - 5, canvas.height - 3);
+
+    // Trigger download
+    const link = document.createElement('a');
+    link.download = `nearbys_qr_${userId}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
 });
 </script>
 </body>
