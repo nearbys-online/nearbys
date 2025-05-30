@@ -585,11 +585,13 @@ function renderOrders() {
         <div class="table-circle">${order.table}</div>
       </div>
       <ul>${order.cart.map(item => `
-        <li>
-          <span>${item.name} x ${item.quantity}</span>
-          <span>${item.total.toFixed(2)} dhs</span>
-        </li>
-      `).join("")}</ul>
+  <li>
+    <span>
+      ${item.name}${item.variantTitle ? ` (${item.variantTitle})` : ''} x ${item.quantity}
+    </span>
+    <span>${item.total.toFixed(2)} dhs</span>
+  </li>
+`).join("")}</ul>
       <div class="total-price">Total: ${order.total} dhs</div>
       ${
         normalized === 'Delivered' ? `
