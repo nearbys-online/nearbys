@@ -548,14 +548,6 @@ function renderOrders() {
 
   const filteredOrders = Object.values(orders).filter(order => order.userId === userId);
 
-  const statusPriority = {
-    "Ordered": 1,
-    "Confirmed": 1,
-    "Served": 2,
-    "Paid": 3,
-    "Cancelled": 4
-  };
-
   const normalizeStatus = (status) => {
     const trimmed = status.trim().toLowerCase();
     if (trimmed.startsWith("ready in")) return "Confirmed";
@@ -563,16 +555,24 @@ function renderOrders() {
   };
 
   const sortedOrders = filteredOrders.sort((a, b) => {
-    const priorityA = statusPriority[normalizeStatus(a.status)] || 5;
-    const priorityB = statusPriority[normalizeStatus(b.status)] || 5;
+    const statusA = normalizeStatus(a.status);
+    const statusB = normalizeStatus(b.status);
 
-    if (priorityA !== priorityB) {
-      return priorityA - priorityB;
+    const isCancelledOrPaidA = statusA === "Cancelled" || statusA === "Paid";
+    const isCancelledOrPaidB = statusB === "Cancelled" || statusB === "Paid";
+
+    // First, push non-cancelled/paid to top
+    if (isCancelledOrPaidA !== isCancelledOrPaidB) {
+      return isCancelledOrPaidA ? 1 : -1;
     }
 
-    const timeA = new Date(`${a.date} ${a.time}`);
-    const timeB = new Date(`${b.date} ${b.time}`);
-    return timeB - timeA;
+    // Within "Paid" or "Cancelled", sort Paid above Cancelled
+    if (isCancelledOrPaidA && statusA !== statusB) {
+      return statusA === "Paid" ? -1 : 1;
+    }
+
+    // Sort by orderNumber descending
+    return parseInt(b.orderNumber) - parseInt(a.orderNumber);
   });
 
   sortedOrders.forEach(order => {
