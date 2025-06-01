@@ -376,6 +376,12 @@
   </div>
 </div>
 
+<!-- QR Code Button -->
+<button id="downloadQrBtn">Download QR Code</button>
+<canvas id="qrCanvas" width="300" height="300" style="display:none;"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
   <img id="coverImage" alt="Restaurant Cover" class="cover-img" />  
   
   <div class="search-container">
@@ -485,7 +491,12 @@ window.addEventListener('click', (event) => {
   }
 });
 
-  function loadUserOrders() {
+
+
+
+
+
+function loadUserOrders() {
     const stored = localStorage.getItem(`storedOrders_${userId}`);
     if (stored) {
       const parsed = JSON.parse(stored);
@@ -516,6 +527,10 @@ window.addEventListener('click', (event) => {
     renderOrders();
   }
 
+
+
+
+
 function renderOrders() {
   const container = document.getElementById("orders");
   container.innerHTML = "";
@@ -525,19 +540,20 @@ function renderOrders() {
   const statusPriority = {
     "Ordered": 1,
     "Confirmed": 1,
-    "Delivered": 2,
-    "Cancelled": 3
+    "Served": 2,
+    "Paid": 3,
+    "Cancelled": 4
   };
 
   const normalizeStatus = (status) => {
     const trimmed = status.trim().toLowerCase();
     if (trimmed.startsWith("ready in")) return "Confirmed";
-    return status.trim();
+    return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
   };
 
   const sortedOrders = filteredOrders.sort((a, b) => {
-    const priorityA = statusPriority[normalizeStatus(a.status)] || 4;
-    const priorityB = statusPriority[normalizeStatus(b.status)] || 4;
+    const priorityA = statusPriority[normalizeStatus(a.status)] || 5;
+    const priorityB = statusPriority[normalizeStatus(b.status)] || 5;
 
     if (priorityA !== priorityB) {
       return priorityA - priorityB;
@@ -550,11 +566,12 @@ function renderOrders() {
 
   sortedOrders.forEach(order => {
     const normalized = normalizeStatus(order.status);
-
+    const isReady = order.status.toLowerCase().startsWith("ready in");
+    const isServed = normalized === "Served";
+    const isPaid = normalized === "Paid";
+    const isCancelled = normalized === "Cancelled";
     const div = document.createElement("div");
     div.className = `order ${normalized.toLowerCase()}`;
-
-    const isConfirmed = normalized === "Confirmed";
 
     div.innerHTML = `
       <div class="order-header">
@@ -569,36 +586,50 @@ function renderOrders() {
       </div>
       <ul>${order.cart.map(item => `
         <li>
-          <span>${item.name} x ${item.quantity}</span>
+          <span>
+            ${item.name}${item.variantTitle ? ` (${item.variantTitle})` : ''} x ${item.quantity}
+          </span>
           <span>${item.total.toFixed(2)} dhs</span>
         </li>
       `).join("")}</ul>
       <div class="total-price">Total: ${order.total} dhs</div>
       ${
-        normalized === 'Delivered' ? `
-          <div class="delivered-text">Delivered</div>
-        ` : normalized === 'Cancelled' ? `
+        isCancelled ? `
           <div class="cancelled-text">Cancelled</div>
+        ` : isPaid ? `
+          <div class="paid-text" style="color: #666; font-weight: bold;">Paid</div>
         ` : `
           <div class="button-group">
-            <button class="action-btn confirm-btn ${isConfirmed ? 'confirmed' : ''}" 
-              onclick="${isConfirmed ? '' : `openReadyTimeModal('${order.orderNumber}')`}" 
-              ${isConfirmed ? 'disabled' : ''}>
-              ${isConfirmed ? 'Confirmed' : 'Confirm'}
-            </button>
-            ${
-              isConfirmed ? `
-                <button class="action-btn deliver-btn" 
-                  onclick="markStatus('${order.orderNumber}', 'Delivered')">
-                  Deliver
-                </button>
-              ` : ''
-            }
-            <button class="action-btn cancel-btn" 
-              onclick="markStatus('${order.orderNumber}', 'Cancelled')">
-              Cancel
-            </button>
-          </div>
+  ${
+    order.status === "Ordered" ? `
+      <button class="action-btn confirm-btn"
+        onclick="openReadyTimeModal('${order.orderNumber}')">
+        Confirm
+      </button>
+    ` : order.status.toLowerCase().startsWith("ready in") ? `
+      <button class="action-btn serve-btn"
+        style="background-color: ${order.status === 'Served' ? '#ccc' : '#009500'}; color: #fff;"
+        onclick="markStatus('${order.orderNumber}', 'Served')"
+        ${order.status === 'Served' ? 'disabled' : ''}>
+        ${order.status === 'Served' ? 'Served' : 'Serve'}
+      </button>
+    ` : order.status === "Served" ? `
+      <button class="action-btn paid-btn"
+        style="background-color: #007bff; color: #fff;"
+        onclick="markStatus('${order.orderNumber}', 'Paid')">
+        Paid
+      </button>
+    ` : ''
+  }
+  ${
+    order.status !== "Paid" && order.status !== "Cancelled" ? `
+      <button class="action-btn cancel-btn"
+        onclick="markStatus('${order.orderNumber}', 'Cancelled')">
+        Cancel
+      </button>
+    ` : ''
+  }
+</div>
         `
       }
     `;
@@ -607,10 +638,12 @@ function renderOrders() {
   });
 }
 
+
+
   async function markStatus(orderNumber, status) {
     if (!orders[orderNumber] || orders[orderNumber].userId !== userId) return;
 
-    const res = await fetch("https://b3313123-855c-49e9-a390-5127c5aa13df-00-3uf6pkflwbjg0.pike.replit.dev/update", {
+    const res = await fetch("https://2054aa2a-6551-4f0a-9ac6-b19b03010851-00-cc96cho83st2.sisko.replit.dev/update", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ orderNumber, status })
@@ -637,7 +670,7 @@ async function fetchOrders() {
   if (!userId) return;
 
   try {
-    const res = await fetch("https://b3313123-855c-49e9-a390-5127c5aa13df-00-3uf6pkflwbjg0.pike.replit.dev/orders");
+    const res = await fetch("https://2054aa2a-6551-4f0a-9ac6-b19b03010851-00-cc96cho83st2.sisko.replit.dev/orders");
     const orderList = await res.json();
 
     const newOrders = orderList.filter(order =>
@@ -729,7 +762,8 @@ document.getElementById("enable-sound").addEventListener("click", () => {
       loadUserOrders();
       fetchOrders();
     }
-  });
+  });  
+  
 </script>
 <script>
 // Function to apply dynamic styles
@@ -827,36 +861,37 @@ window.addEventListener('DOMContentLoaded', () => {
 <script>
   let confirmOrderNumber = null;
 
-  function openReadyTimeModal(orderNumber) {
-    confirmOrderNumber = orderNumber;
-    document.getElementById('prep-time-select').value = '';
-    document.getElementById('ready-time-modal').style.display = 'flex';
+function openReadyTimeModal(orderNumber) {
+  confirmOrderNumber = orderNumber;
+  document.getElementById('prep-time-select').value = '';
+  document.getElementById('ready-time-modal').style.display = 'flex';
+}
+
+function closeReadyTimeModal() {
+  document.getElementById('ready-time-modal').style.display = 'none';
+  confirmOrderNumber = null;
+}
+
+async function submitPrepTime() {
+  const selected = document.getElementById('prep-time-select').value;
+  if (!selected || !confirmOrderNumber) return;
+
+  const status = `Ready in - ${selected}`;  // Capital R to match normalizeStatus
+
+  const res = await fetch("https://2054aa2a-6551-4f0a-9ac6-b19b03010851-00-cc96cho83st2.sisko.replit.dev/update", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ orderNumber: confirmOrderNumber, status })
+  });
+
+  if (res.ok) {
+    // Update local status to full "Ready in - X" to show Serve button immediately
+    orders[confirmOrderNumber].status = status;
+    saveOrdersToStorage();
+    renderOrders();
+    closeReadyTimeModal();
   }
-
-  function closeReadyTimeModal() {
-    document.getElementById('ready-time-modal').style.display = 'none';
-    confirmOrderNumber = null;
-  }
-
-  async function submitPrepTime() {
-    const selected = document.getElementById('prep-time-select').value;
-    if (!selected || !confirmOrderNumber) return;
-
-    const status = `ready in - ${selected}`;
-
-    const res = await fetch("https://b3313123-855c-49e9-a390-5127c5aa13df-00-3uf6pkflwbjg0.pike.replit.dev/update", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderNumber: confirmOrderNumber, status })
-    });
-
-    if (res.ok) {
-      orders[confirmOrderNumber].status = "Confirmed"; // UI logic still shows "Confirmed"
-      saveOrdersToStorage();
-      renderOrders();
-      closeReadyTimeModal();
-    }
-  }
+}
 </script>
 <script>
     function searchOrderByDigits() {
@@ -897,6 +932,42 @@ document.getElementById("orderSearchInput").addEventListener("input", function (
   } else {
     document.getElementById("searchResults").innerHTML = "";
   }
+});
+</script>
+<script> 
+const canvas = document.getElementById('qrCanvas');
+const ctx = canvas.getContext('2d');
+const downloadBtn = document.getElementById('downloadQrBtn');
+
+downloadBtn.addEventListener('click', () => {
+  const userId = localStorage.getItem("loggedInUserId");
+  if (!userId) {
+    console.error("userId is not defined or is null");
+    return;
+  }
+
+  const qrUrl = `https://nearbys.online/pages/order#${userId}`;
+
+  // Generate QR code to a temporary canvas
+  QRCode.toCanvas(canvas, qrUrl, { width: 300, margin: 3 }, function (error) {
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    // Add userId text to canvas
+    ctx.font = "bold 20px Arial";
+    ctx.fillStyle = "black";
+    ctx.textAlign = "right"; // For bottom-right position
+    ctx.textBaseline = "bottom";
+    ctx.fillText(userId, canvas.width - 5, canvas.height - 3);
+
+    // Trigger download
+    const link = document.createElement('a');
+    link.download = `nearbys_qr_${userId}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
 });
 </script>
 </body>
