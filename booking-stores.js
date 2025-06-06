@@ -2,6 +2,6 @@
   const collectionRedirectMap = {
     "Ajanth": "0000",
     "Miamix": "112",
-    "bj": "AAA888"
+    "Bj": "AAA888"
     // Add more mappings as needed
   };
