@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+  <title>Referral QR Code Generator</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
+    }
+    input {
+      padding: 10px;
+      width: 90%;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+    #qrcode {
+      margin-top: 20px;
+    }
+    canvas {
+      margin-top: 10px;
+      background: white;
+    }
+  </style>
+</head>
+<body>
+  <h2>Generate Referral QR Code</h2>
+  <p>Enter a referral code to generate a QR code for:</p>
+  <code>https://nearbys.online/pages/join?ref=YOURCODE</code>
+  <br><br>
+  <input type="text" id="refCodeInput" placeholder="Enter Referral Code" />
+  <button onclick="generateQRCode()">Generate</button>
+  <button onclick="downloadQRCode()">Download</button>
+
+  <div id="qrcode"></div>
+
+  <script>
+    let currentCanvas = null;
+
+    function generateQRCode() {
+      const refCode = document.getElementById('refCodeInput').value.trim();
+      const qrcodeDiv = document.getElementById('qrcode');
+      qrcodeDiv.innerHTML = ''; // Clear previous QR
+
+      if (!refCode) {
+        alert('Please enter a referral code.');
+        return;
+      }
+
+      const url = `https://nearbys.online/pages/join?ref=${encodeURIComponent(refCode)}`;
+
+      QRCode.toCanvas(url, {
+        width: 256,
+        margin: 1
+      }, function (err, qrCanvas) {
+        if (err) {
+          alert('Error generating QR code');
+          return;
+        }
+
+        // Create a new canvas with border
+        const borderSize = 7;
+        const finalSize = qrCanvas.width + borderSize * 2;
+        const canvasWithBorder = document.createElement('canvas');
+        canvasWithBorder.width = finalSize;
+        canvasWithBorder.height = finalSize;
+        const ctx = canvasWithBorder.getContext('2d');
+
+        // Fill background white
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, finalSize, finalSize);
+
+        // Draw border
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, finalSize, borderSize); // top
+        ctx.fillRect(0, finalSize - borderSize, finalSize, borderSize); // bottom
+        ctx.fillRect(0, 0, borderSize, finalSize); // left
+        ctx.fillRect(finalSize - borderSize, 0, borderSize, finalSize); // right
+
+        // Draw QR inside the border
+        ctx.drawImage(qrCanvas, borderSize, borderSize);
+
+        currentCanvas = canvasWithBorder;
+        qrcodeDiv.innerHTML = ''; // Clear and insert new canvas
+        qrcodeDiv.appendChild(canvasWithBorder);
+      });
+    }
+
+    function downloadQRCode() {
+      if (!currentCanvas) {
+        alert('Please generate a QR code first.');
+        return;
+      }
+      const link = document.createElement('a');
+      link.download = 'referral-qr.png';
+      link.href = currentCanvas.toDataURL('image/png');
+      link.click();
+    }
+  </script>
+</body>
+</html>
