@@ -427,6 +427,22 @@
   </div>
 </div>
 
+<!-- Ready Time Modal II -->
+<div id="status-reason-modal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close-modal" onclick="closeStatusReasonModal()">&times;</span>
+    <h3>Select Status</h3>
+    <select id="status-reason-select">
+      <option value="">-- Select Status --</option>
+      <option value="Confirmed">Confirmed</option>
+      <option value="Sorry - Already Booked">Sorry - Already Booked</option>
+      <option value="Sorry - Not Available">Sorry - Not Available</option>
+      <option value="We Are Closed">We Are Closed</option>
+    </select>
+    <button onclick="submitStatusReason()">Send</button>
+  </div>
+</div>
+
   <button id="enable-sound">🔔 Enable Sound Notifications</button>
   <audio id="notif-sound" src="https://cdn.shopify.com/s/files/1/0947/2340/8240/files/water_drop_tone.mp3?v=1747184325" preload="auto"></audio>
 <div style="margin-bottom:100px;"></div>
@@ -873,37 +889,67 @@ window.addEventListener('DOMContentLoaded', () => {
 <script>
   let confirmOrderNumber = null;
 
-function openReadyTimeModal(orderNumber) {
-  confirmOrderNumber = orderNumber;
-  document.getElementById('prep-time-select').value = '';
-  document.getElementById('ready-time-modal').style.display = 'flex';
-}
+  function openReadyTimeModal(orderNumber) {
+    confirmOrderNumber = orderNumber;
+    const table = orders[orderNumber]?.table;
 
-function closeReadyTimeModal() {
-  document.getElementById('ready-time-modal').style.display = 'none';
-  confirmOrderNumber = null;
-}
-
-async function submitPrepTime() {
-  const selected = document.getElementById('prep-time-select').value;
-  if (!selected || !confirmOrderNumber) return;
-
-  const status = `Ready in - ${selected}`;  // Capital R to match normalizeStatus
-
-  const res = await fetch("https://2054aa2a-6551-4f0a-9ac6-b19b03010851-00-cc96cho83st2.sisko.replit.dev/update", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ orderNumber: confirmOrderNumber, status })
-  });
-
-  if (res.ok) {
-    // Update local status to full "Ready in - X" to show Serve button immediately
-    orders[confirmOrderNumber].status = status;
-    saveOrdersToStorage();
-    renderOrders();
-    closeReadyTimeModal();
+    // Check if table is '0' or a time format (e.g. 11:11)
+    if (table === '0' || /^\d{1,2}:\d{2}$/.test(table)) {
+      document.getElementById('status-reason-select').value = '';
+      document.getElementById('status-reason-modal').style.display = 'flex';
+    } else {
+      document.getElementById('prep-time-select').value = '';
+      document.getElementById('ready-time-modal').style.display = 'flex';
+    }
   }
-}
+
+  function closeReadyTimeModal() {
+    document.getElementById('ready-time-modal').style.display = 'none';
+    confirmOrderNumber = null;
+  }
+
+  function closeStatusReasonModal() {
+    document.getElementById('status-reason-modal').style.display = 'none';
+    confirmOrderNumber = null;
+  }
+
+  async function submitPrepTime() {
+    const selected = document.getElementById('prep-time-select').value;
+    if (!selected || !confirmOrderNumber) return;
+
+    const status = `Ready in - ${selected}`;
+
+    const res = await fetch("https://2054aa2a-6551-4f0a-9ac6-b19b03010851-00-cc96cho83st2.sisko.replit.dev/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderNumber: confirmOrderNumber, status })
+    });
+
+    if (res.ok) {
+      orders[confirmOrderNumber].status = status;
+      saveOrdersToStorage();
+      renderOrders();
+      closeReadyTimeModal();
+    }
+  }
+
+  async function submitStatusReason() {
+    const selected = document.getElementById('status-reason-select').value;
+    if (!selected || !confirmOrderNumber) return;
+
+    const res = await fetch("https://2054aa2a-6551-4f0a-9ac6-b19b03010851-00-cc96cho83st2.sisko.replit.dev/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderNumber: confirmOrderNumber, status: selected })
+    });
+
+    if (res.ok) {
+      orders[confirmOrderNumber].status = selected;
+      saveOrdersToStorage();
+      renderOrders();
+      closeStatusReasonModal();
+    }
+  }
 </script>
 <script>
     function searchOrderByDigits() {
