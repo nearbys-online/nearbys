@@ -240,7 +240,7 @@
   }
   </style>
   <style>
-  #ready-time-modal.modal {
+  #ready-time-modal.modal, #status-reason-modal.modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.6);
     display: flex; justify-content: center; align-items: center;
@@ -248,7 +248,7 @@
     font-family: 'Arial', sans-serif;
   }
 
-  #ready-time-modal .modal-content {
+  #ready-time-modal .modal-content, #status-reason-modal .modal-content {
     background: #fff;
     padding: 30px 25px;
     border-radius: 16px;
@@ -260,13 +260,13 @@
     text-align: center;
   }
 
-  #ready-time-modal .modal-content h3 {
+  #ready-time-modal .modal-content h3, #status-reason-modal .modal-content h3 {
     color: var(--primary);
     font-size: 22px;
     margin-bottom: 20px;
   }
 
-  #ready-time-modal select {
+  #ready-time-modal select, #status-reason-modal select {
     width: 100%;
     padding: 12px;
     margin-bottom: 20px;
@@ -276,12 +276,12 @@
     transition: border-color 0.3s ease;
   }
 
-  #ready-time-modal select:focus {
+  #ready-time-modal select:focus, #status-reason-modal select:focus {
     border-color: black;
     outline: none;
   }
 
-  #ready-time-modal button {
+  #ready-time-modal button, #status-reason-modal button {
     background-color: var(--primary);
     color: white;
     border: none;
@@ -292,7 +292,7 @@
     transition: background-color 0.3s ease;
   }
 
-  #ready-time-modal button:hover {
+  #ready-time-modal button:hover, #status-reason-modal button:hover {
     background-color: black;
   }
 
