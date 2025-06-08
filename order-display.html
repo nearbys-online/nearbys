@@ -572,14 +572,7 @@ function renderOrders() {
 
   const normalizeStatus = (status) => {
     const trimmed = status.trim().toLowerCase();
-    if (
-      trimmed.startsWith("ready in") ||
-      trimmed === "confirmed" ||
-      trimmed === "sorry - already booked" ||
-      trimmed === "sorry - not available" ||
-      trimmed === "we are closed"
-    ) return "Confirmed";
-
+    if (trimmed.startsWith("ready in")) return "Confirmed";
     return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
   };
 
@@ -590,24 +583,26 @@ function renderOrders() {
     const isCancelledOrPaidA = statusA === "Cancelled" || statusA === "Paid";
     const isCancelledOrPaidB = statusB === "Cancelled" || statusB === "Paid";
 
+    // First, push non-cancelled/paid to top
     if (isCancelledOrPaidA !== isCancelledOrPaidB) {
       return isCancelledOrPaidA ? 1 : -1;
     }
 
+    // Within "Paid" or "Cancelled", sort Paid above Cancelled
     if (isCancelledOrPaidA && statusA !== statusB) {
       return statusA === "Paid" ? -1 : 1;
     }
 
+    // Sort by orderNumber descending
     return parseInt(b.orderNumber) - parseInt(a.orderNumber);
   });
 
   sortedOrders.forEach(order => {
     const normalized = normalizeStatus(order.status);
-    const isConfirmedLike = normalized === "Confirmed";
+    const isReady = order.status.toLowerCase().startsWith("ready in");
     const isServed = normalized === "Served";
     const isPaid = normalized === "Paid";
     const isCancelled = normalized === "Cancelled";
-
     const div = document.createElement("div");
     div.className = `order ${normalized.toLowerCase()}`;
 
@@ -631,47 +626,47 @@ function renderOrders() {
         </li>
       `).join("")}</ul>
       <div class="total-price">Total: ${order.total} dhs</div>
-<div class="sent-status" style="margin-top: 4px; font-size: 0.9em; color: #666;">
-  Status: ${order.status}
+      <div class="sent-status" style="margin-top: 4px; font-size: 0.9em; color: #666;">
+        Status sent: ${order.firstStatus || order.status}
+      </div>
+      ${
+        isCancelled ? `
+          <div class="cancelled-text">Cancelled</div>
+        ` : isPaid ? `
+          <div class="paid-text" style="color: #666; font-weight: bold;">Paid</div>
+        ` : `
+          <div class="button-group">
+  ${
+    order.status === "Ordered" ? `
+      <button class="action-btn confirm-btn"
+        style="background-color: #ff0000; color: #fff;"
+        onclick="openReadyTimeModal('${order.orderNumber}')">
+        Confirm
+      </button>
+    ` : order.status.toLowerCase().startsWith("ready in") ? `
+      <button class="action-btn serve-btn"
+        style="background-color: ${order.status === 'Served' ? '#ccc' : '#007bff'}; color: #fff;"
+        onclick="markStatus('${order.orderNumber}', 'Served')"
+        ${order.status === 'Served' ? 'disabled' : ''}>
+        ${order.status === 'Served' ? 'Served' : 'Serve'}
+      </button>
+    ` : order.status === "Served" ? `
+      <button class="action-btn paid-btn"
+        style="background-color: #009500; color: #fff;"
+        onclick="markStatus('${order.orderNumber}', 'Paid')">
+        Paid
+      </button>
+    ` : ''
+  }
+  ${
+    order.status !== "Paid" && order.status !== "Cancelled" ? `
+      <button class="action-btn cancel-btn"
+        onclick="markStatus('${order.orderNumber}', 'Cancelled')">
+        Cancel
+      </button>
+    ` : ''
+  }
 </div>
-${
-  isCancelled ? `
-    <div class="cancelled-text">Cancelled</div>
-  ` : isPaid ? `
-    <div class="paid-text" style="color: #666; font-weight: bold;">Paid</div>
-  ` : `
-    <div class="button-group">
-            ${
-              order.status === "Ordered" ? `
-                <button class="action-btn confirm-btn"
-                  style="background-color: #ff0000; color: #fff;"
-                  onclick="openReadyTimeModal('${order.orderNumber}')">
-                  Confirm
-                </button>
-              ` : isConfirmedLike ? `
-                <button class="action-btn serve-btn"
-                  style="background-color: ${order.status === 'Served' ? '#ccc' : '#007bff'}; color: #fff;"
-                  onclick="markStatus('${order.orderNumber}', 'Served')"
-                  ${order.status === 'Served' ? 'disabled' : ''}>
-                  ${order.status === 'Served' ? 'Served' : 'Serve'}
-                </button>
-              ` : order.status === "Served" ? `
-                <button class="action-btn paid-btn"
-                  style="background-color: #009500; color: #fff;"
-                  onclick="markStatus('${order.orderNumber}', 'Paid')">
-                  Paid
-                </button>
-              ` : ''
-            }
-            ${
-              order.status !== "Paid" && order.status !== "Cancelled" ? `
-                <button class="action-btn cancel-btn"
-                  onclick="markStatus('${order.orderNumber}', 'Cancelled')">
-                  Cancel
-                </button>
-              ` : ''
-            }
-          </div>
         `
       }
     `;
@@ -727,6 +722,14 @@ async function fetchOrders() {
     lastOrderCount = userOrders.length;
 
     userOrders.forEach(order => {
+      if (!orders[order.orderNumber]) {
+        // First time receiving this order — store original status
+        order.firstStatus = order.status;
+      } else {
+        // Keep the existing firstStatus if already recorded
+        order.firstStatus = orders[order.orderNumber].firstStatus || orders[order.orderNumber].status;
+      }
+
       orders[order.orderNumber] = order;
     });
 
