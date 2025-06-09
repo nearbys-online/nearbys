@@ -169,12 +169,6 @@
       font-size: 13px;
       font-weight: 500;
     }
-    
-    .sent-status {
-      font-style: italic;
-      font-size: 0.85em;
-      color: #777;
-    }
 
     .ordered .status-indicator { background: #d1fae5; color: #065f46; }
     .confirmed .status-indicator { background: #fef3c7; color: #92400e; }
@@ -246,7 +240,7 @@
   }
   </style>
   <style>
-  #ready-time-modal.modal, #status-reason-modal.modal {
+  #ready-time-modal.modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.6);
     display: flex; justify-content: center; align-items: center;
@@ -254,7 +248,7 @@
     font-family: 'Arial', sans-serif;
   }
 
-  #ready-time-modal .modal-content, #status-reason-modal .modal-content {
+  #ready-time-modal .modal-content {
     background: #fff;
     padding: 30px 25px;
     border-radius: 16px;
@@ -266,13 +260,13 @@
     text-align: center;
   }
 
-  #ready-time-modal .modal-content h3, #status-reason-modal .modal-content h3 {
+  #ready-time-modal .modal-content h3 {
     color: var(--primary);
     font-size: 22px;
     margin-bottom: 20px;
   }
 
-  #ready-time-modal select, #status-reason-modal select {
+  #ready-time-modal select {
     width: 100%;
     padding: 12px;
     margin-bottom: 20px;
@@ -282,12 +276,12 @@
     transition: border-color 0.3s ease;
   }
 
-  #ready-time-modal select:focus, #status-reason-modal select:focus {
+  #ready-time-modal select:focus {
     border-color: black;
     outline: none;
   }
 
-  #ready-time-modal button, #status-reason-modal button {
+  #ready-time-modal button {
     background-color: var(--primary);
     color: white;
     border: none;
@@ -298,7 +292,7 @@
     transition: background-color 0.3s ease;
   }
 
-  #ready-time-modal button:hover, #status-reason-modal button:hover {
+  #ready-time-modal button:hover {
     background-color: black;
   }
 
@@ -626,9 +620,6 @@ function renderOrders() {
         </li>
       `).join("")}</ul>
       <div class="total-price">Total: ${order.total} dhs</div>
-      <div class="sent-status" style="margin-top: 4px; font-size: 0.9em; color: #666;">
-        Status sent: ${order.firstStatus || order.status}
-      </div>
       ${
         isCancelled ? `
           <div class="cancelled-text">Cancelled</div>
@@ -722,14 +713,6 @@ async function fetchOrders() {
     lastOrderCount = userOrders.length;
 
     userOrders.forEach(order => {
-      if (!orders[order.orderNumber]) {
-        // First time receiving this order — store original status
-        order.firstStatus = order.status;
-      } else {
-        // Keep the existing firstStatus if already recorded
-        order.firstStatus = orders[order.orderNumber].firstStatus || orders[order.orderNumber].status;
-      }
-
       orders[order.orderNumber] = order;
     });
 
