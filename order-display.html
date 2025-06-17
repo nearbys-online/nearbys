@@ -92,7 +92,13 @@
       font-weight: bold;
       margin-right: 15px;
     }
-
+    
+    .table-text {
+      font-size: 0.9em;
+      color: #555;
+      margin-top: 2px;
+    }
+    
     .table-circle {
       width: 36px;
       height: 36px;
@@ -641,20 +647,15 @@ function renderOrders() {
   };
 
   const sortedOrders = filteredOrders.sort((a, b) => {
-    // First, separate orders into active and completed (paid/cancelled)
     const isCompletedA = a.status === "Paid" || a.status === "Cancelled";
     const isCompletedB = b.status === "Paid" || b.status === "Cancelled";
 
-    // If one is completed and the other isn't, the completed one goes last
     if (isCompletedA !== isCompletedB) {
         return isCompletedA ? 1 : -1;
     }
 
-    // Create comparable date-time strings (format: "YYYY-MM-DD HH:MM")
     const createDateTime = (order) => {
-        // Default to very old date if missing
         const date = order.date || '1970-01-01';
-        // Default to start of day if time is missing
         const time = order.time || '00:00';
         return `${date} ${time}`;
     };
@@ -662,9 +663,8 @@ function renderOrders() {
     const dateTimeA = createDateTime(a);
     const dateTimeB = createDateTime(b);
 
-    // Sort by datetime (newest first)
     return dateTimeB.localeCompare(dateTimeA);
-});
+  });
 
   sortedOrders.forEach(order => {
     const normalized = normalizeStatus(order.status);
@@ -672,6 +672,11 @@ function renderOrders() {
     const isServed = normalized === "Served";
     const isPaid = normalized === "Paid";
     const isCancelled = normalized === "Cancelled";
+
+    // Determine how to display the table number
+    const showTableCircle = /^\d{1,3}$/.test(order.table);
+    const isTakeaway = order.table === '0';
+    const tableContent = isTakeaway ? 'TA' : order.table;
 
     const div = document.createElement("div");
     div.className = `order ${normalized.toLowerCase()}`;
@@ -682,10 +687,13 @@ function renderOrders() {
           <div class="date-time">
             <span>${order.date || 'N/A'}</span>
             <span>${order.time || 'N/A'}</span>
+            ${!showTableCircle ? `<div class="table-text">Address: ${order.table.includes('|') ? 
+              order.table.split('|').map(part => part.trim()).join(' | ') : 
+              order.table}</div>` : ''}
           </div>
-          <span>#${order.orderNumber}</span>
+          <span class="order-number">#${order.orderNumber}</span>
         </div>
-        <div class="table-circle">${order.table}</div>
+        ${showTableCircle ? `<div class="table-circle">${tableContent}</div>` : ''}
       </div>
       <ul>${order.cart.map(item => `
         <li>
