@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vendor Order Management</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; background: #f7f7f7; margin: 0; }
+    .container { max-width: 800px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #0001; padding: 20px; }
+    h1 { color: #009500; }
+    .summary-bar { background: #e4ffe4; padding: 12px 20px; border-radius: 7px; margin-bottom: 18px; display: flex; gap: 30px; align-items: center; }
+    .summary-bar input { margin-left: 10px; }
+    .order-group { margin-bottom: 25px; }
+    .order-group h2 { font-size: 1.2em; margin-bottom: 10px; color: #009500; }
+    .order-card {
+      background: #fafafa; border: 1px solid #eee; border-radius: 7px; margin-bottom: 12px; padding: 15px 18px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .order-card .order-actions button, .order-card .order-actions select {
+      margin-right: 8px; margin-bottom: 5px;
+    }
+    .order-card .status-badge {
+      display: inline-block; padding: 3px 12px; border-radius: 5px; font-size: 13px; margin-right: 10px;
+    }
+    .status-new { background: #d1ecf1; color: #0c5460; }
+    .status-confirmed { background: #bde5bd; color: #155724; }
+    .status-ontheway { background: #fff3cd; color: #856404; }
+    .status-delivered { background: #d4edda; color: #155724; }
+    .status-cancelled { background: #f8d7da; color: #721c24; }
+    .toggle-btn { background: #009500; color: #fff; border: none; border-radius: 5px; padding: 8px 18px; cursor: pointer; margin-bottom: 10px; }
+    .danger-btn { background: #dc3545; color: #fff; }
+    .print-btn { background: #007bff; color: #fff; }
+    .order-list { margin-bottom: 20px; }
+    .hidden { display: none; }
+    .order-items { font-size: 15px; margin-bottom: 5px; }
+    .order-meta { color: #888; font-size: 13px; }
+    .reason-input { margin-top: 5px; }
+    .warning-popup {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0007; display: flex; align-items: center; justify-content: center; z-index: 10;
+    }
+    .warning-box {
+      background: #fff; padding: 30px 40px; border-radius: 10px; text-align: center; box-shadow: 0 2px 16px #0003;
+    }
+    @media (max-width:600px){
+      .container { padding: 8px; }
+      .order-card { padding: 10px 5px; }
+      .summary-bar { flex-direction: column; gap: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Vendor Order Management</h1>
+    <div class="summary-bar" id="deliveredSummary">
+      <span><b>Delivered Orders:</b> <span id="deliveredCount">0</span></span>
+      <span><b>Total Amount:</b> Dhs <span id="deliveredTotal">0.00</span></span>
+      <span>
+        <label>From <input type="date" id="dateFrom"></label>
+        <label>To <input type="date" id="dateTo"></label>
+        <button onclick="filterDelivered()" class="print-btn">Filter</button>
+        <button onclick="printDelivered()" class="print-btn">Print</button>
+      </span>
+    </div>
+    <button onclick="toggleDelivered()" class="toggle-btn" id="toggleDeliveredBtn">Show Delivered Orders</button>
+    <button onclick="toggleCancelled()" class="toggle-btn" id="toggleCancelledBtn">Show Cancelled Orders</button>
+    <button onclick="clearAllData()" class="toggle-btn danger-btn" style="float:right;">Clear All Data</button>
+
+    <div class="order-group" id="activeOrdersGroup">
+      <h2>Active Orders</h2>
+      <div class="order-list" id="activeOrders"></div>
+    </div>
+    <div class="order-group hidden" id="deliveredOrdersGroup">
+      <h2>Delivered Orders</h2>
+      <div class="order-list" id="deliveredOrders"></div>
+    </div>
+    <div class="order-group hidden" id="cancelledOrdersGroup">
+      <h2>Cancelled Orders</h2>
+      <div class="order-list" id="cancelledOrders"></div>
+    </div>
+  </div>
+  <div class="warning-popup hidden" id="warningPopup">
+    <div class="warning-box">
+      <h3>Warning!</h3>
+      <p>This will delete <b>all order data</b> from this device. Are you sure?</p>
+      <button onclick="confirmClearAll()" class="danger-btn" style="margin:10px 20px;">Yes, Clear All</button>
+      <button onclick="closeWarning()" class="toggle-btn">Cancel</button>
+    </div>
+  </div>
+  <script>
+    // --- CONFIG ---
+    const BACKEND_URL = 'https://your-replit-backend-url.com/orders'; // Set your backend endpoint
+
+    // --- DATA ---
+    let orders = JSON.parse(localStorage.getItem('vendorOrders') || '[]');
+
+    // --- GROUPING ---
+    function groupOrders() {
+      // New: status new or undefined
+      const now = Date.now();
+      let newOrders = [], confirmed = [], ontheway = [], delivered = [], cancelled = [];
+      orders.forEach(o => {
+        if (!o.status || o.status === 'new') newOrders.push(o);
+        else if (o.status === 'confirmed') confirmed.push(o);
+        else if (o.status === 'on its way') ontheway.push(o);
+        else if (o.status === 'delivered') delivered.push(o);
+        else if (o.status === 'cancelled') cancelled.push(o);
+      });
+      // Sort active by time (newest first)
+      newOrders.sort((a,b)=>b.id-a.id);
+      confirmed.sort((a,b)=>b.id-a.id);
+      ontheway.sort((a,b)=>b.id-a.id);
+      delivered.sort((a,b)=>b.id-a.id);
+      cancelled.sort((a,b)=>b.id-a.id);
+      return {newOrders, confirmed, ontheway, delivered, cancelled};
+    }
+
+    // --- RENDER ---
+    function renderOrders() {
+      const groups = groupOrders();
+      // Active Orders
+      let activeHtml = '';
+      if (groups.newOrders.length) activeHtml += `<div><b>New Orders</b></div>`;
+      activeHtml += groups.newOrders.map(orderCardHtml).join('');
+      if (groups.confirmed.length) activeHtml += `<div><b>Confirmed Orders</b></div>`;
+      activeHtml += groups.confirmed.map(orderCardHtml).join('');
+      if (groups.ontheway.length) activeHtml += `<div><b>On Its Way Orders</b></div>`;
+      activeHtml += groups.ontheway.map(orderCardHtml).join('');
+      document.getElementById('activeOrders').innerHTML = activeHtml || '<div style="color:#888;">No active orders.</div>';
+
+      // Delivered
+      document.getElementById('deliveredOrders').innerHTML = groups.delivered.map(orderCardHtml).join('') || '<div style="color:#888;">No delivered orders.</div>';
+
+      // Cancelled
+      document.getElementById('cancelledOrders').innerHTML = groups.cancelled.map(orderCardHtml).join('') || '<div style="color:#888;">No cancelled orders.</div>';
+
+      updateDeliveredSummary(groups.delivered);
+    }
+
+    function orderCardHtml(order) {
+      let status = order.status || 'new';
+      let badgeClass = 'status-' + status.replace(/\s/g,'');
+      let itemsHtml = order.items.map(i=>`<div>${i.title} (${i.variant}) × ${i.quantity} - Dhs ${(i.price*i.quantity).toFixed(2)}</div>`).join('');
+      let actions = '';
+      if (status === 'new') {
+        actions = `<button onclick="markStatus('${order.id}','confirmed')">Mark Confirmed</button>
+                   <button onclick="showCancelReason('${order.id}')">Cancel</button>`;
+      } else if (status === 'confirmed') {
+        actions = `<button onclick="markStatus('${order.id}','on its way')">Mark On Its Way</button>
+                   <button onclick="showCancelReason('${order.id}')">Cancel</button>`;
+      } else if (status === 'on its way') {
+        actions = `<button onclick="markStatus('${order.id}','delivered')">Mark Delivered</button>
+                   <button onclick="showCancelReason('${order.id}')">Cancel</button>`;
+      }
+      let reasonHtml = '';
+      if (status === 'cancelled' && order.cancelReason) {
+        reasonHtml = `<div style="color:#b00;"><b>Reason:</b> ${order.cancelReason}</div>`;
+      }
+      return `
+        <div class="order-card">
+          <div><span class="status-badge ${badgeClass}">${status[0].toUpperCase()+status.slice(1)}</span>
+            <span class="order-meta">#${order.id} | ${order.date}</span>
+          </div>
+          <div class="order-items">${itemsHtml}</div>
+          <div><b>Total:</b> Dhs ${order.total.toFixed(2)}</div>
+          ${reasonHtml}
+          <div class="order-actions">${actions}</div>
+        </div>
+      `;
+    }
+
+    // --- STATUS HANDLING ---
+    function markStatus(orderId, status) {
+      orders = orders.map(o => {
+        if (o.id == orderId) {
+          o.status = status;
+          if (status === 'delivered' || status === 'cancelled') {
+            // Remove from backend
+            fetch(`${BACKEND_URL}/${orderId}`, {method:'DELETE'}).catch(()=>{});
+          }
+        }
+        return o;
+      });
+      localStorage.setItem('vendorOrders', JSON.stringify(orders));
+      renderOrders();
+    }
+
+    // --- CANCEL REASON ---
+    function showCancelReason(orderId) {
+      const reason = prompt("Enter reason for cancellation:");
+      if (reason && reason.trim().length > 0) {
+        orders = orders.map(o => o.id == orderId ? {...o, status:'cancelled', cancelReason:reason} : o);
+        // Remove from backend
+        fetch(`${BACKEND_URL}/${orderId}`, {method:'DELETE'}).catch(()=>{});
+        localStorage.setItem('vendorOrders', JSON.stringify(orders));
+        renderOrders();
+      }
+    }
+
+    // --- DELIVERED SUMMARY & FILTER ---
+    function updateDeliveredSummary(delivered) {
+      let from = document.getElementById('dateFrom').value;
+      let to = document.getElementById('dateTo').value;
+      let filtered = delivered;
+      if (from) filtered = filtered.filter(o=>new Date(o.date)>=new Date(from));
+      if (to) filtered = filtered.filter(o=>new Date(o.date)<=new Date(to+'T23:59:59'));
+      let total = filtered.reduce((s,o)=>s+o.total,0);
+      document.getElementById('deliveredCount').textContent = filtered.length;
+      document.getElementById('deliveredTotal').textContent = total.toFixed(2);
+    }
+    function filterDelivered() { renderOrders(); }
+    function printDelivered() {
+      const delivered = groupOrders().delivered;
+      let from = document.getElementById('dateFrom').value;
+      let to = document.getElementById('dateTo').value;
+      let filtered = delivered;
+      if (from) filtered = filtered.filter(o=>new Date(o.date)>=new Date(from));
+      if (to) filtered = filtered.filter(o=>new Date(o.date)<=new Date(to+'T23:59:59'));
+      let html = `<h2>Delivered Orders</h2><table border="1" cellpadding="8" style="border-collapse:collapse;"><tr><th>ID</th><th>Date</th><th>Items</th><th>Total</th></tr>`;
+      filtered.forEach(o=>{
+        html += `<tr>
+          <td>${o.id}</td>
+          <td>${o.date}</td>
+          <td>${o.items.map(i=>`${i.title} (${i.variant}) × ${i.quantity}`).join('<br>')}</td>
+          <td>Dhs ${o.total.toFixed(2)}</td>
+        </tr>`;
+      });
+      html += `</table><br><b>Total Delivered Orders:</b> ${filtered.length}<br><b>Total Amount:</b> Dhs ${filtered.reduce((s,o)=>s+o.total,0).toFixed(2)}`;
+      let win = window.open('', '', 'width=900,height=700');
+      win.document.write(`<html><head><title>Print Delivered Orders</title></head><body>${html}</body></html>`);
+      win.print();
+    }
+
+    // --- TOGGLE GROUPS ---
+    function toggleDelivered() {
+      let delivered = document.getElementById('deliveredOrdersGroup');
+      let cancelled = document.getElementById('cancelledOrdersGroup');
+      delivered.classList.toggle('hidden');
+      cancelled.classList.add('hidden');
+      document.getElementById('toggleDeliveredBtn').textContent = delivered.classList.contains('hidden') ? "Show Delivered Orders" : "Hide Delivered Orders";
+      document.getElementById('toggleCancelledBtn').textContent = "Show Cancelled Orders";
+    }
+    function toggleCancelled() {
+      let delivered = document.getElementById('deliveredOrdersGroup');
+      let cancelled = document.getElementById('cancelledOrdersGroup');
+      cancelled.classList.toggle('hidden');
+      delivered.classList.add('hidden');
+      document.getElementById('toggleCancelledBtn').textContent = cancelled.classList.contains('hidden') ? "Show Cancelled Orders" : "Hide Cancelled Orders";
+      document.getElementById('toggleDeliveredBtn').textContent = "Show Delivered Orders";
+    }
+
+    // --- CLEAR ALL ---
+    function clearAllData() {
+      document.getElementById('warningPopup').classList.remove('hidden');
+    }
+    function confirmClearAll() {
+      localStorage.removeItem('vendorOrders');
+      orders = [];
+      renderOrders();
+      closeWarning();
+      alert("All data cleared.");
+    }
+    function closeWarning() {
+      document.getElementById('warningPopup').classList.add('hidden');
+    }
+
+    // --- INIT ---
+    function loadOrdersFromBackend() {
+      // Example: fetch all orders from backend and save to localStorage
+      fetch(BACKEND_URL)
+        .then(res=>res.json())
+        .then(data=>{
+          orders = data;
+          localStorage.setItem('vendorOrders', JSON.stringify(orders));
+          renderOrders();
+        }).catch(()=>{});
+    }
+    // Uncomment below to load from backend on page load:
+    // loadOrdersFromBackend();
+
+    renderOrders();
+    document.getElementById('deliveredOrdersGroup').classList.add('hidden');
+    document.getElementById('cancelledOrdersGroup').classList.add('hidden');
+  </script>
+</body>
+</html>
