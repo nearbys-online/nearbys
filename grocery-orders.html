@@ -8,7 +8,7 @@
     body { font-family: sans-serif; background: #f7f7f7; margin: 0; }
     .container { max-width: 800px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #0001; padding: 20px; }
     h1 { color: #009500; }
-    .summary-bar { background: #e4ffe4; padding: 12px 20px; border-radius: 7px; margin-bottom: 18px; display: flex; gap: 30px; align-items: center; }
+    .summary-bar { background: #e4ffe4; padding: 12px 20px; border-radius: 7px; margin-bottom: 18px; display: flex; gap: 30px; align-items: center; flex-wrap: wrap;}
     .summary-bar input { margin-left: 10px; }
     .order-group { margin-bottom: 25px; }
     .order-group h2 { font-size: 1.2em; margin-bottom: 10px; color: #009500; }
@@ -41,15 +41,24 @@
     .warning-box {
       background: #fff; padding: 30px 40px; border-radius: 10px; text-align: center; box-shadow: 0 2px 16px #0003;
     }
+    .vendor-login { margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .vendor-login input { padding: 7px; border-radius: 4px; border: 1px solid #ccc; }
+    .vendor-login button { background: #009500; color: #fff; border: none; border-radius: 5px; padding: 7px 16px; cursor: pointer; }
+    .logout-btn { background: #aaa; color: #fff; border: none; border-radius: 5px; padding: 7px 16px; cursor: pointer; margin-left: 10px;}
     @media (max-width:600px){
       .container { padding: 8px; }
       .order-card { padding: 10px 5px; }
       .summary-bar { flex-direction: column; gap: 10px; }
+      .vendor-login { flex-direction: column; gap: 8px;}
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container" id="mainContainer" style="display:none;">
+    <div class="vendor-login" id="vendorInfoBar" style="margin-bottom:25px;">
+      <span><b>Vendor:</b> <span id="vendorNameDisplay"></span></span>
+      <button class="logout-btn" onclick="logoutVendor()">Logout</button>
+    </div>
     <h1>Vendor Order Management</h1>
     <div class="summary-bar" id="deliveredSummary">
       <span><b>Delivered Orders:</b> <span id="deliveredCount">0</span></span>
@@ -78,6 +87,15 @@
       <div class="order-list" id="cancelledOrders"></div>
     </div>
   </div>
+  <div class="container" id="loginContainer" style="max-width:400px;margin-top:80px;">
+    <form id="vendorLoginForm" onsubmit="loginVendor(event)">
+      <div class="vendor-login">
+        <label for="vendorName"><b>Vendor Name:</b></label>
+        <input type="text" id="vendorName" required placeholder="Enter vendor name">
+        <button type="submit">Login</button>
+      </div>
+    </form>
+  </div>
   <div class="warning-popup hidden" id="warningPopup">
     <div class="warning-box">
       <h3>Warning!</h3>
@@ -86,19 +104,41 @@
       <button onclick="closeWarning()" class="toggle-btn">Cancel</button>
     </div>
   </div>
+  <audio id="notifSound" src="https://cdn.pixabay.com/audio/2022/10/16/audio_12c6b5c0b3.mp3"></audio>
   <script>
     // --- CONFIG ---
     const BACKEND_URL = 'https://your-replit-backend-url.com/orders'; // Set your backend endpoint
 
+    // --- AUTH ---
+    function loginVendor(e) {
+      e.preventDefault();
+      const name = document.getElementById('vendorName').value.trim();
+      if (name.length > 0) {
+        localStorage.setItem('vendorName', name);
+        showVendorUI();
+      }
+    }
+    function showVendorUI() {
+      document.getElementById('loginContainer').style.display = 'none';
+      document.getElementById('mainContainer').style.display = '';
+      document.getElementById('vendorNameDisplay').textContent = localStorage.getItem('vendorName');
+      fetchAndRenderOrders();
+    }
+    function logoutVendor() {
+      localStorage.removeItem('vendorName');
+      location.reload();
+    }
+
     // --- DATA ---
-    let orders = JSON.parse(localStorage.getItem('vendorOrders') || '[]');
+    let orders = [];
+    let lastOrderIds = [];
+    let vendorName = localStorage.getItem('vendorName') || null;
 
     // --- GROUPING ---
     function groupOrders() {
-      // New: status new or undefined
-      const now = Date.now();
       let newOrders = [], confirmed = [], ontheway = [], delivered = [], cancelled = [];
       orders.forEach(o => {
+        if (!o.vendor || o.vendor.toLowerCase() !== vendorName.toLowerCase()) return;
         if (!o.status || o.status === 'new') newOrders.push(o);
         else if (o.status === 'confirmed') confirmed.push(o);
         else if (o.status === 'on its way') ontheway.push(o);
@@ -170,17 +210,20 @@
 
     // --- STATUS HANDLING ---
     function markStatus(orderId, status) {
-      orders = orders.map(o => {
-        if (o.id == orderId) {
-          o.status = status;
-          if (status === 'delivered' || status === 'cancelled') {
-            // Remove from backend
-            fetch(`${BACKEND_URL}/${orderId}`, {method:'DELETE'}).catch(()=>{});
-          }
-        }
-        return o;
-      });
-      localStorage.setItem('vendorOrders', JSON.stringify(orders));
+      let order = orders.find(o => o.id == orderId);
+      if (!order) return;
+      order.status = status;
+      if (status === 'delivered' || status === 'cancelled') {
+        // Remove from backend
+        fetch(`${BACKEND_URL}/${orderId}`, {method:'DELETE'}).catch(()=>{});
+      } else {
+        // Update status in backend
+        fetch(`${BACKEND_URL}/${orderId}`, {
+          method: 'PATCH',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({status})
+        }).catch(()=>{});
+      }
       renderOrders();
     }
 
@@ -188,10 +231,12 @@
     function showCancelReason(orderId) {
       const reason = prompt("Enter reason for cancellation:");
       if (reason && reason.trim().length > 0) {
-        orders = orders.map(o => o.id == orderId ? {...o, status:'cancelled', cancelReason:reason} : o);
+        let order = orders.find(o => o.id == orderId);
+        if (!order) return;
+        order.status = 'cancelled';
+        order.cancelReason = reason;
         // Remove from backend
         fetch(`${BACKEND_URL}/${orderId}`, {method:'DELETE'}).catch(()=>{});
-        localStorage.setItem('vendorOrders', JSON.stringify(orders));
         renderOrders();
       }
     }
@@ -253,7 +298,6 @@
       document.getElementById('warningPopup').classList.remove('hidden');
     }
     function confirmClearAll() {
-      localStorage.removeItem('vendorOrders');
       orders = [];
       renderOrders();
       closeWarning();
@@ -263,23 +307,39 @@
       document.getElementById('warningPopup').classList.add('hidden');
     }
 
-    // --- INIT ---
-    function loadOrdersFromBackend() {
-      // Example: fetch all orders from backend and save to localStorage
+    // --- NOTIFICATION SOUND ---
+    function playNotif() {
+      document.getElementById('notifSound').play();
+    }
+
+    // --- POLLING ---
+    function fetchAndRenderOrders() {
+      vendorName = localStorage.getItem('vendorName');
+      if (!vendorName) return;
       fetch(BACKEND_URL)
         .then(res=>res.json())
         .then(data=>{
-          orders = data;
-          localStorage.setItem('vendorOrders', JSON.stringify(orders));
+          // Only show orders for this vendor
+          let filtered = data.filter(o => o.vendor && o.vendor.toLowerCase() === vendorName.toLowerCase());
+          // Notification if new order(s)
+          let newIds = filtered.filter(o => !o.status || o.status === 'new').map(o=>o.id);
+          if (lastOrderIds.length && newIds.some(id => !lastOrderIds.includes(id))) {
+            playNotif();
+          }
+          lastOrderIds = newIds;
+          orders = filtered;
           renderOrders();
         }).catch(()=>{});
     }
-    // Uncomment below to load from backend on page load:
-    // loadOrdersFromBackend();
+    setInterval(fetchAndRenderOrders, 30000);
 
-    renderOrders();
-    document.getElementById('deliveredOrdersGroup').classList.add('hidden');
-    document.getElementById('cancelledOrdersGroup').classList.add('hidden');
+    // --- INIT ---
+    if (vendorName) {
+      showVendorUI();
+    } else {
+      document.getElementById('loginContainer').style.display = '';
+      document.getElementById('mainContainer').style.display = 'none';
+    }
   </script>
 </body>
 </html>
