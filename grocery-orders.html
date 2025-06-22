@@ -106,242 +106,251 @@
   </div>
   <audio id="notifSound" src="https://cdn.pixabay.com/audio/2022/10/16/audio_12c6b5c0b3.mp3"></audio>
   <script>
-    // --- CONFIG ---
-    const BACKEND_URL = 'https://a0c378c1-9806-4a71-b6a1-1129e3788060-00-90ylo2zyac05.pike.replit.dev/orders'; // Set your backend endpoint
+  const BACKEND_URL = 'https://a0c378c1-9806-4a71-b6a1-1129e3788060-00-90ylo2zyac05.pike.replit.dev/orders';
 
-    // --- AUTH ---
-    function loginVendor(e) {
-      e.preventDefault();
-      const name = document.getElementById('vendorName').value.trim();
-      if (name.length > 0) {
-        localStorage.setItem('vendorName', name);
-        showVendorUI();
-      }
+  function loginVendor(e) {
+    e.preventDefault();
+    const name = document.getElementById('vendorName').value.trim();
+    if (name.length > 0) {
+      localStorage.setItem('vendorName', name);
+      showVendorUI();
     }
-    function showVendorUI() {
-      document.getElementById('loginContainer').style.display = 'none';
-      document.getElementById('mainContainer').style.display = '';
-      document.getElementById('vendorNameDisplay').textContent = localStorage.getItem('vendorName');
-      fetchAndRenderOrders();
+  }
+
+  function showVendorUI() {
+    document.getElementById('loginContainer').style.display = 'none';
+    document.getElementById('mainContainer').style.display = '';
+    document.getElementById('vendorNameDisplay').textContent = localStorage.getItem('vendorName');
+    fetchAndRenderOrders();
+  }
+
+  function logoutVendor() {
+    localStorage.removeItem('vendorName');
+    location.reload();
+  }
+
+  let orders = [];
+  let lastOrderIds = [];
+  let vendorName = localStorage.getItem('vendorName') || null;
+
+  function saveToLocalStore(order) {
+    const key = order.status === 'delivered' ? 'deliveredOrders' : 'cancelledOrders';
+    let stored = JSON.parse(localStorage.getItem(key)) || [];
+    stored.push(order);
+    localStorage.setItem(key, JSON.stringify(stored));
+  }
+
+  function getStoredOrders(key) {
+    return JSON.parse(localStorage.getItem(key)) || [];
+  }
+
+  function groupOrders() {
+    let newOrders = [], confirmed = [], ontheway = [], delivered = [], cancelled = [];
+    orders.forEach(o => {
+      if (!o.vendor || o.vendor.toLowerCase() !== vendorName.toLowerCase()) return;
+      if (!o.status || o.status === 'new') newOrders.push(o);
+      else if (o.status === 'confirmed') confirmed.push(o);
+      else if (o.status === 'on its way') ontheway.push(o);
+    });
+
+    // Get locally stored delivered and cancelled orders
+    delivered = getStoredOrders('deliveredOrders');
+    cancelled = getStoredOrders('cancelledOrders');
+
+    newOrders.sort((a, b) => b.id - a.id);
+    confirmed.sort((a, b) => b.id - a.id);
+    ontheway.sort((a, b) => b.id - a.id);
+    delivered.sort((a, b) => b.id - a.id);
+    cancelled.sort((a, b) => b.id - a.id);
+
+    return { newOrders, confirmed, ontheway, delivered, cancelled };
+  }
+
+  function renderOrders() {
+    const groups = groupOrders();
+
+    let activeHtml = '';
+    if (groups.newOrders.length) activeHtml += `<div><b>New Orders</b></div>`;
+    activeHtml += groups.newOrders.map(orderCardHtml).join('');
+    if (groups.confirmed.length) activeHtml += `<div><b>Confirmed Orders</b></div>`;
+    activeHtml += groups.confirmed.map(orderCardHtml).join('');
+    if (groups.ontheway.length) activeHtml += `<div><b>On Its Way Orders</b></div>`;
+    activeHtml += groups.ontheway.map(orderCardHtml).join('');
+    document.getElementById('activeOrders').innerHTML = activeHtml || '<div style="color:#888;">No active orders.</div>';
+
+    document.getElementById('deliveredOrders').innerHTML = groups.delivered.map(orderCardHtml).join('') || '<div style="color:#888;">No delivered orders.</div>';
+    document.getElementById('cancelledOrders').innerHTML = groups.cancelled.map(orderCardHtml).join('') || '<div style="color:#888;">No cancelled orders.</div>';
+
+    updateDeliveredSummary(groups.delivered);
+  }
+
+  function orderCardHtml(order) {
+    let status = order.status || 'new';
+    let badgeClass = 'status-' + status.replace(/\s/g, '');
+    let itemsHtml = order.items.map(i => `<div>${i.title} (${i.variant}) × ${i.quantity} - Dhs ${(i.price * i.quantity).toFixed(2)}</div>`).join('');
+    let actions = '';
+    if (status === 'new') {
+      actions = `<button onclick="markStatus('${order.id}','confirmed')">Mark Confirmed</button>
+                 <button onclick="showCancelReason('${order.id}')">Cancel</button>`;
+    } else if (status === 'confirmed') {
+      actions = `<button onclick="markStatus('${order.id}','on its way')">Mark On Its Way</button>
+                 <button onclick="showCancelReason('${order.id}')">Cancel</button>`;
+    } else if (status === 'on its way') {
+      actions = `<button onclick="markStatus('${order.id}','delivered')">Mark Delivered</button>
+                 <button onclick="showCancelReason('${order.id}')">Cancel</button>`;
     }
-    function logoutVendor() {
-      localStorage.removeItem('vendorName');
-      location.reload();
+
+    let reasonHtml = '';
+    if (status === 'cancelled' && order.cancelReason) {
+      reasonHtml = `<div style="color:#b00;"><b>Reason:</b> ${order.cancelReason}</div>`;
     }
 
-    // --- DATA ---
-    let orders = [];
-    let lastOrderIds = [];
-    let vendorName = localStorage.getItem('vendorName') || null;
-
-    // --- GROUPING ---
-    function groupOrders() {
-      let newOrders = [], confirmed = [], ontheway = [], delivered = [], cancelled = [];
-      orders.forEach(o => {
-        if (!o.vendor || o.vendor.toLowerCase() !== vendorName.toLowerCase()) return;
-        if (!o.status || o.status === 'new') newOrders.push(o);
-        else if (o.status === 'confirmed') confirmed.push(o);
-        else if (o.status === 'on its way') ontheway.push(o);
-        else if (o.status === 'delivered') delivered.push(o);
-        else if (o.status === 'cancelled') cancelled.push(o);
-      });
-      // Sort active by time (newest first)
-      newOrders.sort((a,b)=>b.id-a.id);
-      confirmed.sort((a,b)=>b.id-a.id);
-      ontheway.sort((a,b)=>b.id-a.id);
-      delivered.sort((a,b)=>b.id-a.id);
-      cancelled.sort((a,b)=>b.id-a.id);
-      return {newOrders, confirmed, ontheway, delivered, cancelled};
-    }
-
-    // --- RENDER ---
-    function renderOrders() {
-      const groups = groupOrders();
-      // Active Orders
-      let activeHtml = '';
-      if (groups.newOrders.length) activeHtml += `<div><b>New Orders</b></div>`;
-      activeHtml += groups.newOrders.map(orderCardHtml).join('');
-      if (groups.confirmed.length) activeHtml += `<div><b>Confirmed Orders</b></div>`;
-      activeHtml += groups.confirmed.map(orderCardHtml).join('');
-      if (groups.ontheway.length) activeHtml += `<div><b>On Its Way Orders</b></div>`;
-      activeHtml += groups.ontheway.map(orderCardHtml).join('');
-      document.getElementById('activeOrders').innerHTML = activeHtml || '<div style="color:#888;">No active orders.</div>';
-
-      // Delivered
-      document.getElementById('deliveredOrders').innerHTML = groups.delivered.map(orderCardHtml).join('') || '<div style="color:#888;">No delivered orders.</div>';
-
-      // Cancelled
-      document.getElementById('cancelledOrders').innerHTML = groups.cancelled.map(orderCardHtml).join('') || '<div style="color:#888;">No cancelled orders.</div>';
-
-      updateDeliveredSummary(groups.delivered);
-    }
-
-    function orderCardHtml(order) {
-      let status = order.status || 'new';
-      let badgeClass = 'status-' + status.replace(/\s/g,'');
-      let itemsHtml = order.items.map(i=>`<div>${i.title} (${i.variant}) × ${i.quantity} - Dhs ${(i.price*i.quantity).toFixed(2)}</div>`).join('');
-      let actions = '';
-      if (status === 'new') {
-        actions = `<button onclick="markStatus('${order.id}','confirmed')">Mark Confirmed</button>
-                   <button onclick="showCancelReason('${order.id}')">Cancel</button>`;
-      } else if (status === 'confirmed') {
-        actions = `<button onclick="markStatus('${order.id}','on its way')">Mark On Its Way</button>
-                   <button onclick="showCancelReason('${order.id}')">Cancel</button>`;
-      } else if (status === 'on its way') {
-        actions = `<button onclick="markStatus('${order.id}','delivered')">Mark Delivered</button>
-                   <button onclick="showCancelReason('${order.id}')">Cancel</button>`;
-      }
-      let reasonHtml = '';
-      if (status === 'cancelled' && order.cancelReason) {
-        reasonHtml = `<div style="color:#b00;"><b>Reason:</b> ${order.cancelReason}</div>`;
-      }
-      return `
-        <div class="order-card">
-          <div><span class="status-badge ${badgeClass}">${status[0].toUpperCase()+status.slice(1)}</span>
-            <span class="order-meta">#${order.id} | ${order.date}</span>
-          </div>
-          <div class="order-items">${itemsHtml}</div>
-          <div><b>Total:</b> Dhs ${order.total.toFixed(2)}</div>
-          ${reasonHtml}
-          <div class="order-actions">${actions}</div>
+    return `
+      <div class="order-card">
+        <div><span class="status-badge ${badgeClass}">${status[0].toUpperCase() + status.slice(1)}</span>
+          <span class="order-meta">#${order.id} | ${order.date}</span>
         </div>
-      `;
+        <div class="order-items">${itemsHtml}</div>
+        <div><b>Total:</b> Dhs ${order.total.toFixed(2)}</div>
+        ${reasonHtml}
+        <div class="order-actions">${actions}</div>
+      </div>
+    `;
+  }
+
+  function markStatus(orderId, status) {
+    let order = orders.find(o => o.id == orderId);
+    if (!order) return;
+    order.status = status;
+
+    if (status === 'delivered' || status === 'cancelled') {
+      if (status === 'cancelled') {
+        order.cancelReason = order.cancelReason || 'No reason';
+      }
+      saveToLocalStore(order);
+      fetch(`${BACKEND_URL}/${orderId}`, { method: 'DELETE' }).catch(() => {});
+    } else {
+      fetch(`${BACKEND_URL}/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      }).catch(() => {});
     }
 
-    // --- STATUS HANDLING ---
-    function markStatus(orderId, status) {
+    renderOrders();
+  }
+
+  function showCancelReason(orderId) {
+    const reason = prompt("Enter reason for cancellation:");
+    if (reason && reason.trim().length > 0) {
       let order = orders.find(o => o.id == orderId);
       if (!order) return;
-      order.status = status;
-      if (status === 'delivered' || status === 'cancelled') {
-        // Remove from backend
-        fetch(`${BACKEND_URL}/${orderId}`, {method:'DELETE'}).catch(()=>{});
-      } else {
-        // Update status in backend
-        fetch(`${BACKEND_URL}/${orderId}`, {
-          method: 'PATCH',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({status})
-        }).catch(()=>{});
-      }
+      order.status = 'cancelled';
+      order.cancelReason = reason;
+      saveToLocalStore(order);
+      fetch(`${BACKEND_URL}/${orderId}`, { method: 'DELETE' }).catch(() => {});
       renderOrders();
     }
+  }
 
-    // --- CANCEL REASON ---
-    function showCancelReason(orderId) {
-      const reason = prompt("Enter reason for cancellation:");
-      if (reason && reason.trim().length > 0) {
-        let order = orders.find(o => o.id == orderId);
-        if (!order) return;
-        order.status = 'cancelled';
-        order.cancelReason = reason;
-        // Remove from backend
-        fetch(`${BACKEND_URL}/${orderId}`, {method:'DELETE'}).catch(()=>{});
+  function updateDeliveredSummary(delivered) {
+    let from = document.getElementById('dateFrom').value;
+    let to = document.getElementById('dateTo').value;
+    let filtered = delivered;
+    if (from) filtered = filtered.filter(o => new Date(o.date) >= new Date(from));
+    if (to) filtered = filtered.filter(o => new Date(o.date) <= new Date(to + 'T23:59:59'));
+    let total = filtered.reduce((s, o) => s + o.total, 0);
+    document.getElementById('deliveredCount').textContent = filtered.length;
+    document.getElementById('deliveredTotal').textContent = total.toFixed(2);
+  }
+
+  function filterDelivered() { renderOrders(); }
+
+  function printDelivered() {
+    const delivered = groupOrders().delivered;
+    let from = document.getElementById('dateFrom').value;
+    let to = document.getElementById('dateTo').value;
+    let filtered = delivered;
+    if (from) filtered = filtered.filter(o => new Date(o.date) >= new Date(from));
+    if (to) filtered = filtered.filter(o => new Date(o.date) <= new Date(to + 'T23:59:59'));
+    let html = `<h2>Delivered Orders</h2><table border="1" cellpadding="8" style="border-collapse:collapse;"><tr><th>ID</th><th>Date</th><th>Items</th><th>Total</th></tr>`;
+    filtered.forEach(o => {
+      html += `<tr>
+        <td>${o.id}</td>
+        <td>${o.date}</td>
+        <td>${o.items.map(i => `${i.title} (${i.variant}) × ${i.quantity}`).join('<br>')}</td>
+        <td>Dhs ${o.total.toFixed(2)}</td>
+      </tr>`;
+    });
+    html += `</table><br><b>Total Delivered Orders:</b> ${filtered.length}<br><b>Total Amount:</b> Dhs ${filtered.reduce((s, o) => s + o.total, 0).toFixed(2)}`;
+    let win = window.open('', '', 'width=900,height=700');
+    win.document.write(`<html><head><title>Print Delivered Orders</title></head><body>${html}</body></html>`);
+    win.print();
+  }
+
+  function toggleDelivered() {
+    let delivered = document.getElementById('deliveredOrdersGroup');
+    let cancelled = document.getElementById('cancelledOrdersGroup');
+    delivered.classList.toggle('hidden');
+    cancelled.classList.add('hidden');
+    document.getElementById('toggleDeliveredBtn').textContent = delivered.classList.contains('hidden') ? "Show Delivered Orders" : "Hide Delivered Orders";
+    document.getElementById('toggleCancelledBtn').textContent = "Show Cancelled Orders";
+  }
+
+  function toggleCancelled() {
+    let delivered = document.getElementById('deliveredOrdersGroup');
+    let cancelled = document.getElementById('cancelledOrdersGroup');
+    cancelled.classList.toggle('hidden');
+    delivered.classList.add('hidden');
+    document.getElementById('toggleCancelledBtn').textContent = cancelled.classList.contains('hidden') ? "Show Cancelled Orders" : "Hide Cancelled Orders";
+    document.getElementById('toggleDeliveredBtn').textContent = "Show Delivered Orders";
+  }
+
+  function clearAllData() {
+    document.getElementById('warningPopup').classList.add('visible');
+  }
+
+  function closeWarning() {
+    document.getElementById('warningPopup').classList.remove('visible');
+  }
+
+  function confirmClearAll() {
+    orders = [];
+    localStorage.removeItem('deliveredOrders');
+    localStorage.removeItem('cancelledOrders');
+    renderOrders();
+    closeWarning();
+    alert("All data cleared.");
+  }
+
+  function playNotif() {
+    document.getElementById('notifSound').play();
+  }
+
+  function fetchAndRenderOrders() {
+    vendorName = localStorage.getItem('vendorName');
+    if (!vendorName) return;
+    fetch(BACKEND_URL)
+      .then(res => res.json())
+      .then(data => {
+        let filtered = data.filter(o => o.vendor && o.vendor.toLowerCase() === vendorName.toLowerCase());
+        let newIds = filtered.filter(o => !o.status || o.status === 'new').map(o => o.id);
+        if (lastOrderIds.length && newIds.some(id => !lastOrderIds.includes(id))) {
+          playNotif();
+        }
+        lastOrderIds = newIds;
+        orders = filtered;
         renderOrders();
-      }
-    }
+      }).catch(() => {});
+  }
+  setInterval(fetchAndRenderOrders, 30000);
 
-    // --- DELIVERED SUMMARY & FILTER ---
-    function updateDeliveredSummary(delivered) {
-      let from = document.getElementById('dateFrom').value;
-      let to = document.getElementById('dateTo').value;
-      let filtered = delivered;
-      if (from) filtered = filtered.filter(o=>new Date(o.date)>=new Date(from));
-      if (to) filtered = filtered.filter(o=>new Date(o.date)<=new Date(to+'T23:59:59'));
-      let total = filtered.reduce((s,o)=>s+o.total,0);
-      document.getElementById('deliveredCount').textContent = filtered.length;
-      document.getElementById('deliveredTotal').textContent = total.toFixed(2);
-    }
-    function filterDelivered() { renderOrders(); }
-    function printDelivered() {
-      const delivered = groupOrders().delivered;
-      let from = document.getElementById('dateFrom').value;
-      let to = document.getElementById('dateTo').value;
-      let filtered = delivered;
-      if (from) filtered = filtered.filter(o=>new Date(o.date)>=new Date(from));
-      if (to) filtered = filtered.filter(o=>new Date(o.date)<=new Date(to+'T23:59:59'));
-      let html = `<h2>Delivered Orders</h2><table border="1" cellpadding="8" style="border-collapse:collapse;"><tr><th>ID</th><th>Date</th><th>Items</th><th>Total</th></tr>`;
-      filtered.forEach(o=>{
-        html += `<tr>
-          <td>${o.id}</td>
-          <td>${o.date}</td>
-          <td>${o.items.map(i=>`${i.title} (${i.variant}) × ${i.quantity}`).join('<br>')}</td>
-          <td>Dhs ${o.total.toFixed(2)}</td>
-        </tr>`;
-      });
-      html += `</table><br><b>Total Delivered Orders:</b> ${filtered.length}<br><b>Total Amount:</b> Dhs ${filtered.reduce((s,o)=>s+o.total,0).toFixed(2)}`;
-      let win = window.open('', '', 'width=900,height=700');
-      win.document.write(`<html><head><title>Print Delivered Orders</title></head><body>${html}</body></html>`);
-      win.print();
-    }
-
-    // --- TOGGLE GROUPS ---
-    function toggleDelivered() {
-      let delivered = document.getElementById('deliveredOrdersGroup');
-      let cancelled = document.getElementById('cancelledOrdersGroup');
-      delivered.classList.toggle('hidden');
-      cancelled.classList.add('hidden');
-      document.getElementById('toggleDeliveredBtn').textContent = delivered.classList.contains('hidden') ? "Show Delivered Orders" : "Hide Delivered Orders";
-      document.getElementById('toggleCancelledBtn').textContent = "Show Cancelled Orders";
-    }
-    function toggleCancelled() {
-      let delivered = document.getElementById('deliveredOrdersGroup');
-      let cancelled = document.getElementById('cancelledOrdersGroup');
-      cancelled.classList.toggle('hidden');
-      delivered.classList.add('hidden');
-      document.getElementById('toggleCancelledBtn').textContent = cancelled.classList.contains('hidden') ? "Show Cancelled Orders" : "Hide Cancelled Orders";
-      document.getElementById('toggleDeliveredBtn').textContent = "Show Delivered Orders";
-    }
-
-    // --- CLEAR ALL ---
-    function clearAllData() {
-  document.getElementById('warningPopup').classList.add('visible');
-}
-
-function closeWarning() {
-  document.getElementById('warningPopup').classList.remove('visible');
-}
-
-    function confirmClearAll() {
-      orders = [];
-      renderOrders();
-      closeWarning();
-      alert("All data cleared.");
-    }
-
-    // --- NOTIFICATION SOUND ---
-    function playNotif() {
-      document.getElementById('notifSound').play();
-    }
-
-    // --- POLLING ---
-    function fetchAndRenderOrders() {
-      vendorName = localStorage.getItem('vendorName');
-      if (!vendorName) return;
-      fetch(BACKEND_URL)
-        .then(res=>res.json())
-        .then(data=>{
-          // Only show orders for this vendor
-          let filtered = data.filter(o => o.vendor && o.vendor.toLowerCase() === vendorName.toLowerCase());
-          // Notification if new order(s)
-          let newIds = filtered.filter(o => !o.status || o.status === 'new').map(o=>o.id);
-          if (lastOrderIds.length && newIds.some(id => !lastOrderIds.includes(id))) {
-            playNotif();
-          }
-          lastOrderIds = newIds;
-          orders = filtered;
-          renderOrders();
-        }).catch(()=>{});
-    }
-    setInterval(fetchAndRenderOrders, 30000);
-
-    // --- INIT ---
-    if (vendorName) {
-      showVendorUI();
-    } else {
-      document.getElementById('loginContainer').style.display = '';
-      document.getElementById('mainContainer').style.display = 'none';
-    }
-  </script>
+  if (vendorName) {
+    showVendorUI();
+  } else {
+    document.getElementById('loginContainer').style.display = '';
+    document.getElementById('mainContainer').style.display = 'none';
+  }
+</script>    
 </body>
 </html>
