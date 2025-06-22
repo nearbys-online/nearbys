@@ -295,16 +295,18 @@
 
     // --- CLEAR ALL ---
     function clearAllData() {
-      document.getElementById('warningPopup').classList.remove('hidden');
-    }
+  document.getElementById('warningPopup').classList.add('visible');
+}
+
+function closeWarning() {
+  document.getElementById('warningPopup').classList.remove('visible');
+}
+
     function confirmClearAll() {
       orders = [];
       renderOrders();
       closeWarning();
       alert("All data cleared.");
-    }
-    function closeWarning() {
-      document.getElementById('warningPopup').classList.add('hidden');
     }
 
     // --- NOTIFICATION SOUND ---
