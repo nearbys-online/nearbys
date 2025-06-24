@@ -1,4 +1,4 @@
 const bizMap = {
     "AjGrocery": "988",
-    "MiamixNadahSHJ": "112"
+    "miamixnadahshj": "112"
   };
