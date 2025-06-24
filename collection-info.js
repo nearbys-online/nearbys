@@ -1,5 +1,5 @@
 const bizMap = {
-    "ajgrocery": "112",
-    "miamix": "110",
+    "ajgrocery": "988",
+    "miamix": "112",
     "bj": "AAA888"
   };
