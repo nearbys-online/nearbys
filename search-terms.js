@@ -1,5 +1,5 @@
     // Prediction word sets
-const presetWords = [
+window.presetWords = [
   "apple", "apricot", "banana", "broccoli", "beetroot", "blueberry", "carrot", "cauliflower", "cabbage",
   "dates", "dragon fruit", "durian", "eggplant", "fig", "grapes", "garlic", "guava", "jackfruit", "kiwi",
   "lemon", "lettuce", "mango", "melon", "nectarine", "okra", "onion", "orange", "papaya", "peach", "pear",
