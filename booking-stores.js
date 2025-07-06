@@ -3,5 +3,4 @@
     "AjGrocer": "988",
     "MiamixNadahSH": "112",
     "AlRas": "988"
-    // Add more mappings as needed
   };
