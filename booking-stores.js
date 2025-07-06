@@ -2,6 +2,6 @@
   const collectionRedirectMap = {
     "AjGrocer": "988",
     "MiamixNadahSH": "112",
-    "Bj": "AAA888"
+    "AlRas": "988"
     // Add more mappings as needed
   };
