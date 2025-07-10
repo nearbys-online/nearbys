@@ -84,7 +84,13 @@
       ]
     },
     "Store 2": {
-      "stores": []
+      "stores": [
+        {
+          "name": "Rapid",
+          "lat": 25.3018266,
+          "lng": 55.378627
+        }
+      ]
     },
     "Store 3": {
       "stores": []
