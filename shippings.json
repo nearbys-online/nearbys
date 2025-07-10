@@ -77,29 +77,17 @@
     "Store 1": {
       "stores": [
         {
-          "name": "AlRas",
+          "name": "Occations",
           "lat": 25.3006599,
           "lng": 55.3750735
         }
       ]
     },
     "Store 2": {
-      "stores": [
-        {
-          "name": "Rapid",
-          "lat": 25.3018266,
-          "lng": 55.378627
-        }
-      ]
+      "stores": []
     },
     "Store 3": {
-      "stores": [
-        {
-          "name": "Occations",
-          "lat": 25.3006599,
-          "lng": 55.3750735
-        }
-      ]
+      "stores": []
     },
     "Store 4": {
       "stores": []
