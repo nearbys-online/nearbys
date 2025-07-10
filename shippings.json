@@ -2,167 +2,113 @@
   "Grocery": {
     "Grocery 1": {
       "name": "Grocery 1",
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Grocery 2": {
       "name": "Grocery 2",
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Grocery 3": {
       "name": "Grocery 3",
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Grocery 4": {
       "name": "Grocery 4",
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Grocery 5": {
       "name": "Grocery 5",
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Grocery 6": {
       "name": "Grocery 6",
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Grocery 7": {
       "name": "Grocery 7",
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Grocery 8": {
       "name": "Grocery 8",
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Grocery 9": {
       "name": "Grocery 9",
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Grocery 10": {
       "name": "Grocery 10",
-      "stores": [
-
-      ]
+      "stores": []
     }
   },
   "Cafeteria": {
     "Cafeteria 1": {
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Cafeteria 2": {
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Cafeteria 3": {
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Cafeteria 4": {
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Cafeteria 5": {
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Cafeteria 6": {
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Cafeteria 7": {
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Cafeteria 8": {
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Cafeteria 9": {
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Cafeteria 10": {
-      "stores": [
-
-      ]
+      "stores": []
     }
   },
   "Store": {
     "Store 1": {
       "stores": [
-
+        {
+          "name": "AlRas",
+          "lat": 25.3006599,
+          "lng": 55.3750735
+        }
       ]
     },
     "Store 2": {
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Store 3": {
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Store 4": {
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Store 5": {
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Store 6": {
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Store 7": {
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Store 8": {
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Store 9": {
-      "stores": [
-
-      ]
+      "stores": []
     },
     "Store 10": {
-      "stores": [
-
-      ]
+      "stores": []
     }
   }
 }
