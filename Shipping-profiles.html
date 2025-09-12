@@ -1,261 +1,114 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shipping Profile Selector</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 1rem;
-      background: #ffffff;
-      color: #333;
-    }
-
-    h2, h3 {
-      color: #009500;
-    }
-
-    select, textarea, button {
-      width: 100%;
-      max-width: 100%;
-      padding: 0.75rem;
-      margin-top: 0.5rem;
-      margin-bottom: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      font-size: 1rem;
-      box-sizing: border-box;
-    }
-    
-    select {
-      top : 10px;
-    }
-
-    button {
-      background-color: #009500;
-      color: white;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    button:hover {
-      background-color: #007c00;
-    }
-
-    ul {
-      list-style-type: none;
-      padding: 0;
-    }
-
-    li {
-      background: #f0f0f0;
-      margin: 0.5rem 0;
-      padding: 0.75rem;
-      border-radius: 8px;
-    }
-  </style>
-</head>
-<body>
-   <h1 style="text-align:center;">SHIPPING Profiles</h1> 
-    
-  <div style="outline: 2px solid #009500; border-radius:15px; background:#00950050; padding:10px; margin-top:50px;">
-      
-  <h3>Paste Your Coordinate Object</h3>
-  <textarea id="coordPaste" rows="4" placeholder='"e": { lat: 24.3935708, lng: 54.5843787, categories: ["t"] }'></textarea>
-  
-  <h3>Select Vendor Category</h3>
-  <select id="category">
-    <option value="Grocery">Grocery</option>
-    <option value="Cafeteria">Cafeteria</option>
-    <option value="Store">Store</option>
-  </select>
-  
-  <button onclick="parseAndUseCoordinates()">Paste & Check Shipping</button>
-  
-  </div>
-  <div style="outline: 2px solid blue; border-radius:15px; background:lightblue; padding:10px; margin-top:50px;">
-  <h3 style="display:none;">Matching Shipping Profiles:</h3>
-  <ul style="display:none;" id="resultList"></ul>
-
-<h3>Select a matched profile to add the store:</h3>
-<select id="profileSelector" style="display: none"></select>
-<button id="addToProfileBtn" style="display: none">Add Store to Selected Profile</button>
-<a id="downloadLink" style="display: none" download="shippings.json">Download Updated JSON</a>
-
-  </div>
-<!-- xxxxxxxxxx -->
-<div style="outline: 2px solid red; border-radius:15px; background:pink; padding:10px; margin-top:50px;">
-  <h3 style="color:blue; text-align:center;">Search Shipping Profile by Name</h3>
-<input type="text" style="height:25px; border-radius:5px; margin-left:10px;" id="profileSearch" placeholder="Enter store name (e.g., CoffeeTime)" />
-<button style="margin-top:20px;" onclick="searchShippingProfileByStore()">Find Shipping Profile</button>
-<ul id="searchResultList"></ul>
-</div>
-
-<script>
-let shippingData = {};
-let matchedProfiles = [];
-let userCoords = {};
-let selectedCategory = '';
-
-function getDistanceKm(lat1, lng1, lat2, lng2) {
-  const toRad = angle => angle * Math.PI / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a = Math.sin(dLat / 2) ** 2 +
-            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-            Math.sin(dLng / 2) ** 2;
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return 6371 * c;
-}
-
-async function parseAndUseCoordinates() {
-  const input = document.getElementById('coordPaste').value;
-  const list = document.getElementById('resultList');
-  const selector = document.getElementById('profileSelector');
-  const addBtn = document.getElementById('addToProfileBtn');
-  const downloadLink = document.getElementById('downloadLink');
-  selectedCategory = document.getElementById('category').value;
-
-  list.innerHTML = '';
-  selector.innerHTML = '';
-  selector.style.display = 'none';
-  addBtn.style.display = 'none';
-  downloadLink.style.display = 'none';
-
-  try {
-    const jsonMatch = input.match(/"([^"]+)"\s*:\s*\{([^}]+)\}/);
-    if (!jsonMatch) throw new Error("Invalid format");
-
-    const storeName = jsonMatch[1];
-    const props = `{${jsonMatch[2]}}`.replace(/(\w+)\s*:/g, '"$1":');
-    const parsed = JSON.parse(props);
-
-    userCoords = {
-      name: storeName,
-      lat: parsed.lat,
-      lng: parsed.lng
-    };
-
-    const res = await fetch('https://nearbysx.pages.dev/shippings.json');
-    shippingData = await res.json();
-
-    const profiles = shippingData[selectedCategory] || {};
-    matchedProfiles = [];
-
-    for (const [profileName, profile] of Object.entries(profiles)) {
-      const allStoresFar = profile.stores.every(store => {
-        const dist = getDistanceKm(userCoords.lat, userCoords.lng, store.lat, store.lng);
-        return dist > 4;
-      });
-
-      if (allStoresFar) {
-        const li = document.createElement('li');
-        li.textContent = profileName;
-        list.appendChild(li);
-        matchedProfiles.push(profileName);
-
-        const option = document.createElement('option');
-        option.value = profileName;
-        option.textContent = profileName;
-        selector.appendChild(option);
-      }
-    }
-
-    if (matchedProfiles.length > 0) {
-      selector.style.display = 'inline-block';
-      addBtn.style.display = 'inline-block';
-    } else {
-      list.innerHTML = '<li>No matching profiles found (all within 4km). Creating new profile...</li>';
-
-      // Determine new profile name
-      const profileNames = Object.keys(profiles);
-      const numbers = profileNames
-        .map(name => parseInt(name.split(' ').pop()))
-        .filter(n => !isNaN(n));
-      const nextNumber = Math.max(0, ...numbers) + 1;
-      const newProfileName = `${selectedCategory} ${nextNumber}`;
-
-      // Create and assign new profile
-      if (!shippingData[selectedCategory]) {
-        shippingData[selectedCategory] = {};
-      }
-      shippingData[selectedCategory][newProfileName] = {
-        stores: [userCoords]
-      };
-
-      // Show download link
-      const blob = new Blob([JSON.stringify(shippingData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      downloadLink.href = url;
-      downloadLink.style.display = 'inline-block';
-      downloadLink.textContent = `Download Updated JSON (New profile: ${newProfileName})`;
-    }
-
-  } catch (err) {
-    console.error(err);
-    list.innerHTML = '<li>Error: Invalid input or failed to fetch JSON.</li>';
-  }
-}
-
-document.getElementById('addToProfileBtn').addEventListener('click', () => {
-  const selected = document.getElementById('profileSelector').value;
-  if (!selected || !shippingData[selectedCategory] || !shippingData[selectedCategory][selected]) return;
-
-  shippingData[selectedCategory][selected].stores.push(userCoords);
-
-  const blob = new Blob([JSON.stringify(shippingData, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-
-  const downloadLink = document.getElementById('downloadLink');
-  downloadLink.href = url;
-  downloadLink.style.display = 'inline-block';
-  downloadLink.textContent = 'Download Updated JSON';
-});
-
-async function searchShippingProfileByStore() {
-  const inputName = document.getElementById('profileSearch').value.trim().toLowerCase();
-  const resultList = document.getElementById('searchResultList');
-  resultList.innerHTML = '';
-
-  if (!inputName) {
-    resultList.innerHTML = '<li>Please enter a store name.</li>';
-    return;
-  }
-
-  try {
-    const res = await fetch('https://nearbysx.pages.dev/shippings.json');
-    const data = await res.json();
-
-    let found = false;
-
-    for (const [categoryName, profiles] of Object.entries(data)) {
-      for (const [profileKey, profileData] of Object.entries(profiles)) {
-        for (const store of profileData.stores) {
-          if (store.name.toLowerCase() === inputName) {
-            const li = document.createElement('li');
-            li.innerHTML = `<strong>Shipping Profile:</strong> ${profileKey} <br/>
-                            <strong>Category:</strong> ${categoryName} <br/>
-                            <strong>Store:</strong> ${store.name} (Lat: ${store.lat}, Lng: ${store.lng})`;
-            resultList.appendChild(li);
-            found = true;
-          }
+{
+  "Grocery": {
+    "Grocery 1": {
+      "name": "Grocery 1",
+      "stores": [
+        {
+          "name": "nbys2",
+          "lat": 25.301058,
+          "lng": 55.3759718
         }
-      }
+      ]
+    },
+    "Grocery 2": {
+      "name": "Grocery 2",
+      "stores": []
+    },
+    "Grocery 3": {
+      "name": "Grocery 3",
+      "stores": []
+    },
+    "Grocery 4": {
+      "name": "Grocery 4",
+      "stores": []
+    },
+    "Grocery 5": {
+      "name": "Grocery 5",
+      "stores": []
+    },
+    "Grocery 6": {
+      "name": "Grocery 6",
+      "stores": []
+    },
+    "Grocery 7": {
+      "name": "Grocery 7",
+      "stores": []
+    },
+    "Grocery 8": {
+      "name": "Grocery 8",
+      "stores": []
+    },
+    "Grocery 9": {
+      "name": "Grocery 9",
+      "stores": []
+    },
+    "Grocery 10": {
+      "name": "Grocery 10",
+      "stores": []
     }
-
-    if (!found) {
-      resultList.innerHTML = '<li>No matching shipping profile found for that store.</li>';
+  },
+  "Cafeteria": {
+    "Cafeteria 1": {
+      "stores": []
+    },
+    "Cafeteria 2": {
+      "stores": []
+    },
+    "Cafeteria 3": {
+      "stores": []
+    },
+    "Cafeteria 4": {
+      "stores": []
+    },
+    "Cafeteria 5": {
+      "stores": []
+    },
+    "Cafeteria 6": {
+      "stores": []
+    },
+    "Cafeteria 7": {
+      "stores": []
+    },
+    "Cafeteria 8": {
+      "stores": []
+    },
+    "Cafeteria 9": {
+      "stores": []
+    },
+    "Cafeteria 10": {
+      "stores": []
     }
-  } catch (err) {
-    console.error(err);
-    resultList.innerHTML = '<li>Error fetching shipping data.</li>';
+  },
+  "Store": {
+    "Store 1": {
+      "stores": []
+    },
+    "Store 2": {
+      "stores": []
+    },
+    "Store 3": {
+      "stores": []
+    },
+    "Store 4": {
+      "stores": []
+    },
+    "Store 5": {
+      "stores": []
+    },
+    "Store 6": {
+      "stores": []
+    },
+    "Store 7": {
+      "stores": []
+    },
+    "Store 8": {
+      "stores": []
+    },
+    "Store 9": {
+      "stores": []
+    },
+    "Store 10": {
+      "stores": []
+    }
   }
 }
-</script>
-
-</body>
-</html>
