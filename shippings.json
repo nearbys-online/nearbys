@@ -2,7 +2,13 @@
   "Grocery": {
     "Grocery 1": {
       "name": "Grocery 1",
-      "stores": []
+      "stores": [
+        {
+          "name": "nbys2",
+          "lat": 25.301058,
+          "lng": 55.3759718
+        }
+      ]
     },
     "Grocery 2": {
       "name": "Grocery 2",
