@@ -75,13 +75,7 @@
   },
   "Store": {
     "Store 1": {
-      "stores": [
-        {
-          "name": "Occations",
-          "lat": 25.3006599,
-          "lng": 55.3750735
-        }
-      ]
+      "stores": []
     },
     "Store 2": {
       "stores": []
